@@ -1,0 +1,30 @@
+package components
+
+import (
+	"fmt"
+	"math/rand"
+)
+
+templ Layout(cacheBust bool) {
+	<html>
+		<head>
+			<script src="/assets/js/htmx.min.js"></script>
+			<script src="/assets/js/hyperscript.0.9.12.js"></script>
+			<script src="/assets/js/ws.js"></script>
+			if cacheBust {
+				<link rel="stylesheet" href={ "/assets/css/style.css?v=" + fmt.Sprint(rand.Int()) }/>
+				<link rel="stylesheet" href={ "/assets/css/base.css?v=" + fmt.Sprint(rand.Int()) }/>
+			} else {
+				<link rel="stylesheet" href="/assets/css/style.css"/>
+				<link rel="stylesheet" href="/assets/css/base.css"/>
+			}
+			<title>Ember Plus Explorer</title>
+		</head>
+		<body class="bg-blue-950 text-white" hx-ext="ws" ws-connect="/ws">
+			@ToastBar("", "")
+			<div id="col wrapper" class="m-4 grid grid-cols-3 gap-4">
+				{ children... }
+			</div>
+		</body>
+	</html>
+}
