@@ -28,32 +28,32 @@ type Session[T Initializable[T]] struct {
 	notfresh bool
 }
 
-func CreateSessionStore[T Initializable[T]](gorillaStore *sessions.CookieStore) (getSession func(id string) *Session[T], middleWare func(next http.Handler) http.Handler) {
+func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore) (getSession func(id string) (s *Session[T], isFresh bool), middleWare func(next http.Handler) http.Handler) {
 	var globalStore map[string]*Session[T] = map[string]*Session[T]{}
 	var globalStoreMu sync.RWMutex
 
-	GetSession := func(id string) *Session[T] {
+	GetSession := func(id string) (s *Session[T], isFresh bool) {
 		globalStoreMu.RLock()
 		if s, ok := globalStore[id]; ok {
 			globalStoreMu.RUnlock()
-			return s
+			return s, false
 		}
 		globalStoreMu.RUnlock()
 
 		// Create New
-		s := &Session[T]{state: Lockable[T]{}}
+		s = &Session[T]{state: Lockable[T]{}}
 		s.state.v = s.state.v.Initialize()
 		s.lastInteraction.Store(time.Now())
 		globalStoreMu.Lock()
 		globalStore[id] = s
 		globalStoreMu.Unlock()
 
-		return s
+		return s, true
 	}
 
 	middleWare = func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			session, _ := gorillaStore.Get(r, "session-name")
+			session, _ := gorillaStore.Get(r, sessionname)
 
 			id, ok := session.Values["id"].(string)
 			if !ok {
@@ -61,9 +61,11 @@ func CreateSessionStore[T Initializable[T]](gorillaStore *sessions.CookieStore) 
 				id = session.Values["id"].(string)
 			}
 
-			s := GetSession(id)
+			s, isFresh := GetSession(id)
 
-			session.Save(r, w)
+			if isFresh {
+				session.Save(r, w)
+			}
 			ctx := context.WithValue(r.Context(), "session", s)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -75,8 +77,6 @@ func CreateSessionStore[T Initializable[T]](gorillaStore *sessions.CookieStore) 
 			select {
 			case <-t.C:
 				globalStoreMu.RLock()
-				defer globalStoreMu.RUnlock()
-
 				for key, s := range globalStore {
 					// Check expirery
 					if time.Since(s.lastInteraction.Load()) > sessionExpireryTime {
@@ -92,6 +92,7 @@ func CreateSessionStore[T Initializable[T]](gorillaStore *sessions.CookieStore) 
 						s.l.Unlock()
 					}
 				}
+				globalStoreMu.RUnlock()
 			}
 		}
 	}()
