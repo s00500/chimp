@@ -81,9 +81,9 @@ func (l *Lockable[T]) Mutate(mutate func(state *T)) {
 	// restore old state
 	switch oldState {
 	case 0: // open
-		l.Unlock()
+		l.Drop()
 	case 1: // Read
-		l.Unlock()
+		l.Drop()
 		l.RLock()
 	case 2:
 		// was write locked before... not great though
