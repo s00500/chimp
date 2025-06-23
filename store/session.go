@@ -6,6 +6,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/alaingilbert/mtx"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 
@@ -18,21 +19,31 @@ import (
 
 const sessionExpireryTime = time.Hour
 
+type Initializable[T any] interface {
+	Initialize() T
+}
+
 type Session[T Initializable[T]] struct {
 	l               sync.RWMutex
 	lastInteraction atomic.Time
 
-	state Lockable[T]
+	State mtx.RWMutex[T]
 
-	//values map[string]interface{} // other values
 	notfresh bool
 }
 
-func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore) (getSession func(id string) (s *Session[T], isFresh bool), middleWare func(next http.Handler) http.Handler) {
+func CookieStore(sessionKey []byte) *sessions.CookieStore {
+	sessionstore := sessions.NewCookieStore(sessionKey)
+	sessionstore.Options.SameSite = http.SameSiteDefaultMode
+	sessionstore.Options.Secure = false // needed as we dont use https
+	return sessionstore
+}
+
+func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore) (middleWare func(next http.Handler) http.Handler) {
 	var globalStore map[string]*Session[T] = map[string]*Session[T]{}
 	var globalStoreMu sync.RWMutex
 
-	GetSession := func(id string) (s *Session[T], isFresh bool) {
+	GetSessionByID := func(id string) (s *Session[T], isFresh bool) {
 		globalStoreMu.RLock()
 		if s, ok := globalStore[id]; ok {
 			globalStoreMu.RUnlock()
@@ -41,8 +52,11 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 		globalStoreMu.RUnlock()
 
 		// Create New
-		s = &Session[T]{state: Lockable[T]{}}
-		s.state.v = s.state.v.Initialize()
+		s = &Session[T]{State: mtx.RWMutex[T]{}}
+		s.State.With(func(v *T) {
+			*v = (*v).Initialize()
+		})
+
 		s.lastInteraction.Store(time.Now())
 		globalStoreMu.Lock()
 		globalStore[id] = s
@@ -61,11 +75,14 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 				id = session.Values["id"].(string)
 			}
 
-			s, isFresh := GetSession(id)
+			s, isFresh := GetSessionByID(id)
 
 			if isFresh {
 				session.Save(r, w)
 			}
+
+			s.lastInteraction.Store(time.Now()) // Sessions timeout if they are not interactied with for session timeout
+
 			ctx := context.WithValue(r.Context(), "session", s)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
@@ -73,44 +90,27 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 
 	go func() {
 		t := time.NewTicker(time.Second * 15)
-		for {
-			select {
-			case <-t.C:
-				globalStoreMu.RLock()
-				for key, s := range globalStore {
-					// Check expirery
-					if time.Since(s.lastInteraction.Load()) > sessionExpireryTime {
-						// reap it
-						// grap the lock on the key first
-						s.l.Lock()
-						globalStoreMu.RUnlock()
-						globalStoreMu.Lock()
+		for range t.C {
+			globalStoreMu.RLock()
+			for key, s := range globalStore {
+				// Check expirery
+				if time.Since(s.lastInteraction.Load()) > sessionExpireryTime {
+					// reap it
+					// grap the lock on the key first
+					s.l.Lock()
+					globalStoreMu.RUnlock()
+					globalStoreMu.Lock()
 
-						delete(globalStore, key)
-						globalStoreMu.Unlock()
-						globalStoreMu.RLock()
-						s.l.Unlock()
-					}
+					delete(globalStore, key)
+					globalStoreMu.Unlock()
+					globalStoreMu.RLock()
+					s.l.Unlock()
 				}
-				globalStoreMu.RUnlock()
 			}
+			globalStoreMu.RUnlock()
 		}
 	}()
-	return GetSession, middleWare
-}
-
-func (s *Session[T]) ReadRef() (ref T, drop context.CancelFunc) {
-	return s.state.ReadRef()
-}
-func (s *Session[T]) Read(read func(state T)) {
-	s.state.Read()
-	defer s.state.Drop()
-	read(s.state.v)
-}
-
-func (s *Session[T]) Mutate(mutate func(state *T)) {
-	s.state.Mutate(mutate)
-	s.lastInteraction.Store(time.Now())
+	return middleWare
 }
 
 func (s *Session[T]) IsFresh() bool {
@@ -126,3 +126,43 @@ func (s *Session[T]) IsFresh() bool {
 	s.l.RUnlock()
 	return false
 }
+
+// TODO:
+func (s *Session[T]) Clear() {
+	//s.l.With()
+
+	s.l.Lock()
+	s.notfresh = false
+	s.l.Unlock()
+
+	s.State.With(func(v *T) {
+		*v = (*v).Initialize()
+	})
+}
+
+// func GetSession[T Initializable[T]](r *http.Request) *Session[T] {
+// 	return r.Context().Value("session").(*Session[T])
+// }
+
+/*
+// TODO: make this a state geter helper
+func State(ctx context.Context) SessionState {
+	val := ctx.Value("session")
+	if val == nil {
+		return SessionState{}
+	}
+	s := ctx.Value("session").(*store.Session[SessionState])
+	if s == nil {
+		return SessionState{}
+	}
+
+	ref, drop := s.ReadRef()
+	defer drop()
+	return ref
+}
+
+func getSessionData(ctx context.Context) *store.Session[sessionstate.SessionState] {
+	return ctx.Value("session").(*store.Session[sessionstate.SessionState])
+}
+
+*/
