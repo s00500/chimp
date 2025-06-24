@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/alaingilbert/mtx"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 
@@ -19,15 +18,11 @@ import (
 
 const sessionExpireryTime = time.Hour
 
-type Initializable[T any] interface {
-	Initialize() T
-}
-
 type Session[T Initializable[T]] struct {
 	l               sync.RWMutex
 	lastInteraction atomic.Time
 
-	State mtx.RWMutex[T]
+	State Lockable[T]
 
 	notfresh bool
 }
@@ -52,8 +47,8 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 		globalStoreMu.RUnlock()
 
 		// Create New
-		s = &Session[T]{State: mtx.RWMutex[T]{}}
-		s.State.With(func(v *T) {
+		s = &Session[T]{State: Lockable[T]{}}
+		s.State.MutateOnly(func(v *T) {
 			*v = (*v).Initialize()
 		})
 
@@ -129,13 +124,12 @@ func (s *Session[T]) IsFresh() bool {
 
 // TODO:
 func (s *Session[T]) Clear() {
-	//s.l.With()
 
 	s.l.Lock()
 	s.notfresh = false
 	s.l.Unlock()
 
-	s.State.With(func(v *T) {
+	s.State.MutateOnly(func(v *T) {
 		*v = (*v).Initialize()
 	})
 }
