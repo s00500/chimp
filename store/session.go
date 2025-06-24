@@ -78,7 +78,7 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 
 			s.lastInteraction.Store(time.Now()) // Sessions timeout if they are not interactied with for session timeout
 
-			ctx := context.WithValue(r.Context(), "session", s)
+			ctx := context.WithValue(r.Context(), "session", &s.State)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
