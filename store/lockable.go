@@ -18,7 +18,7 @@ func (l *Lockable[T]) Use() (ref T, mutate func(func(state *T)), drop context.Ca
 	l.mu.RLock()
 
 	drop = context.CancelFunc(func() {
-		l.mu.Unlock()
+		l.mu.RUnlock()
 	})
 
 	mutate = func(f func(state *T)) {
