@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 	"unicode"
 )
 
 func main() {
+	buffer := bytes.NewBuffer([]byte{})
+
 	url := "https://github.com/Templarian/MaterialDesign/archive/refs/heads/master.zip"
 	resp, err := http.Get(url)
 	if err != nil {
@@ -51,18 +54,25 @@ func main() {
 	}
 
 	// Output map as Go source code
-	fmt.Println("package icons")
-	fmt.Println("")
-	fmt.Println("import \"github.com/s00500/chimp/icon/base\"")
+	fmt.Fprintln(buffer, "package icon")
+	fmt.Fprintln(buffer, "")
+	fmt.Fprintln(buffer, "import \"github.com/s00500/chimp/icon/base\"")
 
-	fmt.Println("")
+	fmt.Fprintf(buffer, "")
 	for name, svg := range mdiIcons {
 		safeSVG := strings.ReplaceAll(svg, "`", "` + \"`\" + `") // Escape backticks
 		safeSVG = strings.TrimSuffix(safeSVG, "</svg>")
 		safeSVG = strings.TrimPrefix(safeSVG, `<svg xmlns="http://www.w3.org/2000/svg" id="mdi-`+name+`" viewBox="0 0 24 24">`)
+		safeSVG = strings.TrimSpace(safeSVG)
 
 		varName := toPascalCase(name)
-		fmt.Printf("const %s base.IconBase = `%s`\n\n", varName, safeSVG)
+		fmt.Fprintf(buffer, "const Mdi%s base.IconBase = `%s`\n\n", varName, safeSVG)
+	}
+
+	// go save the buffer
+	err = os.WriteFile("../../mdi-icons.go", buffer.Bytes(), 0755)
+	if err != nil {
+		fmt.Println("Error: ", err.Error())
 	}
 }
 
