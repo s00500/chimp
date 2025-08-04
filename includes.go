@@ -76,7 +76,10 @@ func StaticMiddleware(baseURL string) func(next http.Handler) http.Handler {
 // ServeIncludedAssets serves included datastar and basecoat versions
 func ServeIncludedAssets(r chi.Router, baseURL string) {
 	p := strings.Trim(baseURL, "/")
-	r.Get("/"+p+"/static/datastar.min.js", datastarHandler)
-	r.Get("/"+p+"/static/basecoat.min.css", baseCoatCSSHandler)
-	r.Get("/"+p+"/static/basecoat.min.js", baseCoatJSHandler)
+	if p != "/" && p != "" {
+		p = "/" + p
+	}
+	r.Get(p+"/static/datastar.min.js", datastarHandler)
+	r.Get(p+"/static/basecoat.min.css", baseCoatCSSHandler)
+	r.Get(p+"/static/basecoat.min.js", baseCoatJSHandler)
 }
