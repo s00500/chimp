@@ -34,9 +34,12 @@ var basecoatCss []byte
 //go:embed static/all.min.js
 var basecoatJs []byte
 
-func IncludedBaseCoat(baseUrl string) templ.Component {
-	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/datastar.min.js"></script>
-  <link rel="stylesheet" href="` + baseUrl + `/static/basecoat.min.css"/>`)
+func IncludedBaseCoatCSS(baseUrl string) templ.Component {
+	return templ.Raw(`<link rel="stylesheet" href="` + baseUrl + `/static/basecoat.min.css"/>`)
+}
+
+func IncludedBaseCoatJS(baseUrl string) templ.Component {
+	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/datastar.min.js"></script>`)
 }
 
 func baseCoatCSSHandler(w http.ResponseWriter, r *http.Request) {
