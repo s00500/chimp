@@ -34,6 +34,24 @@ func CookieStore(sessionKey []byte) *sessions.CookieStore {
 	return sessionstore
 }
 
+// CreateStaticStore: Rarely we need to use a fixed static store, EG: Wails fails to support cookies...
+func CreateStaticStore[T Initializable[T]]() (middleWare func(next http.Handler) http.Handler) {
+	// Wails fails to support cookies... this sucks...
+	// We need a global state now... For now we create it inside of this function.
+	var globalState Lockable[T]
+	globalState.MutateOnly(func(s *T) {
+		newValue := (*s).Initialize()
+		*s = newValue
+	})
+
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(r.Context(), "session", &globalState)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
 func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore) (middleWare func(next http.Handler) http.Handler) {
 	var globalStore map[string]*Session[T] = map[string]*Session[T]{}
 	var globalStoreMu sync.RWMutex
