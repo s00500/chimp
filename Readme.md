@@ -6,4 +6,7 @@ Chimp tries to provide as much as possible for the Hypermedia Templ stack. You c
 
 - Broker
 - SessionStore
+- IconLibraries
+- Common used JS files that can be added as handlers and script tags
+
 
