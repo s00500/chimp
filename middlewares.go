@@ -10,14 +10,24 @@ import (
 func UrlPathMiddleware(baseUrl string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			parts := strings.SplitAfterN(r.Referer(), "/", 2)
-			if len(parts) > 1 {
-				ctx := context.WithValue(r.Context(), "urlpath", strings.TrimPrefix(parts[1], baseUrl))
-				next.ServeHTTP(w, r.WithContext(ctx))
-			} else {
-				//ctx := context.WithValue(r.Context(), "urlpath", strings.TrimPrefix(r.URL.Path, baseURL))
-				next.ServeHTTP(w, r)
-			}
+			_, rest := splitAfterThirdSlash(r.Referer())
+			ctx := context.WithValue(r.Context(), "urlpath", "/"+strings.TrimPrefix(rest, strings.TrimSuffix(baseUrl, "/")))
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+func splitAfterThirdSlash(s string) (string, string) {
+	slashCount := 0
+
+	for i := 0; i < len(s); i++ {
+		if s[i] == '/' {
+			slashCount++
+			if slashCount == 3 {
+				// Return the split parts
+				return s[:i+1], s[i+1:]
+			}
+		}
+	}
+	return s, ""
 }
