@@ -10,11 +10,21 @@ import (
 func UrlPathMiddleware(baseUrl string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			_, rest := splitAfterThirdSlash(r.Referer())
-			ctx := context.WithValue(r.Context(), "urlpath", "/"+strings.TrimPrefix(rest, strings.TrimSuffix(baseUrl, "/")))
-			next.ServeHTTP(w, r.WithContext(ctx))
+			if isSSE(r) {
+
+				_, rest := splitAfterThirdSlash(r.Referer())
+				ctx := context.WithValue(r.Context(), "urlpath", "/"+strings.TrimPrefix(rest, strings.TrimSuffix(baseUrl, "/")))
+				next.ServeHTTP(w, r.WithContext(ctx))
+			} else {
+				ctx := context.WithValue(r.Context(), "urlpath", strings.TrimPrefix(r.URL.Path, baseUrl))
+				next.ServeHTTP(w, r.WithContext(ctx))
+			}
 		})
 	}
+}
+
+func isSSE(r *http.Request) bool {
+	return r.Header.Get("Datastar-Request") == "true"
 }
 
 func splitAfterThirdSlash(s string) (string, string) {
