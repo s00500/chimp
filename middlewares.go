@@ -13,7 +13,7 @@ func UrlPathMiddleware(baseUrl string) func(next http.Handler) http.Handler {
 			if isSSE(r) {
 
 				_, rest := splitAfterThirdSlash(r.Referer())
-				ctx := context.WithValue(r.Context(), "urlpath", "/"+strings.TrimPrefix(rest, strings.TrimSuffix(baseUrl, "/")))
+				ctx := context.WithValue(r.Context(), "urlpath", strings.TrimPrefix("/"+rest, strings.TrimSuffix(baseUrl, "/")))
 				next.ServeHTTP(w, r.WithContext(ctx))
 			} else {
 				ctx := context.WithValue(r.Context(), "urlpath", strings.TrimPrefix(r.URL.Path, baseUrl))
