@@ -1,0 +1,29 @@
+package main
+
+import (
+	"embed"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/joho/godotenv"
+
+	"github.com/s00500/chimp"
+	log "github.com/s00500/env_logger"
+)
+
+//go:embed static
+var staticFS embed.FS
+
+func main() {
+	err := godotenv.Load(".env")
+	if err != nil {
+		log.Warn("Error loading .env file")
+	}
+
+	r := chi.NewRouter()
+
+	chimp.ServeIncludedAssets(r, "")
+	//chimp.ServeStaticFromEmbedded(r, staticFS, "static")
+	chimp.ServeStatic(r, "static", "static")
+	log.MustFatal(http.ListenAndServe(":8090", r))
+}
