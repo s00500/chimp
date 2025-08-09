@@ -39,7 +39,7 @@ func IncludedBaseCoatCSS(baseUrl string) templ.Component {
 }
 
 func IncludedBaseCoatJS(baseUrl string) templ.Component {
-	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/datastar.min.js"></script>`)
+	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/basecoat.min.js"></script>`)
 }
 
 func baseCoatCSSHandler(w http.ResponseWriter, r *http.Request) {
