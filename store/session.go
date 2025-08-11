@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 
@@ -28,6 +30,11 @@ type Session[T Initializable[T]] struct {
 }
 
 func CookieStore(sessionKey []byte) *sessions.CookieStore {
+	if len(sessionKey) == 0 {
+		fmt.Printf("Created cookie session without valid key")
+		time.Sleep(time.Second)
+		os.Exit(1)
+	}
 	sessionstore := sessions.NewCookieStore(sessionKey)
 	sessionstore.Options.SameSite = http.SameSiteDefaultMode
 	sessionstore.Options.Secure = false // needed as we dont use https
