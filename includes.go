@@ -17,14 +17,14 @@ import (
 var modTime = time.Date(2025, 8, 4, 0, 0, 0, 0, time.UTC)
 
 //go:embed static/datastar.min.js
-var datastar []byte
+var datastarBytes []byte
 
 func IncludedDatastar(baseUrl string) templ.Component {
 	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/datastar.min.js"></script>`)
 }
 
 func datastarHandler(w http.ResponseWriter, r *http.Request) {
-	buf := bytes.NewReader(datastar)
+	buf := bytes.NewReader(datastarBytes)
 	http.ServeContent(w, r, "datastar.min.js", modTime, buf)
 }
 

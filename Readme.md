@@ -2,6 +2,11 @@
 
 Chimp tries to provide as much as possible for the Hypermedia Templ stack. You can use the opinionated variant of this stack and it's CLI Tool or reuse the individual modules as building blocks for your app.
 
+## Scaffolding CLI
+
+Install using `go install github.com/s00500/chimp/cli/chimpcli@latest`
+
+
 ## Modules
 
 - Broker

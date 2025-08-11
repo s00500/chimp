@@ -17,7 +17,7 @@ func ServeStatic(r chi.Router, dir, prefix string) {
 // ServeStaticFromEmbedded is a helper to setup serving a static embedded fs
 func ServeStaticFromEmbedded(r chi.Router, fs embed.FS, prefix string) {
 	// use this then in the main UI
-	// go:embed assets
+	// go:embed assets/*
 	//var assetsFS embed.FS
 	p := strings.Trim(prefix, "/")
 	r.Handle("/"+p+"/*", http.StripPrefix("/", http.FileServer(http.FS(fs))))
