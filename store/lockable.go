@@ -21,7 +21,7 @@ func (l *Lockable[T]) Use() (ref T, mutate func(func(state *T)), drop context.Ca
 		l.mu.RUnlock()
 	})
 
-	mutate = func(f func(state *T)) {
+	mutate = func(f func(s *T)) {
 		l.mu.RUnlock()
 		l.mu.Lock()
 		f(&l.v)
@@ -40,7 +40,7 @@ func (l *Lockable[T]) Read(read func(state T)) {
 }
 */
 
-func (l *Lockable[T]) MutateOnly(mutate func(state *T)) {
+func (l *Lockable[T]) MutateOnly(mutate func(s *T)) {
 	l.mu.Lock()
 	mutate(&l.v)
 	l.mu.Unlock()
