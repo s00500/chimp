@@ -1,6 +1,11 @@
 package main
 
 import (
+	"maps"
+	"os"
+	"path/filepath"
+	"slices"
+
 	"github.com/manifoldco/promptui"
 	log "github.com/s00500/env_logger"
 	"github.com/spf13/cobra"
@@ -12,14 +17,21 @@ var fileCmd = &cobra.Command{
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// projectName := args[0]
-		// data := map[string]string{"ProjectName": projectName}
+
+		basePath := filepath.Join(".") // we basically assume we are in the root of the project
+		wd, err := os.Getwd()
+		log.MustFatal(log.Wrap(err, "on getting current working directory"))
+
+		data := TemplateData{ProjectName: filepath.Dir(wd)}
+
+		fileList := append([]string{"All Files"}, slices.Collect(maps.Keys(AllFiles))...)
 
 		prompt := promptui.Select{
 			Label: "Select a file template",
-			Items: []string{"All Files", "Makefile", "css", "BaseCoatCSS", "main.go"},
+			Items: fileList,
 		}
+
 		result := ""
-		var err error
 
 		if len(args) > 0 {
 			result = args[0]
@@ -31,30 +43,19 @@ var fileCmd = &cobra.Command{
 		}
 
 		switch result {
-		case "Makefile":
-			err = WriteEmbedded("templates/Makefile", "Makefile")
-			log.ShouldWrap(err, "on write file")
-		case "css":
-			err = WriteEmbedded("templates/input.css", "css/input.css")
-			log.ShouldWrap(err, "on write file")
-		case "BaseCoatCSS":
-			err = WriteEmbedded("templates/basecoat.css", "css/basecoat.css")
-			log.ShouldWrap(err, "on write file")
-		case "main.go":
-			err = WriteEmbedded("templates/main", "main.go")
-			log.ShouldWrap(err, "on write file")
 		case "All Files":
-
-			err = WriteEmbedded("templates/Makefile", "Makefile")
-			log.ShouldWrap(err, "on write file")
-			err = WriteEmbedded("templates/input.css", "css/input.css")
-			log.ShouldWrap(err, "on write file")
-			err = WriteEmbedded("templates/basecoat.css", "css/basecoat.css")
-			log.ShouldWrap(err, "on write file")
-			err = WriteEmbedded("templates/main", "main.go")
-			log.ShouldWrap(err, "on write file")
+			for _, f := range AllFiles {
+				err := f.Render(basePath, data)
+				log.ShouldWrap(err, "on write file")
+			}
 		default:
-			log.Fatal("nonexisting file")
+			f, ok := AllFiles[result]
+			if !ok {
+				log.Fatal("nonexisting file")
+			}
+
+			err := f.Render(basePath, data)
+			log.ShouldWrap(err, "on write file")
 		}
 
 		log.Infof("File '%s' created ✅", result)

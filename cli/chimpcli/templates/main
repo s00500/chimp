@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -11,7 +12,7 @@ import (
 	log "github.com/s00500/env_logger"
 )
 
-//go:embed static
+//go:embed static/*
 var staticFS embed.FS
 
 func main() {
@@ -20,10 +21,23 @@ func main() {
 		log.Warn("Error loading .env file")
 	}
 
+	baseURL := ""
+
 	r := chi.NewRouter()
 
+	mw := store.CreateSessionStore[state.RootState](appName, store.CookieStore(sessionKey))
+
+	r.Use(mw)
+	r.Use(chimp.UrlPathMiddleware(baseURL)) // Middleware to handle using the URL in your templates
+
+	// TODO: Register your handlers here. Tipp: use a seperate file or package for handlerfunctions
+
 	chimp.ServeIncludedAssets(r, "")
-	//chimp.ServeStaticFromEmbedded(r, staticFS, "static")
+	// chimp.ServeStaticFromEmbedded(r, staticFS, "static")
+
+	port := 8090
 	chimp.ServeStatic(r, "static", "static")
-	log.MustFatal(http.ListenAndServe(":8090", r))
+
+	log.Infof("{.ProjectName} is listening on port :%d", port)
+	log.MustFatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
 }

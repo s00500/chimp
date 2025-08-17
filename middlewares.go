@@ -23,6 +23,16 @@ func UrlPathMiddleware(baseUrl string) func(next http.Handler) http.Handler {
 	}
 }
 
+// Function to use in your templates for get URL
+func URL(ctx context.Context) string {
+	s, ok := ctx.Value("urlpath").(string)
+	if !ok {
+		//log.Debug("no url")
+		return ""
+	}
+	return s
+}
+
 func isSSE(r *http.Request) bool {
 	return r.Header.Get("Datastar-Request") == "true"
 }

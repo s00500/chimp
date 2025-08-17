@@ -8,11 +8,6 @@ import (
 )
 
 // CLI Helper to generate boilerplate from templates
-
-type TemplateData struct {
-	ProjectName string
-}
-
 var rootCmd = &cobra.Command{
 	Use:   "chimp",
 	Short: "chimp cli can help you scaffold your project and add parts",

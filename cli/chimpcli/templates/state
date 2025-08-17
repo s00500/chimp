@@ -1,0 +1,38 @@
+package state
+
+import (
+	"context"
+	"net/http"
+	"os"
+
+	"github.com/s00500/chimp/store"
+)
+
+type ClientState struct {
+	SomeValue bool
+}
+
+func (cs ClientState) Initialize() ClientState {
+	if os.Getenv("GOENV") == "dev" {
+		// Set a fixed value for development
+		return ClientState{}
+	}
+	return ClientState{}
+}
+
+// Helper to use in templates
+func State(ctx context.Context) ClientState {
+	s := ctx.Value("session").(*store.Lockable[ClientState])
+	if s == nil {
+		return ClientState{}
+	}
+
+	ref, _, drop := s.Use()
+	defer drop()
+	return ref
+}
+
+// Helper to use in handlers
+func Session(r *http.Request) *store.Lockable[ClientState] {
+	return r.Context().Value("session").(*store.Lockable[ClientState])
+}

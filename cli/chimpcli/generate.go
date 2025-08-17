@@ -5,6 +5,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"text/template"
 
@@ -23,7 +24,7 @@ var newCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		projectName := args[0]
 		basePath := filepath.Join(".", projectName)
-		data := map[string]string{"ProjectName": projectName}
+		data := TemplateData{ProjectName: projectName}
 
 		dirs := []string{
 			"handler",
@@ -40,9 +41,19 @@ var newCmd = &cobra.Command{
 			}
 		}
 
-		writeTemplate("templates/gitignore.tmpl", filepath.Join(basePath, ".gitignore"), data)
-		//writeTemplate("templates/Makefile.tmpl", filepath.Join(basePath, "Makefile"), data)
-		//writeTemplate("templates/config.yaml.tmpl", filepath.Join(basePath, "config", "config.yaml"), data)
+		WriteTemplate("templates/gitignore.tmpl", filepath.Join(basePath, ".gitignore"), data)
+
+		// TODO: All Files
+
+		// writeTemplate("templates/Makefile.tmpl", filepath.Join(basePath, "Makefile"), data)
+		// writeTemplate("templates/config.yaml.tmpl", filepath.Join(basePath, "config", "config.yaml"), data)
+
+		// TODO: Go Mod init
+		init := exec.Command("go", "mod", "init", projectName)
+		init.CombinedOutput()
+
+		tidy := exec.Command("go", "mod", "tidy")
+		tidy.CombinedOutput()
 
 		fmt.Printf("✅ Project '%s' created successfully!\n", projectName)
 	},
@@ -52,21 +63,22 @@ func init() {
 	rootCmd.AddCommand(newCmd)
 }
 
-func writeTemplate(templatePath, outPath string, data any) {
+func WriteTemplate(templatePath, outPath string, data TemplateData) error {
 	tmpl, err := template.ParseFS(templateFs, templatePath)
 	if err != nil {
-		log.Fatalf("Failed to parse embedded template %s: %v", templatePath, err)
+		return fmt.Errorf("Failed to parse embedded template %s: %v", templatePath, err)
 	}
 
 	f, err := os.Create(outPath)
 	if err != nil {
-		log.Fatalf("Error creating file %s: %v", outPath, err)
+		return fmt.Errorf("Error creating file %s: %v", outPath, err)
 	}
 	defer f.Close()
 
 	if err := tmpl.Execute(f, data); err != nil {
-		log.Fatalf("Error writing template to %s: %v", outPath, err)
+		return fmt.Errorf("Error writing template to %s: %v", outPath, err)
 	}
+	return nil
 }
 
 func WriteEmbedded(filename, dst string) error {
