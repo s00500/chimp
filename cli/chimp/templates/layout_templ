@@ -13,7 +13,7 @@ templ Layout() {
 		<head>
 			@chimp.IncludedDatastar(BaseUrl)
 			@chimp.StyleWithCacheBust(BaseUrl+"/static/style.css", CacheBust)
-			<title>{ .ProjectName }</title>
+			<title>{{ .ProjectName }}</title>
 		</head>
 		//<body data-on-load={ datastar.PostSSE("%s/events", BaseUrl) }> // use on-load to create a subscription like sse event stream
 		<body data-on-load={ datastar.PostSSE("%s/events", BaseUrl) }>

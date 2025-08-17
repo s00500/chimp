@@ -21,7 +21,7 @@ var fileCmd = &cobra.Command{
 		wd, err := os.Getwd()
 		log.MustFatal(log.Wrap(err, "on getting current working directory"))
 
-		data := TemplateData{ProjectName: filepath.Dir(wd)}
+		data := TemplateData{ProjectName: filepath.Base(wd)}
 
 		fileList := append([]string{"All Files"}, slices.Collect(maps.Keys(AllFiles))...)
 
