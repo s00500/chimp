@@ -44,6 +44,11 @@ var AllFiles map[string]FileDef = map[string]FileDef{
 		OutPath:     "main.go",
 		UseTemplate: true,
 	},
+	"env": {
+		InPath:      "templates/env",
+		OutPath:     ".env",
+		UseTemplate: true,
+	},
 	"gitignore": {
 		InPath:      "templates/gitignore",
 		OutPath:     ".gitignore",
