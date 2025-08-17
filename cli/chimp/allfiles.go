@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -53,7 +54,7 @@ var AllFiles map[string]FileDef = map[string]FileDef{
 func (f FileDef) Render(basePath string, data TemplateData) error {
 	if fileExists(f.OutPath) {
 		prompt := promptui.Select{
-			Label: "File %s exists, should it be overwritten ?",
+			Label: fmt.Sprintf("File %s exists, should it be overwritten ?", f.OutPath),
 			Items: []string{"No", "Yes"},
 		}
 		_, result, err := prompt.Run()
