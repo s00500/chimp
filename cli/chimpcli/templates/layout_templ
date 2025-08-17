@@ -1,0 +1,29 @@
+package templates
+
+import (
+	"github.com/s00500/chimp"
+	"github.com/starfederation/datastar-go/datastar"
+)
+
+var BaseUrl = ""
+var CacheBust = false
+
+templ Layout() {
+	<html class="dark">
+		<head>
+			@chimp.IncludedDatastar(BaseUrl)
+			@chimp.StyleWithCacheBust(BaseUrl+"/static/style.css", CacheBust)
+			<title>{ .ProjectName }</title>
+		</head>
+		//<body data-on-load={ datastar.PostSSE("%s/events", BaseUrl) }> // use on-load to create a subscription like sse event stream
+		<body data-on-load={ datastar.PostSSE("%s/events", BaseUrl) }>
+			@Notification("")
+			// @HideModal()
+			// @Loader()
+			<div id="col wrapper" class="m-4 grid grid-cols-3 gap-4">
+				{ children... }
+			</div>
+		</body>
+	</html>
+}
+

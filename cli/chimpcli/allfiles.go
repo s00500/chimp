@@ -38,6 +38,11 @@ var AllFiles map[string]FileDef = map[string]FileDef{
 		OutPath:     "main.go",
 		UseTemplate: true,
 	},
+	"Layout template": {
+		InPath:      "templates/layout_templ",
+		OutPath:     "templates/layout.templ",
+		UseTemplate: true,
+	},
 }
 
 func (f FileDef) Render(basePath string, data TemplateData) error {

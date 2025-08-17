@@ -16,7 +16,6 @@ var fileCmd = &cobra.Command{
 	Short: "Create a new project scaffold",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		// projectName := args[0]
 
 		basePath := filepath.Join(".") // we basically assume we are in the root of the project
 		wd, err := os.Getwd()
@@ -43,11 +42,12 @@ var fileCmd = &cobra.Command{
 		}
 
 		switch result {
-		case "All Files":
+		case "All Files", "all":
 			for _, f := range AllFiles {
 				err := f.Render(basePath, data)
-				log.ShouldWrap(err, "on write file")
+				log.MustFatal(log.Wrap(err, "on write file"))
 			}
+			log.Infof("All Files created ✅")
 		default:
 			f, ok := AllFiles[result]
 			if !ok {
@@ -55,7 +55,7 @@ var fileCmd = &cobra.Command{
 			}
 
 			err := f.Render(basePath, data)
-			log.ShouldWrap(err, "on write file")
+			log.MustFatal(log.Wrap(err, "on write file"))
 		}
 
 		log.Infof("File '%s' created ✅", result)
