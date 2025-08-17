@@ -15,7 +15,7 @@ func TestNotification(t *testing.T) {
 	}()
 	b, _ := io.ReadAll(r)
 	t.Log(string(b))
-	t.Fail()
+	//t.Fail()
 	// doc, err := goquery.NewDocumentFromReader(r)
 	// if err != nil {
 	// 	t.Fatalf("failed to read template: %v", err)

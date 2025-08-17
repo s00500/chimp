@@ -1,23 +1,59 @@
 package components
 
+type ModalConfig struct {
+	HeaderText        string
+	ConfirmButtonText string
+	OnConfirm         string
+}
+
+type ModalOption func(*ModalConfig)
+
+func WithTitle(text string) ModalOption {
+	return func(config *ModalConfig) {
+		config.HeaderText = text
+	}
+}
+
+func WithConfirmButton(text string) ModalOption {
+	return func(config *ModalConfig) {
+		config.ConfirmButtonText = text
+	}
+}
+
+func WithOnConfirm(action string) ModalOption {
+	return func(config *ModalConfig) {
+		config.OnConfirm = action
+	}
+}
+
 // Modal returns a extensible Modal based on Basecoat
-templ ConfirmModal(headerText, mainText, confirmButtonText, onConfirm string) {
+templ ConfirmModal(text string, options ...ModalOption) {
+	{{config := &ModalConfig{
+	HeaderText:        "Confirm",
+	ConfirmButtonText: "Confirm",
+	OnConfirm:         "",
+}
+	}}
+	{{for _, option := range options {
+	option(config)
+}
+	}}
 	<div
 		id="global-basecoat-modal"
 	>
-		if mainText != "" {
+		if text != "" {
 			<div style="display:none" data-on-load__viewtransition="$modalOpen = true; el.remove()"></div>
 			<dialog data-attr-open="$modalOpen" class="dialog w-full sm:max-w-[425px] max-h-[612px]" aria-labelledby="dialog-title">
 				<article>
 					<header>
-						<h2 id="dialog-title">{ headerText }</h2>
+						<h2 id="dialog-title">{ config.HeaderText }</h2>
 					</header>
 					<section>
-						{ mainText }
+						{ text }
 					</section>
 					<footer>
 						<button class="btn" data-on-click__viewtransition="$modalOpen = false">Cancel</button>
-						<button class="btn" data-on-click={ onConfirm }>{ confirmButtonText }</button>
+						<button class="btn" data-on-click={ config.OnConfirm }>{ config.ConfirmButtonText }</button>
 					</footer>
 				</article>
 			</dialog>
