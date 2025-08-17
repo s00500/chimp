@@ -1,12 +1,9 @@
-# Run templ generation in watch mode to detect all .templ files and
-# re-create _templ.txt files on change, then send reload event to browser.
-# Default url: http://localhost:7331
 templ:
-	templ generate --watch --proxy="http://localhost:3030" --open-browser=false
+	go tool templ generate --watch
 
-# Run air to detect any go file changes to re-build and re-run the server.
+# Run air to detect any go file changes to re-build and re-run the server. Use datastar for hotreload
 server:
-	env GOENV=dev air \
+	env GOENV=dev go tool air \
 	--build.cmd "go build -o tmp/bin/main ." \
 	--build.bin "tmp/bin/main" \
 	--build.delay "100" \
@@ -16,11 +13,11 @@ server:
 	--misc.clean_on_exit true
 
 tailwind-clean:
-	tailwindcss -i ./css/input.css -o ./static/output.css --clean
+	go tool gotailwind -i ./css/input.css -o ./static/output.css --clean
 
 # Run tailwindcss to generate the styles.css bundle in watch mode.
 tailwind-watch:
-	tailwindcss -i ./css/input.css -o ./static/output.css --watch
+	go tool gotailwind -i ./css/input.css -o ./static/output.css --watch
 
 # Start development server
 dev:
