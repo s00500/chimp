@@ -6,7 +6,7 @@ Chimp tries to provide as much as possible for the Hypermedia Templ stack. You c
 
 ## Scaffolding CLI
 
-Install using `go install github.com/s00500/chimp/cli/chimpcli@latest`
+Install using `go install github.com/s00500/chimp/cli/chimp@latest`
 
 
 ## Modules
