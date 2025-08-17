@@ -46,19 +46,18 @@ var newCmd = &cobra.Command{
 			log.MustFatal(log.Wrap(err, "on write file"))
 		}
 
-		// TODO: Go Mod init
 		init := exec.Command("go", "mod", "init", projectName)
 		init.Dir = basePath
 		init.CombinedOutput()
-
-		tidy := exec.Command("go", "mod", "tidy")
-		tidy.Dir = basePath
-		tidy.CombinedOutput()
 
 		for _, t := range AllTools {
 			err := t.Install(basePath)
 			log.MustFatal(log.Wrap(err, "on installing tool"))
 		}
+
+		tidy := exec.Command("go", "mod", "tidy")
+		tidy.Dir = basePath
+		tidy.CombinedOutput()
 
 		fmt.Printf("✅ Project '%s' created successfully!\n", projectName)
 	},
