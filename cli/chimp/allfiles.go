@@ -52,7 +52,7 @@ var AllFiles map[string]FileDef = map[string]FileDef{
 }
 
 func (f FileDef) Render(basePath string, data TemplateData) error {
-	if fileExists(f.OutPath) {
+	if fileExists(filepath.Join(basePath, f.OutPath)) {
 		prompt := promptui.Select{
 			Label: fmt.Sprintf("File %s exists, should it be overwritten ?", f.OutPath),
 			Items: []string{"No", "Yes"},
@@ -69,7 +69,7 @@ func (f FileDef) Render(basePath string, data TemplateData) error {
 	if f.UseTemplate {
 		return WriteTemplate(f.InPath, filepath.Join(basePath, f.OutPath), data)
 	} else {
-		return WriteEmbedded(f.InPath, f.OutPath)
+		return WriteEmbedded(f.InPath, filepath.Join(basePath, f.OutPath))
 	}
 }
 
