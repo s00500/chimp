@@ -1,1 +1,1 @@
-go install github.com/s00500/chimp/cli/chimp@main
+go build -o ~/go/bin/chimp cli/chimp

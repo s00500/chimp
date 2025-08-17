@@ -2,9 +2,8 @@ package store
 
 import (
 	"context"
-	"fmt"
+	"crypto/rand"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 
@@ -29,11 +28,18 @@ type Session[T Initializable[T]] struct {
 	notfresh bool
 }
 
+func generateRandomKey() []byte {
+	key := make([]byte, 32) // 32 bytes = 256-bit key
+	_, err := rand.Read(key)
+	if err != nil {
+		panic(err)
+	}
+	return key
+}
+
 func CookieStore(sessionKey []byte) *sessions.CookieStore {
 	if len(sessionKey) == 0 {
-		fmt.Printf("Created cookie session without valid key")
-		time.Sleep(time.Second)
-		os.Exit(1)
+		sessionKey = generateRandomKey()
 	}
 	sessionstore := sessions.NewCookieStore(sessionKey)
 	sessionstore.Options.SameSite = http.SameSiteDefaultMode

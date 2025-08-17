@@ -9,11 +9,19 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/s00500/chimp"
+	"github.com/s00500/chimp/store"
 	log "github.com/s00500/env_logger"
 )
 
-//go:embed static/*
-var staticFS embed.FS
+// TODO: enable this to ensure static fs embedding if needed
+// //go:embed static/*
+// var staticFS embed.FS
+
+var sessionKey = []byte{}
+
+var init(){
+
+}
 
 func main() {
 	err := godotenv.Load(".env")
@@ -21,23 +29,32 @@ func main() {
 		log.Warn("Error loading .env file")
 	}
 
+  if os.Getenv("GOENV") == "dev" {
+    sessionKey = []byte("simple-key")
+  }
+
 	baseURL := ""
+	appName := "{{.ProjectName}}"
 
 	r := chi.NewRouter()
 
-	mw := store.CreateSessionStore[state.RootState](appName, store.CookieStore(sessionKey))
+	mw := store.CreateSessionStore[state.ClientState](appName, store.CookieStore())
 
 	r.Use(mw)
 	r.Use(chimp.UrlPathMiddleware(baseURL)) // Middleware to handle using the URL in your templates
 
 	// TODO: Register your handlers here. Tipp: use a seperate file or package for handlerfunctions
 
+  //------------
+
+
+  // TODO: Use static or embedded serving. Make sure your embedded fs is setup correctly
 	chimp.ServeIncludedAssets(r, "")
 	// chimp.ServeStaticFromEmbedded(r, staticFS, "static")
 
 	port := 8090
 	chimp.ServeStatic(r, "static", "static")
 
-	log.Infof("{.ProjectName} is listening on port :%d", port)
+	log.Infof("{{.ProjectName}} is listening on port :%d", port)
 	log.MustFatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
 }
