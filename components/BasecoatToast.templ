@@ -1,0 +1,23 @@
+package components
+
+import "github.com/s00500/chimp/icon"
+
+templ BCToast(title, content string) {
+	<div id="basecoat-toaster">
+		if content != "" {
+			<div class="toaster-top" data-duration="8000">
+				<div class="toast" role="status" aria-atomic="true" aria-hidden="false" data-category="success">
+					<div class="toast-content">
+						@icon.Icon(icon.HeCheckCircleOutline, "")
+						<section>
+							if title != "" {
+								<h2>{ title }</h2>
+							}
+							<p>{ content }</p>
+						</section>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}

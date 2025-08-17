@@ -1,0 +1,23 @@
+package components
+
+// Loader returns an simple circular loader component
+templ Loader(hidden bool) {
+	if hidden {
+		<div id="global_loader"></div>
+	} else {
+		<div id="global_loader" class="absolute inset-0 flex items-center justify-center">
+			<style>
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .spin {
+      animation: spin 1s linear infinite;
+    }
+  </style>
+			<div class="flex items-center justify-center space-x-2">
+				<div class="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full spin"></div>
+			</div>
+		</div>
+	}
+}
