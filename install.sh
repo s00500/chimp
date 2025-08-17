@@ -1,1 +1,1 @@
-go build -o ~/go/bin/chimp cli/chimp
+go build -o ~/go/bin/chimp ./cli/chimp

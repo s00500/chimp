@@ -1,15 +1,18 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"net/http"
+	"os"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/joho/godotenv"
 
 	"github.com/s00500/chimp"
 	"github.com/s00500/chimp/store"
+
+	"{{.ProjectName}}/state"
+
 	log "github.com/s00500/env_logger"
 )
 
@@ -19,36 +22,31 @@ import (
 
 var sessionKey = []byte{}
 
-var init(){
-
-}
-
 func main() {
 	err := godotenv.Load(".env")
 	if err != nil {
 		log.Warn("Error loading .env file")
 	}
 
-  if os.Getenv("GOENV") == "dev" {
-    sessionKey = []byte("simple-key")
-  }
+	if os.Getenv("GOENV") == "dev" {
+		sessionKey = []byte("simple-key")
+	}
 
 	baseURL := ""
 	appName := "{{.ProjectName}}"
 
 	r := chi.NewRouter()
 
-	mw := store.CreateSessionStore[state.ClientState](appName, store.CookieStore())
+	mw := store.CreateSessionStore[state.ClientState](appName, store.CookieStore(sessionKey))
 
 	r.Use(mw)
 	r.Use(chimp.UrlPathMiddleware(baseURL)) // Middleware to handle using the URL in your templates
 
 	// TODO: Register your handlers here. Tipp: use a seperate file or package for handlerfunctions
 
-  //------------
+	//------------
 
-
-  // TODO: Use static or embedded serving. Make sure your embedded fs is setup correctly
+	// TODO: Use static or embedded serving. Make sure your embedded fs is setup correctly
 	chimp.ServeIncludedAssets(r, "")
 	// chimp.ServeStaticFromEmbedded(r, staticFS, "static")
 
