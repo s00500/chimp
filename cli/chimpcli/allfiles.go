@@ -1,6 +1,11 @@
 package main
 
-import "path/filepath"
+import (
+	"os"
+	"path/filepath"
+
+	"github.com/manifoldco/promptui"
+)
 
 type TemplateData struct {
 	ProjectName string
@@ -46,9 +51,31 @@ var AllFiles map[string]FileDef = map[string]FileDef{
 }
 
 func (f FileDef) Render(basePath string, data TemplateData) error {
+	if fileExists(f.OutPath) {
+		prompt := promptui.Select{
+			Label: "File %s exists, should it be overwritten ?",
+			Items: []string{"No", "Yes"},
+		}
+		_, result, err := prompt.Run()
+		if err != nil {
+			return err
+		}
+		if result == "No" {
+			return nil
+		}
+	}
+
 	if f.UseTemplate {
 		return WriteTemplate(f.InPath, filepath.Join(basePath, f.OutPath), data)
 	} else {
 		return WriteEmbedded(f.InPath, f.OutPath)
 	}
+}
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }

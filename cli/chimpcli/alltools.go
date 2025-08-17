@@ -25,9 +25,12 @@ var AllTools = map[string]ToolDef{
 	},
 }
 
-func (t ToolDef) Install() error {
-	init := exec.Command("go", "get", "--tool", fmt.Sprintf("%s@%s", t.ToolName, t.Version))
-	out, err := init.CombinedOutput()
+func (t ToolDef) Install(basePath string) error {
+	install := exec.Command("go", "get", "--tool", fmt.Sprintf("%s@%s", t.ToolName, t.Version))
+	if basePath != "" {
+		install.Dir = basePath
+	}
+	out, err := install.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("failed install of %s: %s, %w", t.ToolName, string(out), err)
 	}

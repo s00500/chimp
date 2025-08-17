@@ -36,7 +36,7 @@ var toolsCmd = &cobra.Command{
 		switch result {
 		case "All Tools", "all":
 			for _, t := range AllTools {
-				err := t.Install()
+				err := t.Install("")
 				log.MustFatal(log.Wrap(err, "on installing tool"))
 			}
 			log.Infof("All Tools '%s' installed ✅, use it with go tool <toolname>", result)
@@ -46,7 +46,7 @@ var toolsCmd = &cobra.Command{
 				log.Fatal("nonexisting tool")
 			}
 
-			err := t.Install()
+			err := t.Install("")
 			log.MustFatal(log.Wrap(err, "on installing tool"))
 		}
 
