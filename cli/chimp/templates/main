@@ -30,6 +30,7 @@ func main() {
 
 	if os.Getenv("GOENV") == "dev" {
 		sessionKey = []byte("simple-key")
+		templates.CacheBust = true
 	}
 
 	baseURL := ""
@@ -44,11 +45,19 @@ func main() {
 
 	// TODO: Register your handlers here. Tipp: use a seperate file or package for handlerfunctions
 
+	r.Get(baseURL+"/", templ.Handler(templates.Index()).ServeHTTP)
+
+	r.Post("/events", func(w http.ResponseWriter, r *http.Request) {
+		// TODO: Do something
+	})
+
 	//------------
 
 	// TODO: Use static or embedded serving. Make sure your embedded fs is setup correctly
 	chimp.ServeIncludedAssets(r, "")
 	// chimp.ServeStaticFromEmbedded(r, staticFS, "static")
+
+	chimp.ServeHotReload(r, baseURL, os.Getenv("GOENV") == "dev")
 
 	port := 8090
 	chimp.ServeStatic(r, "static", "static")

@@ -59,6 +59,11 @@ var AllFiles map[string]FileDef = map[string]FileDef{
 		OutPath:     "templates/layout.templ",
 		UseTemplate: true,
 	},
+	"index": {
+		InPath:      "templates/index_templ",
+		OutPath:     "templates/index.templ",
+		UseTemplate: true,
+	},
 }
 
 func (f FileDef) Render(basePath string, data TemplateData) error {

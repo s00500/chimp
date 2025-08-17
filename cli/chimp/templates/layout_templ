@@ -23,6 +23,7 @@ templ Layout() {
 				{ children... }
 			</div>
 		</body>
+    @chimp.HotReload(BaseUrl, CacheBust)
 	</html>
 }
 

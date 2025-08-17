@@ -1,0 +1,16 @@
+package templates
+
+import (
+	"github.com/s00500/chimp"
+	"github.com/s00500/chimp/components"
+	"github.com/starfederation/datastar-go/datastar"
+)
+
+templ Index() {
+	@Layout() {
+		<div class="w-full flex flex-1 items-center justify-center">
+			<p class="text-xl">Hello there</p>
+		</div>
+	}
+}
+

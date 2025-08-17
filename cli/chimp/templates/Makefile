@@ -13,11 +13,11 @@ server:
 	--misc.clean_on_exit true
 
 tailwind-clean:
-	go tool gotailwind -i ./css/input.css -o ./static/output.css --clean
+	go tool gotailwind -i ./css/input.css -o ./static/style.css --clean
 
 # Run tailwindcss to generate the styles.css bundle in watch mode.
 tailwind-watch:
-	go tool gotailwind -i ./css/input.css -o ./static/output.css --watch
+	go tool gotailwind -i ./css/input.css -o ./static/style.css --watch
 
 # Start development server
 dev:
