@@ -81,6 +81,8 @@ func (f FileDef) Render(basePath string, data TemplateData) error {
 		}
 	}
 
+	os.MkdirAll(filepath.Dir(filepath.Join(basePath, f.OutPath)), 0755)
+
 	if f.UseTemplate {
 		return WriteTemplate(f.InPath, filepath.Join(basePath, f.OutPath), data)
 	} else {
