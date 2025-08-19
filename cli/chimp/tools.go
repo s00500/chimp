@@ -14,7 +14,7 @@ var toolsCmd = &cobra.Command{
 	Short: "Install tools",
 	Args:  cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		toolList := append([]string{"All Tools"}, slices.Collect(maps.Keys(AllFiles))...)
+		toolList := append([]string{"All Tools"}, slices.Collect(maps.Keys(AllTools))...)
 
 		prompt := promptui.Select{
 			Label: "Select a tool to install",
