@@ -4,6 +4,7 @@ type ModalConfig struct {
 	HeaderText        string
 	ConfirmButtonText string
 	OnConfirm         string
+	HasChildren       bool
 }
 
 type ModalOption func(*ModalConfig)
@@ -14,6 +15,11 @@ func WithTitle(text string) ModalOption {
 	}
 }
 
+func WithChildren() ModalOption {
+	return func(config *ModalConfig) {
+		config.HasChildren = true
+	}
+}
 func WithConfirmButton(text string) ModalOption {
 	return func(config *ModalConfig) {
 		config.ConfirmButtonText = text
@@ -41,7 +47,7 @@ templ ConfirmModal(text string, options ...ModalOption) {
 	<div
 		id="global-basecoat-modal"
 	>
-		if text != "" {
+		if text != "" || config.HasChildren {
 			<div style="display:none" data-on-load__viewtransition="$modalOpen = true; el.remove()"></div>
 			<dialog data-attr-open="$modalOpen" class="dialog w-full sm:max-w-[425px] max-h-[612px]" aria-labelledby="dialog-title">
 				<article>
@@ -50,6 +56,7 @@ templ ConfirmModal(text string, options ...ModalOption) {
 					</header>
 					<section>
 						{ text }
+						{ children... }
 					</section>
 					<footer>
 						<button class="btn" data-on-click__viewtransition="$modalOpen = false">Cancel</button>
