@@ -12,6 +12,9 @@ import (
 	"github.com/s00500/chimp/store"
 
 	"{{.ProjectName}}/state"
+	"{{.ProjectName}}/templates"
+
+	"github.com/a-h/templ"
 
 	log "github.com/s00500/env_logger"
 )
