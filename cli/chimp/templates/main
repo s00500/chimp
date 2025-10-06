@@ -65,6 +65,6 @@ func main() {
 	port := 8090
 	chimp.ServeStatic(r, "static", "static")
 
-	log.Infof("{{.ProjectName}} is listening on port :%d", port)
+	log.Infof("{{.ProjectName}} is listening on port http://127.0.0.1:%d", port)
 	log.MustFatal(http.ListenAndServe(fmt.Sprintf(":%d", port), r))
 }
