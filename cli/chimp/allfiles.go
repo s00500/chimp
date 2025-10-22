@@ -19,9 +19,9 @@ type FileDef struct {
 }
 
 var AllFiles map[string]FileDef = map[string]FileDef{
-	"Makefile": {
-		InPath:      "templates/Makefile",
-		OutPath:     "Makefile",
+	"Magefile": {
+		InPath:      "templates/magefile",
+		OutPath:     "magefile.go",
 		UseTemplate: false,
 	},
 	"CSS": {
