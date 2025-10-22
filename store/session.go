@@ -89,6 +89,9 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 
 			ctx := context.WithValue(r.Context(), "session", &s.State)
 			next.ServeHTTP(w, r.WithContext(ctx))
+
+			// Persist session AFTER handler completes to capture any mutations
+			backend.Set(id, s)
 		})
 	}
 	return middleWare
