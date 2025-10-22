@@ -75,7 +75,7 @@ func ConfirmModal(text string, options ...ModalOption) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if text != "" || config.HasChildren {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div style=\"display:none\" data-on-load__viewtransition=\"$modalOpen = true; el.remove()\"></div><dialog data-attr-open=\"$modalOpen\" class=\"dialog w-full sm:max-w-[425px] max-h-[612px]\" aria-labelledby=\"dialog-title\"><article><header><h2 id=\"dialog-title\">")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<div style=\"display:none\" data-init__viewtransition=\"$modalOpen = true; el.remove()\"></div><dialog data-attr:open=\"$modalOpen\" class=\"dialog w-full sm:max-w-[425px] max-h-[612px]\" aria-labelledby=\"dialog-title\"><article><header><h2 id=\"dialog-title\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -105,7 +105,7 @@ func ConfirmModal(text string, options ...ModalOption) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</section><footer><button class=\"btn\" data-on-click__viewtransition=\"$modalOpen = false\">Cancel</button> <button class=\"btn\" data-on-click=\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</section><footer><button class=\"btn\" data-on:click__viewtransition=\"$modalOpen = false\">Cancel</button> <button class=\"btn\" data-on:click=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
