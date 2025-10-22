@@ -65,32 +65,7 @@ func CreateStaticStore[T Initializable[T]]() (middleWare func(next http.Handler)
 	}
 }
 
-func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore) (middleWare func(next http.Handler) http.Handler) {
-	var globalStore map[string]*Session[T] = map[string]*Session[T]{}
-	var globalStoreMu sync.RWMutex
-
-	GetSessionByID := func(id string) (s *Session[T], isFresh bool) {
-		globalStoreMu.RLock()
-		if s, ok := globalStore[id]; ok {
-			globalStoreMu.RUnlock()
-			return s, false
-		}
-		globalStoreMu.RUnlock()
-
-		// Create New
-		s = &Session[T]{State: Lockable[T]{}}
-		s.State.MutateOnly(func(v *T) {
-			*v = (*v).Initialize()
-		})
-
-		s.lastInteraction.Store(time.Now())
-		globalStoreMu.Lock()
-		globalStore[id] = s
-		globalStoreMu.Unlock()
-
-		return s, true
-	}
-
+func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore, backend SessionBackend[T]) (middleWare func(next http.Handler) http.Handler) {
 	middleWare = func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			session, _ := gorillaStore.Get(r, sessionname)
@@ -101,41 +76,21 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 				id = session.Values["id"].(string)
 			}
 
-			s, isFresh := GetSessionByID(id)
+			s, exists := backend.Get(id)
 
-			if isFresh {
+			if !exists {
+				// New session, save cookie
 				session.Save(r, w)
 			}
 
-			s.lastInteraction.Store(time.Now()) // Sessions timeout if they are not interactied with for session timeout
+			// Update last interaction time and persist to backend
+			s.lastInteraction.Store(time.Now())
+			backend.Set(id, s)
 
 			ctx := context.WithValue(r.Context(), "session", &s.State)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
-
-	go func() {
-		t := time.NewTicker(time.Second * 15)
-		for range t.C {
-			globalStoreMu.RLock()
-			for key, s := range globalStore {
-				// Check expirery
-				if time.Since(s.lastInteraction.Load()) > sessionExpireryTime {
-					// reap it
-					// grap the lock on the key first
-					s.l.Lock()
-					globalStoreMu.RUnlock()
-					globalStoreMu.Lock()
-
-					delete(globalStore, key)
-					globalStoreMu.Unlock()
-					globalStoreMu.RLock()
-					s.l.Unlock()
-				}
-			}
-			globalStoreMu.RUnlock()
-		}
-	}()
 	return middleWare
 }
 
