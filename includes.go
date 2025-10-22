@@ -20,7 +20,7 @@ var modTime = time.Date(2025, 8, 4, 0, 0, 0, 0, time.UTC)
 var datastarBytes []byte
 
 func IncludedDatastar(baseUrl string) templ.Component {
-	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/datastar.min.js"></script>`)
+	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/datastar.min.js?v=rc6"></script>`)
 }
 
 func datastarHandler(w http.ResponseWriter, r *http.Request) {
