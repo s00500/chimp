@@ -26,6 +26,7 @@ type Session[T Initializable[T]] struct {
 	State Lockable[T]
 
 	notfresh bool
+	dirty    atomic.Bool // Track if session needs to be saved
 }
 
 func generateRandomKey() []byte {
@@ -81,17 +82,32 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 			if !exists {
 				// New session, save cookie
 				session.Save(r, w)
+				s.dirty.Store(true) // Mark as dirty to ensure first save
 			}
 
-			// Update last interaction time and persist to backend
-			s.lastInteraction.Store(time.Now())
-			backend.Set(id, s)
+			// Set up dirty flag callback so mutations mark session for saving
+			s.State.markDirty = func() {
+				s.dirty.Store(true)
+			}
+
+			// Update last interaction time in memory
+			lastInteraction := s.lastInteraction.Load()
+			now := time.Now()
+
+			// Only update if more than 1 minute has passed (reduce unnecessary writes)
+			if now.Sub(lastInteraction) > time.Minute {
+				s.lastInteraction.Store(now)
+				s.dirty.Store(true)
+			}
 
 			ctx := context.WithValue(r.Context(), "session", &s.State)
 			next.ServeHTTP(w, r.WithContext(ctx))
 
-			// Persist session AFTER handler completes to capture any mutations
-			backend.Set(id, s)
+			// Only persist if session was modified (dirty flag set by mutations or last interaction update)
+			if s.dirty.Load() {
+				backend.Set(id, s)
+				s.dirty.Store(false)
+			}
 		})
 	}
 	return middleWare
