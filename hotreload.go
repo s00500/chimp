@@ -29,5 +29,5 @@ func HotReload(baseUrl string, enable bool) templ.Component {
 	if !enable {
 		return templ.Raw(``)
 	}
-	return templ.Raw(`<div id="hotreload" data-on-load="@get('` + baseUrl + `/hotreload', {retryMaxCount: 1000,retryInterval:20, retryMaxWaitMs:200})"></div>`)
+	return templ.Raw(`<div id="hotreload" data-init="@get('` + baseUrl + `/hotreload', {retryMaxCount: 1000,retryInterval:20, retryMaxWaitMs:200})"></div>`)
 }

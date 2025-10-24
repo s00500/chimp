@@ -16,8 +16,8 @@ templ Layout() {
 			@chimp.StyleWithCacheBust(BaseUrl+"/static/style.css", CacheBust)
 			<title>{{ .ProjectName }}</title>
 		</head>
-		//<body data-on-load={ datastar.PostSSE("%s/events", BaseUrl) }> // use on-load to create a subscription like sse event stream
-		<body data-on-load={ datastar.PostSSE("%s/events", BaseUrl) }>
+		//<body data-init={ datastar.PostSSE("%s/events", BaseUrl) }> // use on-load to create a subscription like sse event stream
+		<body>
 			@components.Notification("", "")
 			@components.ConfirmModal("")
 			<div id="wrapper" class="m-4 grid grid-cols-3 gap-4">

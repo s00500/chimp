@@ -25,7 +25,7 @@ templ Notification(msgType string, text string) {
 	<div id="chimp-notification">
 		if text != "" {
 			<div
-				data-on-load__delay.3s__viewtransition="el.remove()"
+				data-init__delay.3s__viewtransition="el.remove()"
 				class={ "fixed top-4 right-4 border px-4 py-3 rounded" ,
         templ.KV("bg-red-100 border border-red-400 text-red-700", msgType==NotifyError),
         templ.KV("bg-yellow-100 borderborder-yellow-400 text-yellow-700", msgType==NotifyWarning),
