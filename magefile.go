@@ -108,9 +108,53 @@ func UpdateBasecoat() error {
 	return nil
 }
 
+// UpdateBasecoatSource fetches the latest BaseCoat source CSS from GitHub
+func UpdateBasecoatSource() error {
+	fmt.Println("🔍 Fetching latest BaseCoat source from GitHub...")
+
+	// Query GitHub API for latest release tag
+	resp, err := http.Get("https://api.github.com/repos/hunvreus/basecoat/releases/latest")
+	if err != nil {
+		return fmt.Errorf("failed to fetch GitHub release info: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("GitHub API returned status %d", resp.StatusCode)
+	}
+
+	var release struct {
+		TagName string `json:"tag_name"`
+	}
+
+	if err := json.NewDecoder(resp.Body).Decode(&release); err != nil {
+		return fmt.Errorf("failed to decode release info: %w", err)
+	}
+
+	version := release.TagName
+	fmt.Printf("📦 Found version: %s\n", version)
+
+	// Ensure templates directory exists
+	templatesDir := filepath.Join("cli", "chimp", "templates")
+	if err := os.MkdirAll(templatesDir, 0755); err != nil {
+		return fmt.Errorf("failed to create templates directory: %w", err)
+	}
+
+	// Download source CSS from GitHub
+	downloadURL := fmt.Sprintf("https://raw.githubusercontent.com/hunvreus/basecoat/%s/src/css/basecoat.css", version)
+	outputPath := filepath.Join(templatesDir, "basecoat.css")
+
+	if err := downloadFile(downloadURL, outputPath); err != nil {
+		return fmt.Errorf("failed to download BaseCoat source: %w", err)
+	}
+
+	fmt.Printf("✅ Updated %s to version %s\n", outputPath, version)
+	return nil
+}
+
 // UpdateAssets updates both Datastar and BaseCoat assets
 func UpdateAssets() error {
-	mg.Deps(UpdateDatastar, UpdateBasecoat)
+	mg.Deps(UpdateDatastar, UpdateBasecoat, UpdateBasecoatSource)
 	fmt.Println("\n🎉 All assets updated successfully!")
 	return nil
 }
