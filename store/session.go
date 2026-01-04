@@ -26,6 +26,7 @@ type Session[T Initializable[T]] struct {
 	State Lockable[T]
 
 	notfresh bool
+	dirty    atomic.Bool // Track if session needs to be saved
 }
 
 func generateRandomKey() []byte {
@@ -65,32 +66,15 @@ func CreateStaticStore[T Initializable[T]]() (middleWare func(next http.Handler)
 	}
 }
 
+// CreateSessionStore creates session middleware with in-memory storage.
+// For custom backends (e.g., Redis), use CreateSessionStoreWithBackend.
 func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore) (middleWare func(next http.Handler) http.Handler) {
-	var globalStore map[string]*Session[T] = map[string]*Session[T]{}
-	var globalStoreMu sync.RWMutex
+	return CreateSessionStoreWithBackend(sessionname, gorillaStore, MemoryStore[T]())
+}
 
-	GetSessionByID := func(id string) (s *Session[T], isFresh bool) {
-		globalStoreMu.RLock()
-		if s, ok := globalStore[id]; ok {
-			globalStoreMu.RUnlock()
-			return s, false
-		}
-		globalStoreMu.RUnlock()
-
-		// Create New
-		s = &Session[T]{State: Lockable[T]{}}
-		s.State.MutateOnly(func(v *T) {
-			*v = (*v).Initialize()
-		})
-
-		s.lastInteraction.Store(time.Now())
-		globalStoreMu.Lock()
-		globalStore[id] = s
-		globalStoreMu.Unlock()
-
-		return s, true
-	}
-
+// CreateSessionStoreWithBackend creates session middleware with a custom backend.
+// Use this for Redis or other custom session storage backends.
+func CreateSessionStoreWithBackend[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore, backend SessionBackend[T]) (middleWare func(next http.Handler) http.Handler) {
 	middleWare = func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			session, _ := gorillaStore.Get(r, sessionname)
@@ -101,41 +85,39 @@ func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *se
 				id = session.Values["id"].(string)
 			}
 
-			s, isFresh := GetSessionByID(id)
+			s, exists := backend.Get(id)
 
-			if isFresh {
+			if !exists {
+				// New session, save cookie
 				session.Save(r, w)
+				s.dirty.Store(true) // Mark as dirty to ensure first save
 			}
 
-			s.lastInteraction.Store(time.Now()) // Sessions timeout if they are not interactied with for session timeout
+			// Set up dirty flag callback so mutations mark session for saving
+			s.State.markDirty = func() {
+				s.dirty.Store(true)
+			}
+
+			// Update last interaction time in memory
+			lastInteraction := s.lastInteraction.Load()
+			now := time.Now()
+
+			// Only update if more than 1 minute has passed (reduce unnecessary writes)
+			if now.Sub(lastInteraction) > time.Minute {
+				s.lastInteraction.Store(now)
+				s.dirty.Store(true)
+			}
 
 			ctx := context.WithValue(r.Context(), "session", &s.State)
 			next.ServeHTTP(w, r.WithContext(ctx))
+
+			// Only persist if session was modified (dirty flag set by mutations or last interaction update)
+			if s.dirty.Load() {
+				backend.Set(id, s)
+				s.dirty.Store(false)
+			}
 		})
 	}
-
-	go func() {
-		t := time.NewTicker(time.Second * 15)
-		for range t.C {
-			globalStoreMu.RLock()
-			for key, s := range globalStore {
-				// Check expirery
-				if time.Since(s.lastInteraction.Load()) > sessionExpireryTime {
-					// reap it
-					// grap the lock on the key first
-					s.l.Lock()
-					globalStoreMu.RUnlock()
-					globalStoreMu.Lock()
-
-					delete(globalStore, key)
-					globalStoreMu.Unlock()
-					globalStoreMu.RLock()
-					s.l.Unlock()
-				}
-			}
-			globalStoreMu.RUnlock()
-		}
-	}()
 	return middleWare
 }
 

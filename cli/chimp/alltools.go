@@ -23,6 +23,10 @@ var AllTools = map[string]ToolDef{
 		ToolName: "github.com/a-h/templ/cmd/templ",
 		Version:  "latest",
 	},
+	// "Mage": {
+	// 	ToolName: "github.com/magefile/mage",
+	// 	Version:  "latest",
+	// },
 }
 
 func (t ToolDef) Install(basePath string) error {

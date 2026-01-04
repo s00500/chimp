@@ -1,0 +1,80 @@
+//go:build mage
+
+package main
+
+import (
+	"fmt"
+	"os"
+	"os/exec"
+
+	"github.com/magefile/mage/mg"
+	"github.com/magefile/mage/sh"
+)
+
+// Templ watches and auto-generates templ templates
+func Templ() error {
+	return sh.RunV("go", "tool", "templ", "generate", "--watch", "--open-browser=false")
+}
+
+// TemplBuild generates templ templates once (for production)
+func TemplBuild() error {
+	return sh.RunV("go", "tool", "templ", "generate")
+}
+
+// Server runs development server with hot reload (air)
+func Server() error {
+	env := map[string]string{
+		"ENV":          "dev",
+		"SKIP_MIGRATE": "true",
+	}
+
+	cmd := exec.Command("air",
+		"--build.cmd", "go build -o tmp/bin/main .",
+		"--build.bin", "tmp/bin/main",
+		"--build.delay", "500",
+		"--build.exclude_dir", "node_modules",
+		"--build.include_ext", "go",
+		"--build.stop_on_error", "true",
+		"--misc.clean_on_exit", "true",
+	)
+
+	// Set environment variables
+	cmd.Env = os.Environ()
+	for k, v := range env {
+		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+
+	return cmd.Run()
+}
+
+// TailwindClean builds clean Tailwind CSS for production
+func TailwindClean() error {
+	return sh.RunV("go", "tool", "gotailwind", "-i", "./css/input.css", "-o", "./static/output.css", "--minify")
+}
+
+// TailwindWatch watches and compiles Tailwind CSS
+func TailwindWatch() error {
+	return sh.RunV("go", "tool", "gotailwind", "-i", "./css/input.css", "-o", "./static/output.css", "--watch")
+}
+
+// Dev starts full development environment (templ, tailwind, server)
+func Dev() error {
+	// First run tailwind clean
+	if err := TailwindClean(); err != nil {
+		return err
+	}
+
+	// Then run the three watch processes in parallel
+	mg.Deps(mg.F(TailwindWatch), mg.F(Templ), mg.F(Server))
+	return nil
+}
+
+// Build builds templ templates and clean CSS for production
+func Build() error {
+	mg.Deps(TemplBuild)
+	return TailwindClean()
+}

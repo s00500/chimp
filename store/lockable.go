@@ -10,8 +10,9 @@ type Initializable[T any] interface {
 }
 
 type Lockable[T Initializable[T]] struct {
-	mu sync.RWMutex
-	v  T
+	mu         sync.RWMutex
+	v          T
+	markDirty  func() // Optional callback to mark session as dirty
 }
 
 func (l *Lockable[T]) Use() (ref T, mutate func(func(state *T)), drop context.CancelFunc) {
@@ -25,6 +26,9 @@ func (l *Lockable[T]) Use() (ref T, mutate func(func(state *T)), drop context.Ca
 		l.mu.RUnlock()
 		l.mu.Lock()
 		f(&l.v)
+		if l.markDirty != nil {
+			l.markDirty()
+		}
 		l.mu.Unlock()
 		l.mu.RLock()
 	}
@@ -43,5 +47,8 @@ func (l *Lockable[T]) Read(read func(state T)) {
 func (l *Lockable[T]) MutateOnly(mutate func(s *T)) {
 	l.mu.Lock()
 	mutate(&l.v)
+	if l.markDirty != nil {
+		l.markDirty()
+	}
 	l.mu.Unlock()
 }
