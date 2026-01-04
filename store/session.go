@@ -66,7 +66,15 @@ func CreateStaticStore[T Initializable[T]]() (middleWare func(next http.Handler)
 	}
 }
 
-func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore, backend SessionBackend[T]) (middleWare func(next http.Handler) http.Handler) {
+// CreateSessionStore creates session middleware with in-memory storage.
+// For custom backends (e.g., Redis), use CreateSessionStoreWithBackend.
+func CreateSessionStore[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore) (middleWare func(next http.Handler) http.Handler) {
+	return CreateSessionStoreWithBackend(sessionname, gorillaStore, MemoryStore[T]())
+}
+
+// CreateSessionStoreWithBackend creates session middleware with a custom backend.
+// Use this for Redis or other custom session storage backends.
+func CreateSessionStoreWithBackend[T Initializable[T]](sessionname string, gorillaStore *sessions.CookieStore, backend SessionBackend[T]) (middleWare func(next http.Handler) http.Handler) {
 	middleWare = func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			session, _ := gorillaStore.Get(r, sessionname)
