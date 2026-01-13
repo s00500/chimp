@@ -17,14 +17,34 @@ type props struct {
 	Class       string
 }
 
+// Defaults holds the global default values for icon properties.
+// These can be modified using SetDefaults() at application startup.
+var Defaults = props{
+	Size:        24,
+	Fill:        "none",
+	Stroke:      "currentColor",
+	StrokeWidth: "1.5",
+}
+
+// SetDefaults configures the global default values for all icons.
+// Call this at application startup to set your preferred defaults.
+// Example:
+//
+//	icon.SetDefaults(icon.WithSize(20), icon.WithStroke("currentColor"))
+func SetDefaults(properties ...iconProperty) {
+	for _, prop := range properties {
+		prop(&Defaults)
+	}
+}
+
 type iconProperty func(*props)
 
 func Icon(icon base.IconBase, classes string, properties ...iconProperty) templ.Component {
 	p := props{
-		Size:        24,
-		Fill:        "none",
-		Stroke:      "currentColor",
-		StrokeWidth: "1.5",
+		Size:        Defaults.Size,
+		Fill:        Defaults.Fill,
+		Stroke:      Defaults.Stroke,
+		StrokeWidth: Defaults.StrokeWidth,
 	}
 
 	for _, prop := range properties {
