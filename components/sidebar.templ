@@ -1,0 +1,175 @@
+package components
+
+import (
+	"github.com/s00500/chimp/icon"
+	"github.com/s00500/chimp/icon/base"
+)
+
+// SidebarItem represents a navigation item in the sidebar
+type SidebarItem struct {
+	Label    string
+	Href     string
+	Icon     base.IconBase
+	Current  bool
+	IsSpacer bool
+}
+
+// getCurrentItem returns the current SidebarItem, or a default if none is current
+func getCurrentItem(items []SidebarItem) SidebarItem {
+	for _, item := range items {
+		if item.Current {
+			return item
+		}
+	}
+	if len(items) > 0 {
+		return items[0]
+	}
+	return SidebarItem{Label: "Menu"}
+}
+
+// SimpleSidebarLayout provides a simpler sidebar layout without groups
+templ SimpleSidebarLayout(title, BaseURL string, cacheBust bool, items []SidebarItem) {
+	@BaseHTML(title, cacheBust) {
+		<aside class="sidebar" data-side="left" aria-hidden="false">
+			<nav aria-label="Sidebar navigation">
+				<header>
+					<div class="flex items-center gap-2 px-2 py-1">
+						<span class="font-semibold text-lg">{ title }</span>
+					</div>
+				</header>
+				<hr role="separator"/>
+				<section>
+					<div role="group">
+						<ul>
+							for _, item := range items {
+								if item.IsSpacer {
+									<li class="my-2" aria-hidden="true">
+										<hr class="border-border"/>
+									</li>
+								} else {
+									<li>
+										<a
+											href={ templ.SafeURL(item.Href) }
+											if item.Current {
+												aria-current="page"
+											}
+										>
+											if item.Icon != "" {
+												@templ.Raw(item.Icon)
+											}
+											<span>{ item.Label }</span>
+										</a>
+									</li>
+								}
+							}
+						</ul>
+					</div>
+				</section>
+			</nav>
+		</aside>
+		@sidebarMain() {
+			{ children... }
+		}
+	}
+}
+
+// sidebarMain provides the main content area for sidebar layouts
+templ sidebarMain() {
+	<main class="min-h-screen">
+		<header class="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4">
+			<button
+				type="button"
+				class="btn btn-ghost btn-icon"
+				onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
+				aria-label="Toggle sidebar"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"></line><line x1="4" x2="20" y1="6" y2="6"></line><line x1="4" x2="20" y1="18" y2="18"></line></svg>
+			</button>
+		</header>
+		<div class="p-4">
+			{ children... }
+		</div>
+	</main>
+}
+
+// CardSidebarLayout provides a card-based sidebar layout with mobile dropdown support
+templ CardSidebarLayout(title, BaseURL string, cacheBust bool, items []SidebarItem) {
+	@BaseHTML(title, cacheBust) {
+		<main>
+			<div class="flex flex-col md:flex-row justify-center gap-5 m-5">
+				<!-- Mobile: Dropdown navigation (hidden on desktop) -->
+				<div class="md:hidden w-full">
+					<div class="card">
+						<div class="px-4">
+							@mobileNavDropdown(items)
+						</div>
+					</div>
+				</div>
+				<!-- Desktop: Sidebar card (hidden on mobile) -->
+				<div class="hidden md:block md:w-1/5">
+					<div class="card">
+						<div class="p-6 space-y-4">
+							@cardSidebar(title, items)
+						</div>
+					</div>
+				</div>
+				<!-- Content card (full width mobile, 4/5 desktop) -->
+				<div class="card w-full md:w-4/5">
+					<div class="p-6">
+						{ children... }
+					</div>
+				</div>
+			</div>
+		</main>
+	}
+}
+
+templ cardSidebar(title string, items []SidebarItem) {
+	<section>
+		<div role="group" aria-labelledby="group-label-content-1">
+			<ul class="space-y-1">
+				for _, item := range items {
+					if item.IsSpacer {
+						<li class="my-2" aria-hidden="true">
+							<hr class="border-border"/>
+						</li>
+					} else {
+						<li>
+							<a
+								href={ templ.SafeURL(item.Href) }
+								class={ "flex items-center gap-2 px-3 py-2 rounded-md transition-colors", templ.KV("bg-muted", item.Current), templ.KV("hover:bg-muted", !item.Current) }
+								if item.Current {
+									aria-current="page"
+								}
+							>
+								if item.Icon != "" {
+									@icon.Icon(item.Icon, "size-4 shrink-0")
+								}
+								<span>{ item.Label }</span>
+							</a>
+						</li>
+					}
+				}
+			</ul>
+		</div>
+	</section>
+}
+
+// mobileNavDropdown renders a native select navigation for mobile view
+// Spacers are skipped in the dropdown since they don't translate to select elements
+templ mobileNavDropdown(items []SidebarItem) {
+	<select class="select w-full h-12 text-base py-3" onchange="window.location.href = this.value">
+		for _, item := range items {
+			if !item.IsSpacer {
+				<option
+					value={ item.Href }
+					if item.Current {
+						selected
+					}
+				>
+					{ item.Label }
+				</option>
+			}
+		}
+	</select>
+}

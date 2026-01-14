@@ -1,0 +1,32 @@
+package components
+
+import "github.com/s00500/chimp"
+
+// Base provides the shared html/head/body structure with ToastBar
+templ BaseHTML(title string, cacheBust bool) {
+	<html class="dark">
+		<head>
+			@chimp.Base()
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			@chimp.IncludedDatastar()
+			// we do not include the BasecoatCSS, as this is created by ourself
+			@chimp.IncludedBaseCoatJS()
+			@chimp.StyleWithCacheBust("assets/output.css", cacheBust)
+			<title>{ title }</title>
+		</head>
+		<body>
+			@ConfirmModal("")
+			{ children... }
+			@chimp.HotReload(cacheBust)
+		</body>
+	</html>
+}
+
+// PlainGrid provides a simple grid layout (original layout)
+templ PlainGridLayout(title string, cacheBust bool) {
+	@BaseHTML(title, cacheBust) {
+		<div id="col wrapper" class="m-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+			{ children... }
+		</div>
+	}
+}

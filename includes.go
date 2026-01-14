@@ -52,7 +52,7 @@ func baseCoatJSHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, "basecoat.min.js", modTime, buf)
 }
 
-// ServeIncludedAssets serves included datastar and basecoat versions
+// ServeIncludedAssets serves included datastar, basecoat, and chimp assets
 func ServeIncludedAssets(r chi.Router, baseURL string) {
 	p := strings.Trim(baseURL, "/")
 	if p != "/" && p != "" {
