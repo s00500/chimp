@@ -3,8 +3,59 @@ package components
 import (
 	"context"
 	"io"
+	"strings"
 	"testing"
 )
+
+func TestNestedSlotsWithLazyInit(t *testing.T) {
+	// Test that slots work without middleware/Root - just a plain context
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := NestedSlotTest().Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	// Verify outer slot value is present
+	if !strings.Contains(output, "Outer: hello") {
+		t.Error("expected 'Outer: hello' in output")
+	}
+
+	// Verify inner slot value is present
+	if !strings.Contains(output, "Inner: 42") {
+		t.Error("expected 'Inner: 42' in output")
+	}
+
+	// Verify nested access works
+	if !strings.Contains(output, "Outer says: hello") {
+		t.Error("expected 'Outer says: hello' in nested content")
+	}
+	if !strings.Contains(output, "Inner says: 42") {
+		t.Error("expected 'Inner says: 42' in nested content")
+	}
+}
+
+func TestSiblingSlotsWithLazyInit(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := SiblingSlotTest().Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	// Verify both slots render their children
+	if !strings.Contains(output, "<h1>") || !strings.Contains(output, "<p>") {
+		t.Error("expected DualSlot structure with h1 and p tags")
+	}
+}
 
 func TestNotification(t *testing.T) {
 	// Pipe the rendered template into goquery.

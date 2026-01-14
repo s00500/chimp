@@ -1,5 +1,11 @@
 package components
 
+import "strconv"
+
+func intToStr(i int) string {
+	return strconv.Itoa(i)
+}
+
 var Dual1 = DefineSlot[string]()
 var Dual2 = DefineSlot[string]()
 
@@ -26,3 +32,46 @@ templ DualSlot() {
 // 		}
 // 	}
 // }
+
+// Test nested slots with lazy initialization (no middleware/Root needed)
+var OuterSlot = DefineSlot[string]()
+var InnerSlot = DefineSlot[int]()
+
+templ OuterComponent() {
+	<div class="outer">
+		<span class="outer-value">Outer: { OuterSlot.Value(ctx) }</span>
+		{ children... }
+	</div>
+}
+
+templ InnerComponent() {
+	<div class="inner">
+		<span class="inner-value">Inner: { intToStr(InnerSlot.Value(ctx)) }</span>
+		{ children... }
+	</div>
+}
+
+templ NestedSlotTest() {
+	@OuterSlot.WithValue("hello") {
+		@OuterComponent() {
+			@InnerSlot.WithValue(42) {
+				@InnerComponent() {
+					<p>Both slots should work!</p>
+					<p>Outer says: { OuterSlot.Value(ctx) }</p>
+					<p>Inner says: { intToStr(InnerSlot.Value(ctx)) }</p>
+				}
+			}
+		}
+	}
+}
+
+// Test sibling slots at same level
+templ SiblingSlotTest() {
+	@Dual1.WithValue("first") {
+		@Dual2.WithValue("second") {
+			@DualSlot() {
+				<span>Nested content</span>
+			}
+		}
+	}
+}
