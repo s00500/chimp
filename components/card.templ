@@ -1,0 +1,39 @@
+package components
+
+templ Section() {
+	<section class="w-full rounded-lg border scroll-mt-14">
+		{ children... }
+	</section>
+}
+
+templ SectionHeader(title string) {
+	<header class="border-b px-4 py-3 flex items-center justify-between">
+		<h2 class="text-sm font-medium">{ title }</h2>
+		{ children... }
+	</header>
+}
+
+templ CardHeader(title string) {
+	<header class="flex items-center justify-between">
+		<h2>{ title }</h2>
+		{ children... }
+	</header>
+}
+
+templ SectionContent() {
+	<div class="p-4">
+		{ children... }
+	</div>
+}
+
+templ Card() {
+	<div class="card">
+		{ children... }
+	</div>
+}
+
+templ CardContent() {
+	<section>
+		{ children... }
+	</section>
+}
