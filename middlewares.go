@@ -6,6 +6,16 @@ import (
 	"strings"
 )
 
+// Sets a fixed context value for the baseurl of the router, to be used int emplates and with Base()
+func BaseMiddleware(baseUrl string) func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(r.Context(), "baseurl", baseUrl)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	}
+}
+
 // Uses the refer header of th erequest to determin the current page in the templates
 func UrlPathMiddleware(baseUrl string) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
