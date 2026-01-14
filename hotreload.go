@@ -25,9 +25,9 @@ func ServeHotReload(r *chi.Mux, enable bool) {
 }
 
 // HotReload adds a datastar based hotreload element to the frontend. Use the enable flag to easily disable in production
-func HotReload(baseUrl string, enable bool) templ.Component {
+func HotReload(enable bool) templ.Component {
 	if !enable {
 		return templ.Raw(``)
 	}
-	return templ.Raw(`<div id="hotreload" data-init="@get('/hotreload', {retryMaxCount: 1000,retryInterval:20, retryMaxWaitMs:200})"></div>`)
+	return templ.Raw(`<div id="hotreload" data-init="@get('hotreload', {retryMaxCount: 1000,retryInterval:20, retryMaxWaitMs:200})"></div>`)
 }

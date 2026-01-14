@@ -19,8 +19,8 @@ var modTime = time.Date(2025, 8, 4, 0, 0, 0, 0, time.UTC)
 //go:embed static/datastar.min.js
 var datastarBytes []byte
 
-func IncludedDatastar(baseUrl string) templ.Component {
-	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/datastar.min.js?v=rc6"></script>`)
+func IncludedDatastar() templ.Component {
+	return templ.Raw(`<script type="module" src="static/datastar.min.js?v=rc6"></script>`)
 }
 
 func datastarHandler(w http.ResponseWriter, r *http.Request) {
@@ -34,12 +34,12 @@ var basecoatCss []byte
 //go:embed static/all.min.js
 var basecoatJs []byte
 
-func IncludedBaseCoatCSS(baseUrl string) templ.Component {
-	return templ.Raw(`<link rel="stylesheet" href="` + baseUrl + `/static/basecoat.min.css"/>`)
+func IncludedBaseCoatCSS() templ.Component {
+	return templ.Raw(`<link rel="stylesheet" href="static/basecoat.min.css"/>`)
 }
 
-func IncludedBaseCoatJS(baseUrl string) templ.Component {
-	return templ.Raw(`<script type="module" src="` + baseUrl + `/static/basecoat.min.js"></script>`)
+func IncludedBaseCoatJS() templ.Component {
+	return templ.Raw(`<script type="module" src="static/basecoat.min.js"></script>`)
 }
 
 func baseCoatCSSHandler(w http.ResponseWriter, r *http.Request) {
@@ -51,30 +51,6 @@ func baseCoatJSHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bytes.NewReader(basecoatJs)
 	http.ServeContent(w, r, "basecoat.min.js", modTime, buf)
 }
-
-// One way of doing it is via middleware...
-/*
-func StaticMiddleware(baseURL string) func(next http.Handler) http.Handler {
-	datastarURL := baseURL + "/static/datastar.min.js"
-	baseCoatCSSURL := baseURL + "/static/basecoat.min.css"
-	baseCoatJSURL := baseURL + "/static/basecoat.min.js"
-
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.URL.Path {
-			case datastarURL:
-				datastarHandler(w, r)
-			case baseCoatCSSURL:
-				baseCoatCSSHandler(w, r)
-			case baseCoatJSURL:
-				baseCoatJSHandler(w, r)
-			default:
-				next.ServeHTTP(w, r)
-			}
-		})
-	}
-}
-*/
 
 // ServeIncludedAssets serves included datastar and basecoat versions
 func ServeIncludedAssets(r chi.Router, baseURL string) {
