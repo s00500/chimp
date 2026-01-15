@@ -11,6 +11,10 @@ type ToolDef struct {
 }
 
 var AllTools = map[string]ToolDef{
+	"Chimp": {
+		ToolName: "github.com/s00500/chimp/cli/chimp",
+		Version:  "latest",
+	},
 	"Tailwind": {
 		ToolName: "github.com/hookenz/gotailwind/v4",
 		Version:  "latest",
