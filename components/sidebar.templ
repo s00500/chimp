@@ -173,3 +173,67 @@ templ mobileNavDropdown(items []SidebarItem) {
 		}
 	</select>
 }
+
+// SectionSidebarLayout provides a section-based sidebar layout using bordered sections instead of cards
+templ SectionSidebarLayout(title, BaseURL string, cacheBust bool, items []SidebarItem) {
+	@BaseHTML(title, cacheBust) {
+		<main>
+			<div class="flex flex-col md:flex-row justify-center gap-5 m-5">
+				<!-- Mobile: Dropdown navigation (hidden on desktop) -->
+				<div class="md:hidden w-full">
+					<section class="w-full rounded-lg border">
+						<div class="px-4 py-3">
+							@mobileNavDropdown(items)
+						</div>
+					</section>
+				</div>
+				<!-- Desktop: Sidebar section (hidden on mobile) -->
+				<div class="hidden md:block md:w-1/5">
+					<section class="w-full rounded-lg border">
+						<header class="border-b px-4 py-3">
+							<h2 class="text-sm font-medium">{ title }</h2>
+						</header>
+						<div class="p-4">
+							@sectionSidebar(items)
+						</div>
+					</section>
+				</div>
+				<!-- Content section (full width mobile, 4/5 desktop) -->
+				<section class="w-full md:w-4/5 rounded-lg border">
+					<div class="p-4">
+						{ children... }
+					</div>
+				</section>
+			</div>
+		</main>
+	}
+}
+
+templ sectionSidebar(items []SidebarItem) {
+	<nav aria-label="Section navigation">
+		<ul class="space-y-1">
+			for _, item := range items {
+				if item.IsSpacer {
+					<li class="my-2" aria-hidden="true">
+						<hr class="border-border"/>
+					</li>
+				} else {
+					<li>
+						<a
+							href={ templ.SafeURL(item.Href) }
+							class={ "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors", templ.KV("bg-muted font-medium", item.Current), templ.KV("hover:bg-muted/50", !item.Current) }
+							if item.Current {
+								aria-current="page"
+							}
+						>
+							if item.Icon != "" {
+								@icon.Icon(item.Icon, "size-4 shrink-0")
+							}
+							<span>{ item.Label }</span>
+						</a>
+					</li>
+				}
+			}
+		</ul>
+	</nav>
+}
