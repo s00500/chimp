@@ -170,7 +170,13 @@ func Templ() error {
 
 // TemplGenerate generates templ templates once (for production/CI)
 func TemplGenerate() error {
+	mg.Deps(ExtractClasses)
 	return sh.RunV("go", "tool", "templ", "generate")
+}
+
+// Dev runs Templ watchers
+func Build() {
+	mg.Deps(mg.F(TemplGenerate))
 }
 
 // Dev runs Templ watchers
