@@ -2,5 +2,5 @@ package chimp
 
 // Base inserts a base tag, removing the need from many other places to use BaseURL, ensure you include the middleware for baseurl
 templ Base() {
-	<base href={ templ.URL(ctx.Value("baseurl").(string) + "/") }/>
+	<base href={ templ.URL(BaseURL(ctx) + "/") }/>
 }

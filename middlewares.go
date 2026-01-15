@@ -33,12 +33,20 @@ func UrlPathMiddleware(baseUrl string) func(next http.Handler) http.Handler {
 	}
 }
 
-// Function to use in your templates for get URL
+// Function to use in your templates to get the current URL path
 func URL(ctx context.Context) string {
 	s, ok := ctx.Value("urlpath").(string)
 	if !ok {
-		//log.Debug("no url")
-		return ""
+		panic("chimp: urlpath not found in context - ensure UrlPathMiddleware is applied to your router")
+	}
+	return s
+}
+
+// Function to use in your templates to get the base URL
+func BaseURL(ctx context.Context) string {
+	s, ok := ctx.Value("baseurl").(string)
+	if !ok {
+		panic("chimp: baseurl not found in context - ensure BaseMiddleware is applied to your router")
 	}
 	return s
 }
