@@ -2,6 +2,8 @@ package components
 
 import "github.com/s00500/chimp"
 
+var EnableTweakCN bool
+
 // Base provides the shared html/head/body structure with ToastBar
 templ BaseHTML(title string, cacheBust bool) {
 	<html class="dark">
@@ -12,6 +14,9 @@ templ BaseHTML(title string, cacheBust bool) {
 			// we do not include the BasecoatCSS, as this is created by ourself
 			@chimp.IncludedBaseCoatJS()
 			@chimp.StyleWithCacheBust("assets/output.css", cacheBust)
+			if EnableTweakCN {
+				<script src="https://tweakcn.com/live-preview.min.js"></script>
+			}
 			<title>{ title }</title>
 		</head>
 		<body>
