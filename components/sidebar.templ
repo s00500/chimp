@@ -5,6 +5,8 @@ import (
 	"github.com/s00500/chimp/icon/base"
 )
 
+var CacheBust = false
+
 // SidebarItem represents a navigation item in the sidebar
 type SidebarItem struct {
 	Label    string
@@ -28,43 +30,54 @@ func getCurrentItem(items []SidebarItem) SidebarItem {
 }
 
 // SimpleSidebarLayout provides a simpler sidebar layout without groups
-templ SimpleSidebarLayout(title, BaseURL string, cacheBust bool, items []SidebarItem) {
-	@BaseHTML(title, cacheBust) {
+templ SimpleSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
+	@BaseHTML(title, CacheBust) {
 		<aside class="sidebar" data-side="left" aria-hidden="false">
 			<nav aria-label="Sidebar navigation">
 				<header>
-					<div class="flex items-center gap-2 px-2 py-1">
-						<span class="font-semibold text-lg">{ title }</span>
-					</div>
+					if config.HeaderContent != nil {
+						@config.HeaderContent
+					} else {
+						<div class="flex items-center gap-2 px-2 py-1">
+							<span class="font-semibold text-lg">{ title }</span>
+						</div>
+					}
 				</header>
 				<hr role="separator"/>
 				<section>
 					<div role="group">
 						<ul>
 							for _, item := range items {
-								if item.IsSpacer {
-									<li class="my-2" aria-hidden="true">
-										<hr class="border-border"/>
-									</li>
+								if config.ItemRenderer != nil {
+									@config.ItemRenderer(item)
 								} else {
-									<li>
-										<a
-											href={ templ.SafeURL(item.Href) }
-											if item.Current {
-												aria-current="page"
-											}
-										>
-											if item.Icon != "" {
-												@templ.Raw(item.Icon)
-											}
-											<span>{ item.Label }</span>
-										</a>
-									</li>
+									if item.IsSpacer {
+										<li class="my-2" aria-hidden="true">
+											<hr class="border-border"/>
+										</li>
+									} else {
+										<li>
+											<a
+												href={ templ.SafeURL(item.Href) }
+												if item.Current {
+													aria-current="page"
+												}
+											>
+												if item.Icon != "" {
+													@templ.Raw(item.Icon)
+												}
+												<span>{ item.Label }</span>
+											</a>
+										</li>
+									}
 								}
 							}
 						</ul>
 					</div>
 				</section>
+				if config.FooterContent != nil {
+					@config.FooterContent
+				}
 			</nav>
 		</aside>
 		@sidebarMain() {
@@ -79,7 +92,7 @@ templ sidebarMain() {
 		<header class="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4">
 			<button
 				type="button"
-				class="btn btn-ghost btn-icon"
+				class="btn-ghost btn-icon"
 				onclick="document.dispatchEvent(new CustomEvent('basecoat:sidebar'))"
 				aria-label="Toggle sidebar"
 			>
@@ -92,29 +105,54 @@ templ sidebarMain() {
 	</main>
 }
 
+type SidebarConfig struct {
+	HeaderContent      templ.Component
+	ItemRenderer       func(item SidebarItem) templ.Component
+	ItemRendererMobile func(item SidebarItem) templ.Component
+	FooterContent      templ.Component
+}
+
 // CardSidebarLayout provides a card-based sidebar layout with mobile dropdown support
-templ CardSidebarLayout(title, BaseURL string, cacheBust bool, items []SidebarItem) {
-	@BaseHTML(title, cacheBust) {
+templ CardSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
+	@BaseHTML(title, CacheBust) {
 		<main>
-			<div class="flex flex-col md:flex-row justify-center gap-5 m-5">
-				<!-- Mobile: Dropdown navigation (hidden on desktop) -->
-				<div class="md:hidden w-full">
-					<div class="card">
-						<div class="px-4">
-							@mobileNavDropdown(items)
+			<div class="flex flex-col md:flex-row justify-center gap-5 p-2 md:p-5  md:h-screen">
+				@templ.Fragment("Sidebar") {
+					<!-- Mobile: Dropdown navigation (hidden on desktop) -->
+					<div class="md:hidden w-full">
+						<div class="card py-2">
+							<div class="px-4">
+								if config.HeaderContent!= nil {
+									<div class="py-3">
+										@config.HeaderContent
+									</div>
+								}
+								@mobileNavDropdown(items, config.ItemRendererMobile)
+								if config.FooterContent!= nil {
+									<div class="py-3">
+										@config.FooterContent
+									</div>
+								}
+							</div>
 						</div>
 					</div>
-				</div>
-				<!-- Desktop: Sidebar card (hidden on mobile) -->
-				<div class="hidden md:block md:w-1/5">
-					<div class="card">
-						<div class="p-6 space-y-4">
-							@cardSidebar(title, items)
+					<!-- Desktop: Sidebar card (hidden on mobile) -->
+					<div class="hidden md:block md:w-1/5">
+						<div class="card py-2 md:h-full">
+							<div class="p-6 space-y-4">
+								if config.HeaderContent!= nil {
+									@config.HeaderContent
+								}
+								@cardSidebar(title, items, config.ItemRenderer)
+								if config.FooterContent!= nil {
+									@config.FooterContent
+								}
+							</div>
 						</div>
 					</div>
-				</div>
+				}
 				<!-- Content card (full width mobile, 4/5 desktop) -->
-				<div class="card w-full md:w-4/5">
+				<div class="card py-2 w-full md:w-4/5 md:h-full">
 					<div class="p-6">
 						{ children... }
 					</div>
@@ -124,30 +162,34 @@ templ CardSidebarLayout(title, BaseURL string, cacheBust bool, items []SidebarIt
 	}
 }
 
-templ cardSidebar(title string, items []SidebarItem) {
+templ cardSidebar(title string, items []SidebarItem, render func(item SidebarItem) templ.Component) {
 	<section>
 		<div role="group" aria-labelledby="group-label-content-1">
 			<ul class="space-y-1">
 				for _, item := range items {
-					if item.IsSpacer {
-						<li class="my-2" aria-hidden="true">
-							<hr class="border-border"/>
-						</li>
+					if render != nil {
+						@render(item)
 					} else {
-						<li>
-							<a
-								href={ templ.SafeURL(item.Href) }
-								class={ "flex items-center gap-2 px-3 py-2 rounded-md transition-colors", templ.KV("bg-muted", item.Current), templ.KV("hover:bg-muted", !item.Current) }
-								if item.Current {
-									aria-current="page"
-								}
-							>
-								if item.Icon != "" {
-									@icon.Icon(item.Icon, "size-4 shrink-0")
-								}
-								<span>{ item.Label }</span>
-							</a>
-						</li>
+						if item.IsSpacer {
+							<li class="my-2" aria-hidden="true">
+								<hr class="border-border"/>
+							</li>
+						} else {
+							<li>
+								<a
+									href={ templ.SafeURL(item.Href) }
+									class={ "flex items-center gap-2 px-3 py-2 rounded-md transition-colors", templ.KV("bg-sidebar-accent", item.Current), templ.KV("hover:bg-muted", !item.Current) }
+									if item.Current {
+										aria-current="page"
+									}
+								>
+									if item.Icon != "" {
+										@icon.Icon(item.Icon, "size-4 shrink-0")
+									}
+									<span>{ item.Label }</span>
+								</a>
+							</li>
+						}
 					}
 				}
 			</ul>
@@ -157,47 +199,73 @@ templ cardSidebar(title string, items []SidebarItem) {
 
 // mobileNavDropdown renders a native select navigation for mobile view
 // Spacers are skipped in the dropdown since they don't translate to select elements
-templ mobileNavDropdown(items []SidebarItem) {
+templ mobileNavDropdown(items []SidebarItem, render func(item SidebarItem) templ.Component) {
 	<select class="select w-full h-12 text-base py-3" onchange="window.location.href = this.value">
-		for _, item := range items {
-			if !item.IsSpacer {
-				<option
-					value={ item.Href }
-					if item.Current {
-						selected
-					}
-				>
-					{ item.Label }
-				</option>
+		if render != nil {
+			for _, item := range items {
+				@render(item)
+			}
+		} else {
+			// default rendering
+			for _, item := range items {
+				if !item.IsSpacer {
+					<option
+						value={ item.Href }
+						if item.Current {
+							selected
+						}
+					>
+						{ item.Label }
+					</option>
+				}
 			}
 		}
 	</select>
 }
 
 // SectionSidebarLayout provides a section-based sidebar layout using bordered sections instead of cards
-templ SectionSidebarLayout(title, BaseURL string, cacheBust bool, items []SidebarItem) {
-	@BaseHTML(title, cacheBust) {
+templ SectionSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
+	@BaseHTML(title, CacheBust) {
 		<main>
-			<div class="flex flex-col md:flex-row justify-center gap-5 m-5">
-				<!-- Mobile: Dropdown navigation (hidden on desktop) -->
-				<div class="md:hidden w-full">
-					<section class="w-full rounded-lg border">
-						<div class="px-4 py-3">
-							@mobileNavDropdown(items)
-						</div>
-					</section>
-				</div>
-				<!-- Desktop: Sidebar section (hidden on mobile) -->
-				<div class="hidden md:block md:w-1/5">
-					<section class="w-full rounded-lg border">
-						<header class="border-b px-4 py-3">
-							<h2 class="text-sm font-medium">{ title }</h2>
-						</header>
-						<div class="p-4">
-							@sectionSidebar(items)
-						</div>
-					</section>
-				</div>
+			<div class="flex flex-col md:flex-row justify-center gap-5 p-5 md:p-5 md:h-screen">
+				@templ.Fragment("Sidebar") {
+					<!-- Mobile: Dropdown navigation (hidden on desktop) -->
+					<div class="md:hidden w-full">
+						<section class="w-full rounded-lg border">
+							<div class="px-4 py-3">
+								if config.HeaderContent != nil {
+									<div class="py-3">
+										@config.HeaderContent
+									</div>
+								}
+								@mobileNavDropdown(items, config.ItemRendererMobile)
+								if config.FooterContent != nil {
+									<div class="py-3">
+										@config.HeaderContent
+									</div>
+								}
+							</div>
+						</section>
+					</div>
+					<!-- Desktop: Sidebar section (hidden on mobile) -->
+					<div class="hidden md:block md:w-1/5 h-full">
+						<section class="w-full rounded-lg border h-full">
+							<header class="border-b px-4 py-3">
+								if config.HeaderContent != nil {
+									@config.HeaderContent
+								} else {
+									<h2 class="text-sm font-medium">{ title }</h2>
+								}
+							</header>
+							<div class="p-4">
+								@sectionSidebar(items, config.ItemRenderer)
+								if config.FooterContent != nil {
+									@config.FooterContent
+								}
+							</div>
+						</section>
+					</div>
+				}
 				<!-- Content section (full width mobile, 4/5 desktop) -->
 				<section class="w-full md:w-4/5 rounded-lg border">
 					<div class="p-4">
@@ -209,29 +277,33 @@ templ SectionSidebarLayout(title, BaseURL string, cacheBust bool, items []Sideba
 	}
 }
 
-templ sectionSidebar(items []SidebarItem) {
+templ sectionSidebar(items []SidebarItem, render func(item SidebarItem) templ.Component) {
 	<nav aria-label="Section navigation">
 		<ul class="space-y-1">
 			for _, item := range items {
-				if item.IsSpacer {
-					<li class="my-2" aria-hidden="true">
-						<hr class="border-border"/>
-					</li>
+				if render != nil {
+					@render(item)
 				} else {
-					<li>
-						<a
-							href={ templ.SafeURL(item.Href) }
-							class={ "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors", templ.KV("bg-muted font-medium", item.Current), templ.KV("hover:bg-muted/50", !item.Current) }
-							if item.Current {
-								aria-current="page"
-							}
-						>
-							if item.Icon != "" {
-								@icon.Icon(item.Icon, "size-4 shrink-0")
-							}
-							<span>{ item.Label }</span>
-						</a>
-					</li>
+					if item.IsSpacer {
+						<li class="my-2" aria-hidden="true">
+							<hr class="border-border"/>
+						</li>
+					} else {
+						<li>
+							<a
+								href={ templ.SafeURL(item.Href) }
+								class={ "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors", templ.KV("bg-sidebar-accent font-medium", item.Current), templ.KV("hover:bg-muted/50", !item.Current) }
+								if item.Current {
+									aria-current="page"
+								}
+							>
+								if item.Icon != "" {
+									@icon.Icon(item.Icon, "size-4 shrink-0")
+								}
+								<span>{ item.Label }</span>
+							</a>
+						</li>
+					}
 				}
 			}
 		</ul>
