@@ -1,7 +1,7 @@
 package components
 
 import (
-	"github.com/s00500/chimp/icon"
+	"strings"
 	"github.com/s00500/chimp/icon/base"
 )
 
@@ -9,11 +9,14 @@ var CacheBust = false
 
 // SidebarItem represents a navigation item in the sidebar
 type SidebarItem struct {
-	Label    string
-	Href     string
-	Icon     base.IconBase
-	Current  bool
-	IsSpacer bool
+	Label       string
+	Href        string
+	Icon        base.IconBase
+	Current     bool
+	IsSpacer    bool
+	IsTitle     bool          // render as a non-clickable section title
+	Children    []SidebarItem // nested subitems for accordion-style collapsible menus
+	DefaultOpen bool          // control initial open state of collapsible items
 }
 
 // getCurrentItem returns the current SidebarItem, or a default if none is current
@@ -22,11 +25,84 @@ func getCurrentItem(items []SidebarItem) SidebarItem {
 		if item.Current {
 			return item
 		}
+		// Check children recursively
+		if len(item.Children) > 0 {
+			if child := getCurrentItem(item.Children); child.Current {
+				return child
+			}
+		}
 	}
 	if len(items) > 0 {
 		return items[0]
 	}
 	return SidebarItem{Label: "Menu"}
+}
+
+// hasCurrentChild checks if any child in the tree is current
+func hasCurrentChild(items []SidebarItem) bool {
+	for _, item := range items {
+		if item.Current {
+			return true
+		}
+		if len(item.Children) > 0 && hasCurrentChild(item.Children) {
+			return true
+		}
+	}
+	return false
+}
+
+// renderSidebarItemRecursive renders a sidebar item and its children recursively
+templ renderSidebarItemRecursive(item SidebarItem, depth int) {
+	if item.IsSpacer {
+		<li class="my-2" aria-hidden="true">
+			<hr class="border-border"/>
+		</li>
+	} else if item.IsTitle {
+		<li class="pt-4 first:pt-0">
+			<div>
+				<h3 class="text-lg font-bold">
+					if item.Icon != "" {
+						@templ.Raw(item.Icon)
+					}
+					{ item.Label }
+				</h3>
+			</div>
+		</li>
+	} else if len(item.Children) > 0 {
+		// Collapsible item with children
+		<li>
+			<details open?={ item.DefaultOpen || hasCurrentChild(item.Children) }>
+				<summary
+					class={ templ.KV("font-medium", hasCurrentChild(item.Children)) }
+				>
+					if item.Icon != "" {
+						@templ.Raw(item.Icon)
+					}
+					<span>{ item.Label }</span>
+				</summary>
+				<ul>
+					for _, child := range item.Children {
+						@renderSidebarItemRecursive(child, depth+1)
+					}
+				</ul>
+			</details>
+		</li>
+	} else {
+		// Regular item without children
+		<li>
+			<a
+				href={ templ.SafeURL(item.Href) }
+				if item.Current {
+					aria-current="page"
+				}
+			>
+				if item.Icon != "" {
+					@templ.Raw(item.Icon)
+				}
+				<span>{ item.Label }</span>
+			</a>
+		</li>
+	}
 }
 
 // SimpleSidebarLayout provides a simpler sidebar layout without groups
@@ -51,25 +127,7 @@ templ SimpleSidebarLayout(title string, items []SidebarItem, config SidebarConfi
 								if config.ItemRenderer != nil {
 									@config.ItemRenderer(item)
 								} else {
-									if item.IsSpacer {
-										<li class="my-2" aria-hidden="true">
-											<hr class="border-border"/>
-										</li>
-									} else {
-										<li>
-											<a
-												href={ templ.SafeURL(item.Href) }
-												if item.Current {
-													aria-current="page"
-												}
-											>
-												if item.Icon != "" {
-													@templ.Raw(item.Icon)
-												}
-												<span>{ item.Label }</span>
-											</a>
-										</li>
-									}
+									@renderSidebarItemRecursive(item, 0)
 								}
 							}
 						</ul>
@@ -170,31 +228,35 @@ templ cardSidebar(title string, items []SidebarItem, render func(item SidebarIte
 					if render != nil {
 						@render(item)
 					} else {
-						if item.IsSpacer {
-							<li class="my-2" aria-hidden="true">
-								<hr class="border-border"/>
-							</li>
-						} else {
-							<li>
-								<a
-									href={ templ.SafeURL(item.Href) }
-									class={ "flex items-center gap-2 px-3 py-2 rounded-md transition-colors", templ.KV("bg-sidebar-accent", item.Current), templ.KV("hover:bg-muted", !item.Current) }
-									if item.Current {
-										aria-current="page"
-									}
-								>
-									if item.Icon != "" {
-										@icon.Icon(item.Icon, "size-4 shrink-0")
-									}
-									<span>{ item.Label }</span>
-								</a>
-							</li>
-						}
+						@renderSidebarItemRecursive(item, 0)
 					}
 				}
 			</ul>
 		</div>
 	</section>
+}
+
+// renderMobileItemFlattened recursively renders sidebar items as flat select options with indentation
+templ renderMobileItemFlattened(item SidebarItem, level int) {
+	if !item.IsSpacer {
+		if item.IsTitle {
+			<option disabled>
+				{ strings.Repeat("　", level) }— { item.Label } —
+			</option>
+		} else if item.Href != "" {
+			<option
+				value={ item.Href }
+				if item.Current {
+					selected
+				}
+			>
+				{ strings.Repeat("　", level) }{ item.Label }
+			</option>
+		}
+		for _, child := range item.Children {
+			@renderMobileItemFlattened(child, level+1)
+		}
+	}
 }
 
 // mobileNavDropdown renders a native select navigation for mobile view
@@ -206,18 +268,8 @@ templ mobileNavDropdown(items []SidebarItem, render func(item SidebarItem) templ
 				@render(item)
 			}
 		} else {
-			// default rendering
 			for _, item := range items {
-				if !item.IsSpacer {
-					<option
-						value={ item.Href }
-						if item.Current {
-							selected
-						}
-					>
-						{ item.Label }
-					</option>
-				}
+				@renderMobileItemFlattened(item, 0)
 			}
 		}
 	</select>
@@ -284,26 +336,7 @@ templ sectionSidebar(items []SidebarItem, render func(item SidebarItem) templ.Co
 				if render != nil {
 					@render(item)
 				} else {
-					if item.IsSpacer {
-						<li class="my-2" aria-hidden="true">
-							<hr class="border-border"/>
-						</li>
-					} else {
-						<li>
-							<a
-								href={ templ.SafeURL(item.Href) }
-								class={ "flex items-center gap-2 px-3 py-2 rounded-md text-sm transition-colors", templ.KV("bg-sidebar-accent font-medium", item.Current), templ.KV("hover:bg-muted/50", !item.Current) }
-								if item.Current {
-									aria-current="page"
-								}
-							>
-								if item.Icon != "" {
-									@icon.Icon(item.Icon, "size-4 shrink-0")
-								}
-								<span>{ item.Label }</span>
-							</a>
-						</li>
-					}
+					@renderSidebarItemRecursive(item, 0)
 				}
 			}
 		</ul>
