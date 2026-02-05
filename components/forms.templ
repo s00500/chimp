@@ -16,7 +16,7 @@ import "strconv"
 //	)
 templ FormInput(label, name string, options ...FormOption) {
 	{{ config := ApplyFormOptions(options) }}
-	<div class="field">
+	<div class="field grid gap-2 flex-1">
 		<label class="label" for={ name }>{ label }</label>
 		<input
 			class={ "input", config.Class }
@@ -75,7 +75,7 @@ templ FormInput(label, name string, options ...FormOption) {
 //	)
 templ FormTextarea(label, name string, options ...FormOption) {
 	{{ config := ApplyFormOptions(options) }}
-	<div class="field">
+	<div class="field grid gap-2 flex-1">
 		<label class="label" for={ name }>{ label }</label>
 		<textarea
 			class={ "textarea", config.Class }
@@ -127,7 +127,7 @@ templ FormTextarea(label, name string, options ...FormOption) {
 //	)
 templ FormSelect(label, name string, options ...FormOption) {
 	{{ config := ApplyFormOptions(options) }}
-	<div class="field">
+	<div class="field grid gap-2 flex-1">
 		<label class="label" for={ name }>{ label }</label>
 		<select
 			class={ "select", config.Class }
@@ -234,7 +234,7 @@ templ FormSwitch(label, name string, options ...FormOption) {
 //	)
 templ FormRadioGroup(label, name string, options ...FormOption) {
 	{{ config := ApplyFormOptions(options) }}
-	<fieldset class="field">
+	<fieldset class="field grid gap-2 flex-1">
 		<legend class="label">{ label }</legend>
 		<div class="space-y-2">
 			for _, opt := range config.Options {

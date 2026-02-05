@@ -1,11 +1,105 @@
 package components
 
-templ Section() {
-	<section class="w-full rounded-lg border scroll-mt-14">
+// Card renders a card container with optional title and configurable padding.
+//
+// Example:
+//
+//	@Card(WithCardTitle("User Profile"), WithPadding("lg")) {
+//	    @FormInput("Name", "name", WithModel("form.name"))
+//	}
+templ Card(options ...CardOption) {
+	{{ config := ApplyCardOptions(options) }}
+	<div class={ "card", config.Class }>
+		if config.Title != "" {
+			<header class="flex items-center justify-between pb-4">
+				<h2>{ config.Title }</h2>
+			</header>
+		}
+		<section class={ cardPaddingClass(config.Padding) }>
+			{ children... }
+		</section>
+	</div>
+}
+
+// cardPaddingClass returns the padding class based on size
+func cardPaddingClass(size string) string {
+	switch size {
+	case "none":
+		return ""
+	case "sm":
+		return "p-2"
+	case "lg":
+		return "p-6"
+	default: // md
+		return ""
+	}
+}
+
+// CardHeader renders a card header with title and optional actions.
+//
+// Example:
+//
+//	@CardHeader("Settings") {
+//	    @Button("Save", WithVariant(VariantPrimary))
+//	}
+templ CardHeader(title string) {
+	<header class="flex items-center justify-between pb-4">
+		<h2>{ title }</h2>
+		{ children... }
+	</header>
+}
+
+// CardContent renders the main content area of a card.
+templ CardContent() {
+	<section>
 		{ children... }
 	</section>
 }
 
+// Section renders a bordered section container with optional title.
+//
+// Example:
+//
+//	@Section(WithSectionTitle("Account Settings")) {
+//	    @Stack {
+//	        @FormInput("Email", "email", WithModel("form.email"))
+//	    }
+//	}
+templ Section(options ...SectionOption) {
+	{{ config := ApplySectionOptions(options) }}
+	<section class={ "w-full rounded-lg border scroll-mt-14", config.Class }>
+		if config.Title != "" {
+			<header class="border-b px-4 py-3 flex items-center justify-between">
+				<h2 class="font-medium">{ config.Title }</h2>
+			</header>
+		}
+		<div class={ sectionPaddingClass(config.Padding) }>
+			{ children... }
+		</div>
+	</section>
+}
+
+// sectionPaddingClass returns the padding class based on size
+func sectionPaddingClass(size string) string {
+	switch size {
+	case "none":
+		return ""
+	case "sm":
+		return "p-2"
+	case "lg":
+		return "p-6"
+	default: // md
+		return "p-4"
+	}
+}
+
+// SectionHeader renders a section header with title and optional actions.
+//
+// Example:
+//
+//	@SectionHeader("User List") {
+//	    @Button("Add User", WithVariant(VariantPrimary))
+//	}
 templ SectionHeader(title string) {
 	<header class="border-b px-4 py-3 flex items-center justify-between">
 		<h2 class="font-medium">{ title }</h2>
@@ -13,27 +107,9 @@ templ SectionHeader(title string) {
 	</header>
 }
 
-templ CardHeader(title string) {
-	<header class="flex items-center justify-between">
-		<h2>{ title }</h2>
-		{ children... }
-	</header>
-}
-
+// SectionContent renders the main content area of a section.
 templ SectionContent() {
 	<div class="p-4">
 		{ children... }
 	</div>
-}
-
-templ Card() {
-	<div class="card">
-		{ children... }
-	</div>
-}
-
-templ CardContent() {
-	<section>
-		{ children... }
-	</section>
 }

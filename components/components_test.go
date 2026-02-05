@@ -240,3 +240,49 @@ func TestRow(t *testing.T) {
 		t.Error("expected gap-2 class for sm gap")
 	}
 }
+
+func TestCard(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := Card(WithCardTitle("Test Card"), WithPadding("lg")).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	if !strings.Contains(output, "card") {
+		t.Error("expected card class")
+	}
+	if !strings.Contains(output, "Test Card") {
+		t.Error("expected card title")
+	}
+	if !strings.Contains(output, "p-6") {
+		t.Error("expected p-6 class for lg padding")
+	}
+}
+
+func TestSection(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := Section(WithSectionTitle("Test Section")).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	if !strings.Contains(output, "rounded-lg border") {
+		t.Error("expected section border classes")
+	}
+	if !strings.Contains(output, "Test Section") {
+		t.Error("expected section title")
+	}
+	if !strings.Contains(output, "border-b") {
+		t.Error("expected header border-b class")
+	}
+}

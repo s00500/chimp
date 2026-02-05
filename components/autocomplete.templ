@@ -29,7 +29,7 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 	{{ debounceMs := strconv.Itoa(config.Debounce) }}
 	{{ searchExpr := fmt.Sprintf("$%s.search.length >= %d", signalName, config.MinChars) }}
 	{{ endpoint := config.SearchEndpoint + "?q=$" + signalName + ".search" }}
-	<div class="field">
+	<div class="field grid gap-2 flex-1">
 		<label class="label" for={ name }>{ label }</label>
 		<div
 			class="combobox relative"

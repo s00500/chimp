@@ -716,3 +716,87 @@ func ApplyFormGroupOptions(options []FormGroupOption) *FormGroupConfig {
 	}
 	return config
 }
+
+// CardConfig holds configuration for card components
+type CardConfig struct {
+	Title   string // optional title for card header
+	Padding string // padding size: none, sm, md (default), lg
+	Class   string // additional classes
+}
+
+// CardOption is a function that modifies CardConfig
+type CardOption func(*CardConfig)
+
+// WithCardTitle sets the card title (renders a header)
+func WithCardTitle(title string) CardOption {
+	return func(c *CardConfig) {
+		c.Title = title
+	}
+}
+
+// WithPadding sets the padding size
+func WithPadding(size string) CardOption {
+	return func(c *CardConfig) {
+		c.Padding = size
+	}
+}
+
+// WithCardClass adds additional CSS classes to card
+func WithCardClass(class string) CardOption {
+	return func(c *CardConfig) {
+		c.Class = class
+	}
+}
+
+// ApplyCardOptions applies all options and returns config
+func ApplyCardOptions(options []CardOption) *CardConfig {
+	config := &CardConfig{
+		Padding: "md",
+	}
+	for _, opt := range options {
+		opt(config)
+	}
+	return config
+}
+
+// SectionConfig holds configuration for section components
+type SectionConfig struct {
+	Title   string // optional title for section header
+	Padding string // padding size: none, sm, md (default), lg
+	Class   string // additional classes
+}
+
+// SectionOption is a function that modifies SectionConfig
+type SectionOption func(*SectionConfig)
+
+// WithSectionTitle sets the section title (renders a header)
+func WithSectionTitle(title string) SectionOption {
+	return func(c *SectionConfig) {
+		c.Title = title
+	}
+}
+
+// WithSectionPadding sets the padding size for section
+func WithSectionPadding(size string) SectionOption {
+	return func(c *SectionConfig) {
+		c.Padding = size
+	}
+}
+
+// WithSectionClass adds additional CSS classes to section
+func WithSectionClass(class string) SectionOption {
+	return func(c *SectionConfig) {
+		c.Class = class
+	}
+}
+
+// ApplySectionOptions applies all options and returns config
+func ApplySectionOptions(options []SectionOption) *SectionConfig {
+	config := &SectionConfig{
+		Padding: "md",
+	}
+	for _, opt := range options {
+		opt(config)
+	}
+	return config
+}

@@ -9,9 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
-	"sort"
-	"strings"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -165,7 +162,7 @@ func UpdateAssets() error {
 
 // Templ watches and auto-generates templ templates
 func Templ() error {
-	return sh.RunV("go", "tool", "templ", "generate", "--watch", "--open-browser=false")
+	return sh.RunV("go", "tool", "templ", "generate", "--watch", "--open-browser=false", "--cmd", "go run ./tools/extract-classes")
 }
 
 // TemplGenerate generates templ templates once (for production/CI)
@@ -186,58 +183,7 @@ func Dev() {
 
 // ExtractClasses scans all .templ files and extracts Tailwind class names to css/classes.txt
 func ExtractClasses() error {
-	fmt.Println("Scanning .templ files for Tailwind classes...")
-
-	classes := make(map[string]struct{})
-	classRegex := regexp.MustCompile(`class="([^"]*)"`)
-
-	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if d.IsDir() || !strings.HasSuffix(path, ".templ") {
-			return nil
-		}
-
-		content, err := os.ReadFile(path)
-		if err != nil {
-			return fmt.Errorf("failed to read %s: %w", path, err)
-		}
-
-		matches := classRegex.FindAllSubmatch(content, -1)
-		for _, match := range matches {
-			if len(match) > 1 {
-				classStr := string(match[1])
-				for _, class := range strings.Fields(classStr) {
-					classes[class] = struct{}{}
-				}
-			}
-		}
-
-		return nil
-	})
-
-	if err != nil {
-		return fmt.Errorf("failed to walk directory: %w", err)
-	}
-
-	// Sort classes
-	sorted := make([]string, 0, len(classes))
-	for class := range classes {
-		sorted = append(sorted, class)
-	}
-	sort.Strings(sorted)
-
-	// Write to cli/chimp/templates for embedding in CLI
-	output := strings.Join(sorted, "\n") + "\n"
-	outputPath := filepath.Join("cli", "chimp", "templates", "classes.txt")
-	if err := os.WriteFile(outputPath, []byte(output), 0644); err != nil {
-		return fmt.Errorf("failed to write %s: %w", outputPath, err)
-	}
-
-	fmt.Printf("Extracted %d unique classes to %s\n", len(sorted), outputPath)
-	return nil
+	return sh.RunV("go", "run", "./tools/extract-classes")
 }
 
 // downloadFile downloads a file from a URL to a local path
