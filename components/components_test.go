@@ -181,7 +181,7 @@ func TestButton(t *testing.T) {
 
 	err := Button("Save",
 		WithVariant(VariantPrimary),
-		WithButtonOn("click", "@post('/save')"),
+		WithOn("click", "@post('/save')"),
 	).Render(ctx, &buf)
 	if err != nil {
 		t.Fatalf("render failed: %v", err)

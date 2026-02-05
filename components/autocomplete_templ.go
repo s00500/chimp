@@ -165,15 +165,15 @@ func FormAutocomplete(label, name string, options ...AutocompleteOption) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if config.FormConfig.Placeholder != "" {
+		if config.Placeholder != "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " placeholder=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var10 string
-			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(config.FormConfig.Placeholder)
+			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(config.Placeholder)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/autocomplete.templ`, Line: 48, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/autocomplete.templ`, Line: 48, Col: 37}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
@@ -184,13 +184,13 @@ func FormAutocomplete(label, name string, options ...AutocompleteOption) templ.C
 				return templ_7745c5c3_Err
 			}
 		}
-		if config.FormConfig.Disabled {
+		if config.Disabled {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, " disabled")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		if config.FormConfig.Required {
+		if config.Required {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, " required")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -282,15 +282,15 @@ func FormAutocomplete(label, name string, options ...AutocompleteOption) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if config.FormConfig.Datastar.Model != "" {
+		if config.Datastar.Model != "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 21, " data-model=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var17 string
-			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(config.FormConfig.Datastar.Model)
+			templ_7745c5c3_Var17, templ_7745c5c3_Err = templ.JoinStringErrs(config.Datastar.Model)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/autocomplete.templ`, Line: 79, Col: 50}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/autocomplete.templ`, Line: 79, Col: 39}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 			if templ_7745c5c3_Err != nil {
@@ -305,15 +305,15 @@ func FormAutocomplete(label, name string, options ...AutocompleteOption) templ.C
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if config.FormConfig.Error != "" {
+		if config.Error != "" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 24, "<p class=\"field-error\" data-show=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var18 string
-			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(config.FormConfig.Error)
+			templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(config.Error)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/autocomplete.templ`, Line: 84, Col: 61}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/autocomplete.templ`, Line: 84, Col: 50}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 			if templ_7745c5c3_Err != nil {
@@ -324,9 +324,9 @@ func FormAutocomplete(label, name string, options ...AutocompleteOption) templ.C
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var19 string
-			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(config.FormConfig.Error)
+			templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(config.Error)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/autocomplete.templ`, Line: 84, Col: 99}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/autocomplete.templ`, Line: 84, Col: 77}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 			if templ_7745c5c3_Err != nil {

@@ -44,13 +44,13 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 				data-on:input={ fmt.Sprintf("__debounce_%sms: %s && @get('%s')", debounceMs, searchExpr, endpoint) }
 				data-on:focus={ fmt.Sprintf("$%s.open = $%s.results.length > 0", signalName, signalName) }
 				data-on:blur__debounce_200ms={ fmt.Sprintf("$%s.open = false", signalName) }
-				if config.FormConfig.Placeholder != "" {
-					placeholder={ config.FormConfig.Placeholder }
+				if config.Placeholder != "" {
+					placeholder={ config.Placeholder }
 				}
-				if config.FormConfig.Disabled {
+				if config.Disabled {
 					disabled
 				}
-				if config.FormConfig.Required {
+				if config.Required {
 					required
 				}
 			/>
@@ -75,13 +75,13 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 				type="hidden"
 				name={ name }
 				data-bind:value={ fmt.Sprintf("$%s.value", signalName) }
-				if config.FormConfig.Datastar.Model != "" {
-					data-model={ config.FormConfig.Datastar.Model }
+				if config.Datastar.Model != "" {
+					data-model={ config.Datastar.Model }
 				}
 			/>
 		</div>
-		if config.FormConfig.Error != "" {
-			<p class="field-error" data-show={ config.FormConfig.Error } data-text={ config.FormConfig.Error }></p>
+		if config.Error != "" {
+			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
 		}
 	</div>
 }

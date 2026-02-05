@@ -37,7 +37,7 @@ func Card(options ...CardOption) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		config := applyCardOptions(options)
-		var templ_7745c5c3_Var2 = []any{"card", config.Class}
+		var templ_7745c5c3_Var2 = []any{"card", "flex-1", config.Class}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var2...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err

@@ -10,7 +10,7 @@ package components
 templ Card(options ...CardOption) {
 	{{ config := applyCardOptions(options) }}
 	<div
-		class={ "card", config.Class }
+		class={ "card", "flex-1", config.Class }
 		if config.ID != "" {
 			id={ config.ID }
 		}

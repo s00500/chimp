@@ -14,7 +14,7 @@ import "github.com/s00500/chimp/icon/base"
 //
 // Example:
 //
-//	@Button("Save", WithVariant(VariantPrimary), WithButtonOn("click", "@post('/save')"))
+//	@Button("Save", WithVariant(VariantPrimary), WithOn("click", "@post('/save')"))
 //	@Button("Delete", WithVariant(VariantDestructive), WithLoading("$deleting"))
 func Button(text string, options ...ButtonOption) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
@@ -131,7 +131,7 @@ func Button(text string, options ...ButtonOption) templ.Component {
 //
 // Example:
 //
-//	@ButtonIcon(icon.Trash, WithVariant(VariantGhost), WithButtonOn("click", "$confirmDelete()"))
+//	@ButtonIcon(icon.Trash, WithVariant(VariantGhost), WithOn("click", "$confirmDelete()"))
 func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

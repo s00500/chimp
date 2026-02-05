@@ -34,7 +34,6 @@ func (d *DatastarAttrs) ToAttrs() templ.Attributes {
 	}
 
 	if len(d.Signals) > 0 {
-		// Format as JSON object
 		var sb strings.Builder
 		sb.WriteString("{")
 		first := true
@@ -66,263 +65,26 @@ func (d *DatastarAttrs) ToAttrs() templ.Attributes {
 	return attrs
 }
 
-// FormConfig holds configuration for form input components
-type FormConfig struct {
-	// Basic attributes
-	Type        string // input type: text, email, password, number, etc.
-	Placeholder string
-	Required    bool
-	Disabled    bool
-	Readonly    bool
-	Autofocus   bool
+// ============================================================================
+// Common Config (embedded by all component configs)
+// ============================================================================
 
-	// Validation
-	Min       string // min value for number/date
-	Max       string // max value for number/date
-	MinLength int
-	MaxLength int
-	Pattern   string // regex pattern
-	Step      string // step for number inputs
-
-	// Textarea specific
-	Rows int
-	Cols int
-
-	// Select specific
-	Options     []SelectOption
-	Multiple    bool
-	EmptyOption string // placeholder option text
-
-	// Error handling
-	Error string // data-show expression for error, or static error text
-
-	// Datastar attributes
+// CommonConfig holds attributes shared by most components
+type CommonConfig struct {
+	ID       string
+	Class    string
 	Datastar DatastarAttrs
-
-	// Extra attributes
-	Class      string
-	ExtraAttrs templ.Attributes
+	Attrs    templ.Attributes
 }
 
-// FormOption is a function that modifies FormConfig
-type FormOption func(*FormConfig)
-
-// WithType sets the input type (text, email, password, number, etc.)
-func WithType(t string) FormOption {
-	return func(c *FormConfig) {
-		c.Type = t
-	}
-}
-
-// WithPlaceholder sets the placeholder text
-func WithPlaceholder(p string) FormOption {
-	return func(c *FormConfig) {
-		c.Placeholder = p
-	}
-}
-
-// WithRequired marks the field as required
-func WithRequired() FormOption {
-	return func(c *FormConfig) {
-		c.Required = true
-	}
-}
-
-// WithDisabled marks the field as disabled
-func WithDisabled() FormOption {
-	return func(c *FormConfig) {
-		c.Disabled = true
-	}
-}
-
-// WithReadonly marks the field as readonly
-func WithReadonly() FormOption {
-	return func(c *FormConfig) {
-		c.Readonly = true
-	}
-}
-
-// WithAutofocus sets autofocus on the field
-func WithAutofocus() FormOption {
-	return func(c *FormConfig) {
-		c.Autofocus = true
-	}
-}
-
-// WithMin sets the minimum value
-func WithMin(min string) FormOption {
-	return func(c *FormConfig) {
-		c.Min = min
-	}
-}
-
-// WithMax sets the maximum value
-func WithMax(max string) FormOption {
-	return func(c *FormConfig) {
-		c.Max = max
-	}
-}
-
-// WithMinLength sets the minimum length
-func WithMinLength(n int) FormOption {
-	return func(c *FormConfig) {
-		c.MinLength = n
-	}
-}
-
-// WithMaxLength sets the maximum length
-func WithMaxLength(n int) FormOption {
-	return func(c *FormConfig) {
-		c.MaxLength = n
-	}
-}
-
-// WithPattern sets a regex validation pattern
-func WithPattern(pattern string) FormOption {
-	return func(c *FormConfig) {
-		c.Pattern = pattern
-	}
-}
-
-// WithStep sets the step value for number inputs
-func WithStep(step string) FormOption {
-	return func(c *FormConfig) {
-		c.Step = step
-	}
-}
-
-// WithRows sets the number of rows for textarea
-func WithRows(rows int) FormOption {
-	return func(c *FormConfig) {
-		c.Rows = rows
-	}
-}
-
-// WithCols sets the number of columns for textarea
-func WithCols(cols int) FormOption {
-	return func(c *FormConfig) {
-		c.Cols = cols
-	}
-}
-
-// WithOptions sets the options for select/radio components
-func WithOptions(options []SelectOption) FormOption {
-	return func(c *FormConfig) {
-		c.Options = options
-	}
-}
-
-// WithMultiple allows multiple selection
-func WithMultiple() FormOption {
-	return func(c *FormConfig) {
-		c.Multiple = true
-	}
-}
-
-// WithEmptyOption adds a placeholder option to select
-func WithEmptyOption(text string) FormOption {
-	return func(c *FormConfig) {
-		c.EmptyOption = text
-	}
-}
-
-// WithError sets the error expression or text
-func WithError(expr string) FormOption {
-	return func(c *FormConfig) {
-		c.Error = expr
-	}
-}
-
-// WithClass adds additional CSS classes
-func WithClass(class string) FormOption {
-	return func(c *FormConfig) {
-		c.Class = class
-	}
-}
-
-// WithAttrs adds extra HTML attributes
-func WithAttrs(attrs templ.Attributes) FormOption {
-	return func(c *FormConfig) {
-		c.ExtraAttrs = attrs
-	}
-}
-
-// Datastar-specific options
-
-// WithModel sets the data-model attribute for two-way binding
-func WithModel(expr string) FormOption {
-	return func(c *FormConfig) {
-		c.Datastar.Model = expr
-	}
-}
-
-// WithOn adds a data-on:event handler
-func WithOn(event, action string) FormOption {
-	return func(c *FormConfig) {
-		if c.Datastar.On == nil {
-			c.Datastar.On = make(map[string]string)
-		}
-		c.Datastar.On[event] = action
-	}
-}
-
-// WithBind adds a data-bind:attr binding
-func WithBind(attr, expr string) FormOption {
-	return func(c *FormConfig) {
-		if c.Datastar.Bind == nil {
-			c.Datastar.Bind = make(map[string]string)
-		}
-		c.Datastar.Bind[attr] = expr
-	}
-}
-
-// WithSignal adds a signal to data-signals
-func WithSignal(name, value string) FormOption {
-	return func(c *FormConfig) {
-		if c.Datastar.Signals == nil {
-			c.Datastar.Signals = make(map[string]string)
-		}
-		c.Datastar.Signals[name] = value
-	}
-}
-
-// WithDataAttr adds a data-attr:name binding
-func WithDataAttr(name, expr string) FormOption {
-	return func(c *FormConfig) {
-		if c.Datastar.Attrs == nil {
-			c.Datastar.Attrs = make(map[string]string)
-		}
-		c.Datastar.Attrs[name] = expr
-	}
-}
-
-// WithShow sets the data-show expression
-func WithShow(expr string) FormOption {
-	return func(c *FormConfig) {
-		c.Datastar.Show = expr
-	}
-}
-
-// ApplyOptions applies all options to a FormConfig and returns it
-func applyFormOptions(options []FormOption) *FormConfig {
-	config := &FormConfig{
-		Type: "text", // default type
-		Rows: 3,      // default textarea rows
-	}
-	for _, opt := range options {
-		opt(config)
-	}
-	return config
-}
-
-// InputAttrs returns all attributes for an input element including datastar attrs
-func (c *FormConfig) InputAttrs() templ.Attributes {
+// CommonAttrs returns all common attributes including datastar attrs
+func (c *CommonConfig) CommonAttrs() templ.Attributes {
 	attrs := templ.Attributes{}
 
-	// Add datastar attributes
-	if c.Datastar.Model != "" {
-		attrs["data-model"] = c.Datastar.Model
+	if c.ID != "" {
+		attrs["id"] = c.ID
 	}
+
 	for event, action := range c.Datastar.On {
 		attrs["data-on:"+event] = action
 	}
@@ -332,219 +94,433 @@ func (c *FormConfig) InputAttrs() templ.Attributes {
 	for name, expr := range c.Datastar.Attrs {
 		attrs["data-attr:"+name] = expr
 	}
+	if c.Datastar.Show != "" {
+		attrs["data-show"] = c.Datastar.Show
+	}
 
-	// Add extra attrs
-	for k, v := range c.ExtraAttrs {
+	for k, v := range c.Attrs {
 		attrs[k] = v
 	}
 
 	return attrs
 }
 
+// ============================================================================
+// Option Interfaces (each component defines what options it accepts)
+// ============================================================================
+
+type FormOption interface{ applyToForm(*FormConfig) }
+type ButtonOption interface{ applyToButton(*ButtonConfig) }
+type AutocompleteOption interface{ applyToAutocomplete(*AutocompleteConfig) }
+type DataTableOption interface{ applyToDataTable(*DataTableConfig) }
+type StackOption interface{ applyToStack(*StackConfig) }
+type FormGroupOption interface{ applyToFormGroup(*FormGroupConfig) }
+type CardOption interface{ applyToCard(*CardConfig) }
+type SectionOption interface{ applyToSection(*SectionConfig) }
+
+// ============================================================================
+// Common Options (implement multiple interfaces - work on many components)
+// ============================================================================
+
+// idOption sets the id attribute
+type idOption string
+
+func (o idOption) applyToForm(c *FormConfig)               { c.ID = string(o) }
+func (o idOption) applyToButton(c *ButtonConfig)           { c.ID = string(o) }
+func (o idOption) applyToAutocomplete(c *AutocompleteConfig) { c.ID = string(o) }
+func (o idOption) applyToDataTable(c *DataTableConfig)     { c.ID = string(o) }
+func (o idOption) applyToStack(c *StackConfig)             { c.ID = string(o) }
+func (o idOption) applyToFormGroup(c *FormGroupConfig)     { c.ID = string(o) }
+func (o idOption) applyToCard(c *CardConfig)               { c.ID = string(o) }
+func (o idOption) applyToSection(c *SectionConfig)         { c.ID = string(o) }
+
+// WithID sets the id attribute (works on any component)
+func WithID(id string) idOption { return idOption(id) }
+
+// classOption adds CSS classes
+type classOption string
+
+func (o classOption) apply(c *CommonConfig) {
+	if c.Class == "" {
+		c.Class = string(o)
+	} else {
+		c.Class += " " + string(o)
+	}
+}
+func (o classOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
+func (o classOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o classOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
+func (o classOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
+func (o classOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
+func (o classOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
+func (o classOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
+func (o classOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+
+// WithClass adds CSS classes (works on any component)
+func WithClass(class string) classOption { return classOption(class) }
+
+// onOption adds a data-on:event handler
+type onOption struct {
+	event  string
+	action string
+}
+
+func (o onOption) apply(c *CommonConfig) {
+	if c.Datastar.On == nil {
+		c.Datastar.On = make(map[string]string)
+	}
+	c.Datastar.On[o.event] = o.action
+}
+func (o onOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
+func (o onOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o onOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
+func (o onOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
+func (o onOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
+func (o onOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
+func (o onOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
+func (o onOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+
+// WithOn adds a data-on:event handler (works on any component)
+func WithOn(event, action string) onOption { return onOption{event, action} }
+
+// bindOption adds a data-bind:attr binding
+type bindOption struct {
+	attr string
+	expr string
+}
+
+func (o bindOption) apply(c *CommonConfig) {
+	if c.Datastar.Bind == nil {
+		c.Datastar.Bind = make(map[string]string)
+	}
+	c.Datastar.Bind[o.attr] = o.expr
+}
+func (o bindOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
+func (o bindOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o bindOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
+func (o bindOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
+func (o bindOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
+func (o bindOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
+func (o bindOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
+func (o bindOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+
+// WithBind adds a data-bind:attr binding (works on any component)
+func WithBind(attr, expr string) bindOption { return bindOption{attr, expr} }
+
+// showOption sets the data-show expression
+type showOption string
+
+func (o showOption) apply(c *CommonConfig) { c.Datastar.Show = string(o) }
+func (o showOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
+func (o showOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o showOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
+func (o showOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
+func (o showOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
+func (o showOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
+func (o showOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
+func (o showOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+
+// WithShow sets the data-show expression (works on any component)
+func WithShow(expr string) showOption { return showOption(expr) }
+
+// attrsOption adds extra HTML attributes
+type attrsOption templ.Attributes
+
+func (o attrsOption) apply(c *CommonConfig) {
+	if c.Attrs == nil {
+		c.Attrs = make(templ.Attributes)
+	}
+	for k, v := range o {
+		c.Attrs[k] = v
+	}
+}
+func (o attrsOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+
+// WithAttrs adds extra HTML attributes (works on any component)
+func WithAttrs(attrs templ.Attributes) attrsOption { return attrsOption(attrs) }
+
+// ============================================================================
+// Form Config & Options
+// ============================================================================
+
+// FormConfig holds configuration for form input components
+type FormConfig struct {
+	CommonConfig // embedded
+
+	Type        string // input type: text, email, password, number, etc.
+	Placeholder string
+	Required    bool
+	Disabled    bool
+	Readonly    bool
+	Autofocus   bool
+
+	Min       string // min value for number/date
+	Max       string // max value for number/date
+	MinLength int
+	MaxLength int
+	Pattern   string // regex pattern
+	Step      string // step for number inputs
+
+	Rows int // textarea rows
+	Cols int // textarea cols
+
+	Options     []SelectOption // select/radio options
+	Multiple    bool
+	EmptyOption string // placeholder option text
+
+	Error string // data-show expression for error
+}
+
+// Form-specific option types
+type formTypeOption string
+func (o formTypeOption) applyToForm(c *FormConfig) { c.Type = string(o) }
+
+type formPlaceholderOption string
+func (o formPlaceholderOption) applyToForm(c *FormConfig) { c.Placeholder = string(o) }
+
+type formRequiredOption struct{}
+func (o formRequiredOption) applyToForm(c *FormConfig) { c.Required = true }
+
+type formDisabledOption struct{}
+func (o formDisabledOption) applyToForm(c *FormConfig) { c.Disabled = true }
+
+type formReadonlyOption struct{}
+func (o formReadonlyOption) applyToForm(c *FormConfig) { c.Readonly = true }
+
+type formAutofocusOption struct{}
+func (o formAutofocusOption) applyToForm(c *FormConfig) { c.Autofocus = true }
+
+type formMinOption string
+func (o formMinOption) applyToForm(c *FormConfig) { c.Min = string(o) }
+
+type formMaxOption string
+func (o formMaxOption) applyToForm(c *FormConfig) { c.Max = string(o) }
+
+type formMinLengthOption int
+func (o formMinLengthOption) applyToForm(c *FormConfig) { c.MinLength = int(o) }
+
+type formMaxLengthOption int
+func (o formMaxLengthOption) applyToForm(c *FormConfig) { c.MaxLength = int(o) }
+
+type formPatternOption string
+func (o formPatternOption) applyToForm(c *FormConfig) { c.Pattern = string(o) }
+
+type formStepOption string
+func (o formStepOption) applyToForm(c *FormConfig) { c.Step = string(o) }
+
+type formRowsOption int
+func (o formRowsOption) applyToForm(c *FormConfig) { c.Rows = int(o) }
+
+type formColsOption int
+func (o formColsOption) applyToForm(c *FormConfig) { c.Cols = int(o) }
+
+type formOptionsOption []SelectOption
+func (o formOptionsOption) applyToForm(c *FormConfig) { c.Options = []SelectOption(o) }
+
+type formMultipleOption struct{}
+func (o formMultipleOption) applyToForm(c *FormConfig) { c.Multiple = true }
+
+type formEmptyOptionOption string
+func (o formEmptyOptionOption) applyToForm(c *FormConfig) { c.EmptyOption = string(o) }
+
+type formErrorOption string
+func (o formErrorOption) applyToForm(c *FormConfig) { c.Error = string(o) }
+
+type formModelOption string
+func (o formModelOption) applyToForm(c *FormConfig) { c.Datastar.Model = string(o) }
+
+type formSignalOption struct {
+	name  string
+	value string
+}
+func (o formSignalOption) applyToForm(c *FormConfig) {
+	if c.Datastar.Signals == nil {
+		c.Datastar.Signals = make(map[string]string)
+	}
+	c.Datastar.Signals[o.name] = o.value
+}
+
+type formDataAttrOption struct {
+	name string
+	expr string
+}
+func (o formDataAttrOption) applyToForm(c *FormConfig) {
+	if c.Datastar.Attrs == nil {
+		c.Datastar.Attrs = make(map[string]string)
+	}
+	c.Datastar.Attrs[o.name] = o.expr
+}
+
+// Form option constructors
+func WithType(t string) formTypeOption             { return formTypeOption(t) }
+func WithPlaceholder(p string) formPlaceholderOption { return formPlaceholderOption(p) }
+func WithRequired() formRequiredOption             { return formRequiredOption{} }
+func WithDisabled() formDisabledOption             { return formDisabledOption{} }
+func WithReadonly() formReadonlyOption             { return formReadonlyOption{} }
+func WithAutofocus() formAutofocusOption           { return formAutofocusOption{} }
+func WithMin(min string) formMinOption             { return formMinOption(min) }
+func WithMax(max string) formMaxOption             { return formMaxOption(max) }
+func WithMinLength(n int) formMinLengthOption      { return formMinLengthOption(n) }
+func WithMaxLength(n int) formMaxLengthOption      { return formMaxLengthOption(n) }
+func WithPattern(pattern string) formPatternOption { return formPatternOption(pattern) }
+func WithStep(step string) formStepOption          { return formStepOption(step) }
+func WithRows(rows int) formRowsOption             { return formRowsOption(rows) }
+func WithCols(cols int) formColsOption             { return formColsOption(cols) }
+func WithOptions(options []SelectOption) formOptionsOption { return formOptionsOption(options) }
+func WithMultiple() formMultipleOption             { return formMultipleOption{} }
+func WithEmptyOption(text string) formEmptyOptionOption { return formEmptyOptionOption(text) }
+func WithError(expr string) formErrorOption        { return formErrorOption(expr) }
+func WithModel(expr string) formModelOption        { return formModelOption(expr) }
+func WithSignal(name, value string) formSignalOption { return formSignalOption{name, value} }
+func WithDataAttr(name, expr string) formDataAttrOption { return formDataAttrOption{name, expr} }
+
+// applyFormOptions applies all options to a FormConfig
+func applyFormOptions(options []FormOption) *FormConfig {
+	config := &FormConfig{
+		Type: "text",
+		Rows: 3,
+	}
+	for _, opt := range options {
+		opt.applyToForm(config)
+	}
+	return config
+}
+
+// InputAttrs returns all attributes for an input element
+func (c *FormConfig) InputAttrs() templ.Attributes {
+	attrs := c.CommonAttrs()
+
+	if c.Datastar.Model != "" {
+		attrs["data-model"] = c.Datastar.Model
+	}
+
+	return attrs
+}
+
+// ============================================================================
+// Button Config & Options
+// ============================================================================
+
 // ButtonConfig holds configuration for button components
 type ButtonConfig struct {
+	CommonConfig // embedded
+
 	Variant  Variant
 	Size     Size
 	Type     string // button, submit, reset
 	Disabled bool
 	Loading  string // data-show expression for loading state
-
-	// Datastar attributes
-	Datastar DatastarAttrs
-
-	// Extra attributes
-	Class      string
-	ExtraAttrs templ.Attributes
 }
 
-// ButtonOption is a function that modifies ButtonConfig
-type ButtonOption func(*ButtonConfig)
+// Button-specific option types
+type buttonVariantOption Variant
+func (o buttonVariantOption) applyToButton(c *ButtonConfig) { c.Variant = Variant(o) }
 
-// WithVariant sets the button variant
-func WithVariant(v Variant) ButtonOption {
-	return func(c *ButtonConfig) {
-		c.Variant = v
-	}
-}
+type buttonSizeOption Size
+func (o buttonSizeOption) applyToButton(c *ButtonConfig) { c.Size = Size(o) }
 
-// WithSize sets the component size
-func WithSize(s Size) ButtonOption {
-	return func(c *ButtonConfig) {
-		c.Size = s
-	}
-}
+type buttonTypeOption string
+func (o buttonTypeOption) applyToButton(c *ButtonConfig) { c.Type = string(o) }
 
-// WithButtonType sets the button type (button, submit, reset)
-func WithButtonType(t string) ButtonOption {
-	return func(c *ButtonConfig) {
-		c.Type = t
-	}
-}
+type buttonDisabledOption struct{}
+func (o buttonDisabledOption) applyToButton(c *ButtonConfig) { c.Disabled = true }
 
-// WithButtonDisabled marks the button as disabled
-func WithButtonDisabled() ButtonOption {
-	return func(c *ButtonConfig) {
-		c.Disabled = true
-	}
-}
+type buttonLoadingOption string
+func (o buttonLoadingOption) applyToButton(c *ButtonConfig) { c.Loading = string(o) }
 
-// WithLoading sets the loading state expression
-func WithLoading(expr string) ButtonOption {
-	return func(c *ButtonConfig) {
-		c.Loading = expr
-	}
-}
+// Button option constructors
+func WithVariant(v Variant) buttonVariantOption     { return buttonVariantOption(v) }
+func WithSize(s Size) buttonSizeOption              { return buttonSizeOption(s) }
+func WithButtonType(t string) buttonTypeOption      { return buttonTypeOption(t) }
+func WithButtonDisabled() buttonDisabledOption      { return buttonDisabledOption{} }
+func WithLoading(expr string) buttonLoadingOption   { return buttonLoadingOption(expr) }
 
-// WithButtonClass adds additional CSS classes to button
-func WithButtonClass(class string) ButtonOption {
-	return func(c *ButtonConfig) {
-		c.Class = class
-	}
-}
-
-// WithButtonAttrs adds extra HTML attributes to button
-func WithButtonAttrs(attrs templ.Attributes) ButtonOption {
-	return func(c *ButtonConfig) {
-		c.ExtraAttrs = attrs
-	}
-}
-
-// WithButtonOn adds a data-on:event handler to button
-func WithButtonOn(event, action string) ButtonOption {
-	return func(c *ButtonConfig) {
-		if c.Datastar.On == nil {
-			c.Datastar.On = make(map[string]string)
-		}
-		c.Datastar.On[event] = action
-	}
-}
-
-// WithButtonBind adds a data-bind:attr binding to button
-func WithButtonBind(attr, expr string) ButtonOption {
-	return func(c *ButtonConfig) {
-		if c.Datastar.Bind == nil {
-			c.Datastar.Bind = make(map[string]string)
-		}
-		c.Datastar.Bind[attr] = expr
-	}
-}
-
-// applyButtonOptions applies all options to a ButtonConfig and returns it
+// applyButtonOptions applies all options to a ButtonConfig
 func applyButtonOptions(options []ButtonOption) *ButtonConfig {
 	config := &ButtonConfig{
 		Variant: VariantPrimary,
 		Type:    "button",
 	}
 	for _, opt := range options {
-		opt(config)
+		opt.applyToButton(config)
 	}
 	return config
 }
 
-// ButtonAttrs returns all attributes for a button element including datastar attrs
+// ButtonAttrs returns all attributes for a button element
 func (c *ButtonConfig) ButtonAttrs() templ.Attributes {
-	attrs := templ.Attributes{}
-
-	// Add datastar attributes
-	for event, action := range c.Datastar.On {
-		attrs["data-on:"+event] = action
-	}
-	for attr, expr := range c.Datastar.Bind {
-		attrs["data-bind:"+attr] = expr
-	}
-
-	// Add extra attrs
-	for k, v := range c.ExtraAttrs {
-		attrs[k] = v
-	}
-
-	return attrs
+	return c.CommonAttrs()
 }
+
+// ============================================================================
+// Autocomplete Config & Options
+// ============================================================================
 
 // AutocompleteConfig holds configuration for autocomplete component
 type AutocompleteConfig struct {
-	SearchEndpoint string // SSE endpoint for search
-	DisplayField   string // field to show in input (default: "name")
-	ValueField     string // field to use as value (default: "id")
-	MinChars       int    // minimum chars before search (default: 2)
-	Debounce       int    // debounce time in ms (default: 300)
+	CommonConfig // embedded
 
-	// Inherit from FormConfig
-	FormConfig
+	SearchEndpoint string
+	DisplayField   string
+	ValueField     string
+	MinChars       int
+	Debounce       int
+
+	Placeholder string
+	Required    bool
+	Disabled    bool
+	Error       string
 }
 
-// AutocompleteOption is a function that modifies AutocompleteConfig
-type AutocompleteOption func(*AutocompleteConfig)
+// Autocomplete-specific option types
+type acSearchEndpointOption string
+func (o acSearchEndpointOption) applyToAutocomplete(c *AutocompleteConfig) { c.SearchEndpoint = string(o) }
 
-// WithSearchEndpoint sets the SSE search endpoint
-func WithSearchEndpoint(endpoint string) AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.SearchEndpoint = endpoint
-	}
-}
+type acDisplayFieldOption string
+func (o acDisplayFieldOption) applyToAutocomplete(c *AutocompleteConfig) { c.DisplayField = string(o) }
 
-// WithDisplayField sets which field to display in the input
-func WithDisplayField(field string) AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.DisplayField = field
-	}
-}
+type acValueFieldOption string
+func (o acValueFieldOption) applyToAutocomplete(c *AutocompleteConfig) { c.ValueField = string(o) }
 
-// WithValueField sets which field to use as the value
-func WithValueField(field string) AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.ValueField = field
-	}
-}
+type acMinCharsOption int
+func (o acMinCharsOption) applyToAutocomplete(c *AutocompleteConfig) { c.MinChars = int(o) }
 
-// WithMinChars sets minimum characters before search triggers
-func WithMinChars(n int) AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.MinChars = n
-	}
-}
+type acDebounceOption int
+func (o acDebounceOption) applyToAutocomplete(c *AutocompleteConfig) { c.Debounce = int(o) }
 
-// WithDebounce sets the debounce time in milliseconds
-func WithDebounce(ms int) AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.Debounce = ms
-	}
-}
+type acPlaceholderOption string
+func (o acPlaceholderOption) applyToAutocomplete(c *AutocompleteConfig) { c.Placeholder = string(o) }
 
-// WithAutocompletePlaceholder sets the placeholder for autocomplete
-func WithAutocompletePlaceholder(p string) AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.FormConfig.Placeholder = p
-	}
-}
+type acModelOption string
+func (o acModelOption) applyToAutocomplete(c *AutocompleteConfig) { c.Datastar.Model = string(o) }
 
-// WithAutocompleteModel sets the data-model for the hidden value field
-func WithAutocompleteModel(expr string) AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.FormConfig.Datastar.Model = expr
-	}
-}
+type acRequiredOption struct{}
+func (o acRequiredOption) applyToAutocomplete(c *AutocompleteConfig) { c.Required = true }
 
-// WithAutocompleteRequired marks the autocomplete as required
-func WithAutocompleteRequired() AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.FormConfig.Required = true
-	}
-}
+type acDisabledOption struct{}
+func (o acDisabledOption) applyToAutocomplete(c *AutocompleteConfig) { c.Disabled = true }
 
-// WithAutocompleteDisabled marks the autocomplete as disabled
-func WithAutocompleteDisabled() AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.FormConfig.Disabled = true
-	}
-}
+type acErrorOption string
+func (o acErrorOption) applyToAutocomplete(c *AutocompleteConfig) { c.Error = string(o) }
 
-// WithAutocompleteError sets the error expression for autocomplete
-func WithAutocompleteError(expr string) AutocompleteOption {
-	return func(c *AutocompleteConfig) {
-		c.FormConfig.Error = expr
-	}
-}
+// Autocomplete option constructors
+func WithSearchEndpoint(endpoint string) acSearchEndpointOption { return acSearchEndpointOption(endpoint) }
+func WithDisplayField(field string) acDisplayFieldOption       { return acDisplayFieldOption(field) }
+func WithValueField(field string) acValueFieldOption           { return acValueFieldOption(field) }
+func WithMinChars(n int) acMinCharsOption                      { return acMinCharsOption(n) }
+func WithDebounce(ms int) acDebounceOption                     { return acDebounceOption(ms) }
+func WithAutocompletePlaceholder(p string) acPlaceholderOption { return acPlaceholderOption(p) }
+func WithAutocompleteModel(expr string) acModelOption          { return acModelOption(expr) }
+func WithAutocompleteRequired() acRequiredOption               { return acRequiredOption{} }
+func WithAutocompleteDisabled() acDisabledOption               { return acDisabledOption{} }
+func WithAutocompleteError(expr string) acErrorOption          { return acErrorOption(expr) }
 
 // applyAutocompleteOptions applies all options and returns config
 func applyAutocompleteOptions(options []AutocompleteOption) *AutocompleteConfig {
@@ -555,70 +531,54 @@ func applyAutocompleteOptions(options []AutocompleteOption) *AutocompleteConfig 
 		Debounce:     300,
 	}
 	for _, opt := range options {
-		opt(config)
+		opt.applyToAutocomplete(config)
 	}
 	return config
 }
 
+// ============================================================================
+// DataTable Config & Options
+// ============================================================================
+
 // DataTableConfig holds configuration for data table component
 type DataTableConfig struct {
-	DataEndpoint string   // SSE endpoint for data
-	Columns      []Column // column definitions
-	PageSize     int      // items per page (default: 25)
-	Selectable   bool     // show checkbox column
-	Sortable     bool     // enable sorting (default: true based on column config)
+	CommonConfig // embedded
 
-	// Datastar signals prefix (for namespacing, e.g., "users" -> $users.page)
+	DataEndpoint string
+	Columns      []Column
+	PageSize     int
+	Selectable   bool
+	Sortable     bool
 	SignalPrefix string
-
-	// Custom row actions renderer
-	RowActions func(rowIndex int) templ.Component
+	RowActions   func(rowIndex int) templ.Component
 }
 
-// DataTableOption is a function that modifies DataTableConfig
-type DataTableOption func(*DataTableConfig)
+// DataTable-specific option types
+type dtDataEndpointOption string
+func (o dtDataEndpointOption) applyToDataTable(c *DataTableConfig) { c.DataEndpoint = string(o) }
 
-// WithDataEndpoint sets the SSE data endpoint
-func WithDataEndpoint(endpoint string) DataTableOption {
-	return func(c *DataTableConfig) {
-		c.DataEndpoint = endpoint
-	}
-}
+type dtColumnsOption []Column
+func (o dtColumnsOption) applyToDataTable(c *DataTableConfig) { c.Columns = []Column(o) }
 
-// WithColumns sets the table columns
-func WithColumns(columns []Column) DataTableOption {
-	return func(c *DataTableConfig) {
-		c.Columns = columns
-	}
-}
+type dtPageSizeOption int
+func (o dtPageSizeOption) applyToDataTable(c *DataTableConfig) { c.PageSize = int(o) }
 
-// WithPageSize sets items per page
-func WithPageSize(size int) DataTableOption {
-	return func(c *DataTableConfig) {
-		c.PageSize = size
-	}
-}
+type dtSelectableOption struct{}
+func (o dtSelectableOption) applyToDataTable(c *DataTableConfig) { c.Selectable = true }
 
-// WithSelectable enables row selection checkboxes
-func WithSelectable() DataTableOption {
-	return func(c *DataTableConfig) {
-		c.Selectable = true
-	}
-}
+type dtSignalPrefixOption string
+func (o dtSignalPrefixOption) applyToDataTable(c *DataTableConfig) { c.SignalPrefix = string(o) }
 
-// WithSignalPrefix sets a prefix for datastar signals
-func WithSignalPrefix(prefix string) DataTableOption {
-	return func(c *DataTableConfig) {
-		c.SignalPrefix = prefix
-	}
-}
+type dtRowActionsOption func(rowIndex int) templ.Component
+func (o dtRowActionsOption) applyToDataTable(c *DataTableConfig) { c.RowActions = o }
 
-// WithRowActions sets a custom row actions renderer
-func WithRowActions(fn func(rowIndex int) templ.Component) DataTableOption {
-	return func(c *DataTableConfig) {
-		c.RowActions = fn
-	}
-}
+// DataTable option constructors
+func WithDataEndpoint(endpoint string) dtDataEndpointOption         { return dtDataEndpointOption(endpoint) }
+func WithColumns(columns []Column) dtColumnsOption                  { return dtColumnsOption(columns) }
+func WithPageSize(size int) dtPageSizeOption                        { return dtPageSizeOption(size) }
+func WithSelectable() dtSelectableOption                            { return dtSelectableOption{} }
+func WithSignalPrefix(prefix string) dtSignalPrefixOption           { return dtSignalPrefixOption(prefix) }
+func WithRowActions(fn func(rowIndex int) templ.Component) dtRowActionsOption { return dtRowActionsOption(fn) }
 
 // applyDataTableOptions applies all options and returns config
 func applyDataTableOptions(options []DataTableOption) *DataTableConfig {
@@ -627,41 +587,33 @@ func applyDataTableOptions(options []DataTableOption) *DataTableConfig {
 		Sortable: true,
 	}
 	for _, opt := range options {
-		opt(config)
+		opt.applyToDataTable(config)
 	}
 	return config
 }
 
+// ============================================================================
+// Stack Config & Options
+// ============================================================================
+
 // StackConfig holds configuration for stack layout component
 type StackConfig struct {
-	Gap       string // gap size: xs, sm, md, lg, xl or custom value
-	Direction string // flex direction: col (default), row
-	Class     string // additional classes
+	CommonConfig // embedded
+
+	Gap       string
+	Direction string
 }
 
-// StackOption is a function that modifies StackConfig
-type StackOption func(*StackConfig)
+// Stack-specific option types
+type stackGapOption string
+func (o stackGapOption) applyToStack(c *StackConfig) { c.Gap = string(o) }
 
-// WithGap sets the gap between stack items
-func WithGap(gap string) StackOption {
-	return func(c *StackConfig) {
-		c.Gap = gap
-	}
-}
+type stackDirectionOption string
+func (o stackDirectionOption) applyToStack(c *StackConfig) { c.Direction = string(o) }
 
-// WithDirection sets the stack direction
-func WithDirection(dir string) StackOption {
-	return func(c *StackConfig) {
-		c.Direction = dir
-	}
-}
-
-// WithStackClass adds additional CSS classes
-func WithStackClass(class string) StackOption {
-	return func(c *StackConfig) {
-		c.Class = class
-	}
-}
+// Stack option constructors
+func WithGap(gap string) stackGapOption           { return stackGapOption(gap) }
+func WithDirection(dir string) stackDirectionOption { return stackDirectionOption(dir) }
 
 // applyStackOptions applies all options and returns config
 func applyStackOptions(options []StackOption) *StackConfig {
@@ -670,91 +622,64 @@ func applyStackOptions(options []StackOption) *StackConfig {
 		Direction: "col",
 	}
 	for _, opt := range options {
-		opt(config)
+		opt.applyToStack(config)
 	}
 	return config
 }
 
+// ============================================================================
+// FormGroup Config & Options
+// ============================================================================
+
 // FormGroupConfig holds configuration for form group wrapper
 type FormGroupConfig struct {
-	OnSubmit string // data-on:submit action
-	Class    string // additional classes
+	CommonConfig // embedded
 
-	// Datastar attributes
-	Datastar DatastarAttrs
+	OnSubmit string
 }
 
-// FormGroupOption is a function that modifies FormGroupConfig
-type FormGroupOption func(*FormGroupConfig)
+// FormGroup-specific option types
+type fgSubmitOption string
+func (o fgSubmitOption) applyToFormGroup(c *FormGroupConfig) { c.OnSubmit = string(o) }
 
-// WithFormSubmit sets the form submit handler
-func WithFormSubmit(action string) FormGroupOption {
-	return func(c *FormGroupConfig) {
-		c.OnSubmit = action
-	}
-}
+type fgSignalsOption map[string]string
+func (o fgSignalsOption) applyToFormGroup(c *FormGroupConfig) { c.Datastar.Signals = o }
 
-// WithFormClass adds additional CSS classes to form
-func WithFormClass(class string) FormGroupOption {
-	return func(c *FormGroupConfig) {
-		c.Class = class
-	}
-}
-
-// WithFormSignals adds signals to the form
-func WithFormSignals(signals map[string]string) FormGroupOption {
-	return func(c *FormGroupConfig) {
-		c.Datastar.Signals = signals
-	}
-}
+// FormGroup option constructors
+func WithFormSubmit(action string) fgSubmitOption              { return fgSubmitOption(action) }
+func WithFormSignals(signals map[string]string) fgSignalsOption { return fgSignalsOption(signals) }
 
 // applyFormGroupOptions applies all options and returns config
 func applyFormGroupOptions(options []FormGroupOption) *FormGroupConfig {
 	config := &FormGroupConfig{}
 	for _, opt := range options {
-		opt(config)
+		opt.applyToFormGroup(config)
 	}
 	return config
 }
 
+// ============================================================================
+// Card Config & Options
+// ============================================================================
+
 // CardConfig holds configuration for card components
 type CardConfig struct {
-	ID      string // optional id attribute
-	Title   string // optional title for card header
-	Padding string // padding size: none, sm, md (default), lg
-	Class   string // additional classes
+	CommonConfig // embedded
+
+	Title   string
+	Padding string
 }
 
-// CardOption is a function that modifies CardConfig
-type CardOption func(*CardConfig)
+// Card-specific option types
+type cardTitleOption string
+func (o cardTitleOption) applyToCard(c *CardConfig) { c.Title = string(o) }
 
-// WithID sets the id attribute for card
-func WithID(id string) CardOption {
-	return func(c *CardConfig) {
-		c.ID = id
-	}
-}
+type cardPaddingOption string
+func (o cardPaddingOption) applyToCard(c *CardConfig) { c.Padding = string(o) }
 
-// WithCardTitle sets the card title (renders a header)
-func WithCardTitle(title string) CardOption {
-	return func(c *CardConfig) {
-		c.Title = title
-	}
-}
-
-// WithPadding sets the padding size
-func WithPadding(size string) CardOption {
-	return func(c *CardConfig) {
-		c.Padding = size
-	}
-}
-
-// WithCardClass adds additional CSS classes to card
-func WithCardClass(class string) CardOption {
-	return func(c *CardConfig) {
-		c.Class = class
-	}
-}
+// Card option constructors
+func WithCardTitle(title string) cardTitleOption { return cardTitleOption(title) }
+func WithPadding(size string) cardPaddingOption  { return cardPaddingOption(size) }
 
 // applyCardOptions applies all options and returns config
 func applyCardOptions(options []CardOption) *CardConfig {
@@ -762,49 +687,33 @@ func applyCardOptions(options []CardOption) *CardConfig {
 		Padding: "md",
 	}
 	for _, opt := range options {
-		opt(config)
+		opt.applyToCard(config)
 	}
 	return config
 }
 
+// ============================================================================
+// Section Config & Options
+// ============================================================================
+
 // SectionConfig holds configuration for section components
 type SectionConfig struct {
-	ID      string // optional id attribute
-	Title   string // optional title for section header
-	Padding string // padding size: none, sm, md (default), lg
-	Class   string // additional classes
+	CommonConfig // embedded
+
+	Title   string
+	Padding string
 }
 
-// SectionOption is a function that modifies SectionConfig
-type SectionOption func(*SectionConfig)
+// Section-specific option types
+type sectionTitleOption string
+func (o sectionTitleOption) applyToSection(c *SectionConfig) { c.Title = string(o) }
 
-// WithSectionID sets the id attribute for section
-func WithSectionID(id string) SectionOption {
-	return func(c *SectionConfig) {
-		c.ID = id
-	}
-}
+type sectionPaddingOption string
+func (o sectionPaddingOption) applyToSection(c *SectionConfig) { c.Padding = string(o) }
 
-// WithSectionTitle sets the section title (renders a header)
-func WithSectionTitle(title string) SectionOption {
-	return func(c *SectionConfig) {
-		c.Title = title
-	}
-}
-
-// WithSectionPadding sets the padding size for section
-func WithSectionPadding(size string) SectionOption {
-	return func(c *SectionConfig) {
-		c.Padding = size
-	}
-}
-
-// WithSectionClass adds additional CSS classes to section
-func WithSectionClass(class string) SectionOption {
-	return func(c *SectionConfig) {
-		c.Class = class
-	}
-}
+// Section option constructors
+func WithSectionTitle(title string) sectionTitleOption   { return sectionTitleOption(title) }
+func WithSectionPadding(size string) sectionPaddingOption { return sectionPaddingOption(size) }
 
 // applySectionOptions applies all options and returns config
 func applySectionOptions(options []SectionOption) *SectionConfig {
@@ -812,7 +721,7 @@ func applySectionOptions(options []SectionOption) *SectionConfig {
 		Padding: "md",
 	}
 	for _, opt := range options {
-		opt(config)
+		opt.applyToSection(config)
 	}
 	return config
 }
