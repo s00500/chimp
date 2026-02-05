@@ -61,6 +61,7 @@ md:grid-cols-3
 md:h-full
 md:h-screen
 md:hidden
+md:overflow-auto
 md:p-5
 md:w-1/5
 md:w-4/5
