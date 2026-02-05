@@ -1,0 +1,87 @@
+package components
+
+import "strconv"
+import "fmt"
+
+// FormAutocomplete renders a server-driven autocomplete/combobox component.
+// Searches are performed via SSE endpoint, results are displayed in a dropdown.
+//
+// Example:
+//
+//	@FormAutocomplete("Customer", "customer_id",
+//	    WithSearchEndpoint("/api/customers/search"),
+//	    WithAutocompletePlaceholder("Search customers..."),
+//	    WithAutocompleteModel("form.customerId"),
+//	    WithDisplayField("name"),
+//	    WithValueField("id"),
+//	    WithMinChars(2),
+//	)
+//
+// The SSE endpoint should return signals like:
+//
+//	datastar.MergeSignals(sse, map[string]any{
+//	    "results": customers,  // array of objects with displayField and valueField
+//	    "open": len(customers) > 0,
+//	})
+templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
+	{{ config := ApplyAutocompleteOptions(options) }}
+	{{ signalName := name + "_ac" }}
+	{{ debounceMs := strconv.Itoa(config.Debounce) }}
+	{{ searchExpr := fmt.Sprintf("$%s.search.length >= %d", signalName, config.MinChars) }}
+	{{ endpoint := config.SearchEndpoint + "?q=$" + signalName + ".search" }}
+	<div class="field">
+		<label class="label" for={ name }>{ label }</label>
+		<div
+			class="combobox relative"
+			data-signals={ fmt.Sprintf("{%s: {search: '', results: [], open: false, selectedDisplay: ''}}", signalName) }
+		>
+			<input
+				class="input w-full"
+				type="text"
+				id={ name + "_search" }
+				autocomplete="off"
+				data-model={ fmt.Sprintf("%s.search", signalName) }
+				data-on:input={ fmt.Sprintf("__debounce_%sms: %s && @get('%s')", debounceMs, searchExpr, endpoint) }
+				data-on:focus={ fmt.Sprintf("$%s.open = $%s.results.length > 0", signalName, signalName) }
+				data-on:blur__debounce_200ms={ fmt.Sprintf("$%s.open = false", signalName) }
+				if config.FormConfig.Placeholder != "" {
+					placeholder={ config.FormConfig.Placeholder }
+				}
+				if config.FormConfig.Disabled {
+					disabled
+				}
+				if config.FormConfig.Required {
+					required
+				}
+			/>
+			<div
+				class="combobox-content absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto"
+				data-show={ fmt.Sprintf("$%s.open && $%s.results.length > 0", signalName, signalName) }
+			>
+				<template data-for={ fmt.Sprintf("item in $%s.results", signalName) }>
+					<button
+						type="button"
+						class="combobox-item w-full text-left px-3 py-2 hover:bg-muted cursor-pointer"
+						data-on:mousedown={ fmt.Sprintf("$%s.value = item.%s; $%s.search = item.%s; $%s.selectedDisplay = item.%s; $%s.open = false",
+							signalName, config.ValueField,
+							signalName, config.DisplayField,
+							signalName, config.DisplayField,
+							signalName) }
+						data-text={ fmt.Sprintf("item.%s", config.DisplayField) }
+					></button>
+				</template>
+			</div>
+			<input
+				type="hidden"
+				name={ name }
+				data-bind:value={ fmt.Sprintf("$%s.value", signalName) }
+				if config.FormConfig.Datastar.Model != "" {
+					data-model={ config.FormConfig.Datastar.Model }
+				}
+			/>
+		</div>
+		if config.FormConfig.Error != "" {
+			<p class="field-error" data-show={ config.FormConfig.Error } data-text={ config.FormConfig.Error }></p>
+		}
+	</div>
+}

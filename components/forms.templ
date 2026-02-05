@@ -1,5 +1,264 @@
 package components
 
+import "strconv"
+
+// FormInput renders a complete form input field with label and error handling.
+// Supports text, email, password, number, search, tel, url input types.
+//
+// Example:
+//
+//	@FormInput("Email", "email",
+//	    WithType("email"),
+//	    WithModel("form.email"),
+//	    WithPlaceholder("you@example.com"),
+//	    WithRequired(),
+//	    WithError("$errors.email"),
+//	)
+templ FormInput(label, name string, options ...FormOption) {
+	{{ config := ApplyFormOptions(options) }}
+	<div class="field">
+		<label class="label" for={ name }>{ label }</label>
+		<input
+			class={ "input", config.Class }
+			type={ config.Type }
+			id={ name }
+			name={ name }
+			if config.Placeholder != "" {
+				placeholder={ config.Placeholder }
+			}
+			if config.Required {
+				required
+			}
+			if config.Disabled {
+				disabled
+			}
+			if config.Readonly {
+				readonly
+			}
+			if config.Autofocus {
+				autofocus
+			}
+			if config.Min != "" {
+				min={ config.Min }
+			}
+			if config.Max != "" {
+				max={ config.Max }
+			}
+			if config.MinLength > 0 {
+				minlength={ strconv.Itoa(config.MinLength) }
+			}
+			if config.MaxLength > 0 {
+				maxlength={ strconv.Itoa(config.MaxLength) }
+			}
+			if config.Pattern != "" {
+				pattern={ config.Pattern }
+			}
+			if config.Step != "" {
+				step={ config.Step }
+			}
+			{ config.InputAttrs()... }
+		/>
+		if config.Error != "" {
+			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
+		}
+	</div>
+}
+
+// FormTextarea renders a textarea field with label and error handling.
+//
+// Example:
+//
+//	@FormTextarea("Bio", "bio",
+//	    WithModel("form.bio"),
+//	    WithRows(4),
+//	    WithPlaceholder("Tell us about yourself..."),
+//	)
+templ FormTextarea(label, name string, options ...FormOption) {
+	{{ config := ApplyFormOptions(options) }}
+	<div class="field">
+		<label class="label" for={ name }>{ label }</label>
+		<textarea
+			class={ "textarea", config.Class }
+			id={ name }
+			name={ name }
+			if config.Placeholder != "" {
+				placeholder={ config.Placeholder }
+			}
+			if config.Required {
+				required
+			}
+			if config.Disabled {
+				disabled
+			}
+			if config.Readonly {
+				readonly
+			}
+			if config.Rows > 0 {
+				rows={ strconv.Itoa(config.Rows) }
+			}
+			if config.Cols > 0 {
+				cols={ strconv.Itoa(config.Cols) }
+			}
+			if config.MinLength > 0 {
+				minlength={ strconv.Itoa(config.MinLength) }
+			}
+			if config.MaxLength > 0 {
+				maxlength={ strconv.Itoa(config.MaxLength) }
+			}
+			{ config.InputAttrs()... }
+		></textarea>
+		if config.Error != "" {
+			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
+		}
+	</div>
+}
+
+// FormSelect renders a select dropdown with label and error handling.
+//
+// Example:
+//
+//	@FormSelect("Country", "country",
+//	    WithModel("form.country"),
+//	    WithOptions([]SelectOption{
+//	        {Value: "us", Label: "United States"},
+//	        {Value: "de", Label: "Germany"},
+//	    }),
+//	    WithEmptyOption("Select a country"),
+//	)
+templ FormSelect(label, name string, options ...FormOption) {
+	{{ config := ApplyFormOptions(options) }}
+	<div class="field">
+		<label class="label" for={ name }>{ label }</label>
+		<select
+			class={ "select", config.Class }
+			id={ name }
+			name={ name }
+			if config.Required {
+				required
+			}
+			if config.Disabled {
+				disabled
+			}
+			if config.Multiple {
+				multiple
+			}
+			{ config.InputAttrs()... }
+		>
+			if config.EmptyOption != "" {
+				<option value="">{ config.EmptyOption }</option>
+			}
+			for _, opt := range config.Options {
+				<option
+					value={ opt.Value }
+					if opt.Disabled {
+						disabled
+					}
+				>{ opt.Label }</option>
+			}
+		</select>
+		if config.Error != "" {
+			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
+		}
+	</div>
+}
+
+// FormCheckbox renders a checkbox with label.
+//
+// Example:
+//
+//	@FormCheckbox("Accept terms", "terms", WithModel("form.acceptTerms"))
+templ FormCheckbox(label, name string, options ...FormOption) {
+	{{ config := ApplyFormOptions(options) }}
+	<div class="field">
+		<label class="checkbox">
+			<input
+				type="checkbox"
+				id={ name }
+				name={ name }
+				if config.Required {
+					required
+				}
+				if config.Disabled {
+					disabled
+				}
+				{ config.InputAttrs()... }
+			/>
+			<span>{ label }</span>
+		</label>
+		if config.Error != "" {
+			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
+		}
+	</div>
+}
+
+// FormSwitch renders a toggle switch with label.
+//
+// Example:
+//
+//	@FormSwitch("Notifications", "notifications", WithModel("form.notifications"))
+templ FormSwitch(label, name string, options ...FormOption) {
+	{{ config := ApplyFormOptions(options) }}
+	<div class="field">
+		<label class="switch">
+			<input
+				type="checkbox"
+				role="switch"
+				id={ name }
+				name={ name }
+				if config.Required {
+					required
+				}
+				if config.Disabled {
+					disabled
+				}
+				{ config.InputAttrs()... }
+			/>
+			<span>{ label }</span>
+		</label>
+		if config.Error != "" {
+			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
+		}
+	</div>
+}
+
+// FormRadioGroup renders a group of radio buttons with label.
+//
+// Example:
+//
+//	@FormRadioGroup("Plan", "plan",
+//	    WithModel("form.plan"),
+//	    WithOptions([]SelectOption{
+//	        {Value: "free", Label: "Free"},
+//	        {Value: "pro", Label: "Pro"},
+//	    }),
+//	)
+templ FormRadioGroup(label, name string, options ...FormOption) {
+	{{ config := ApplyFormOptions(options) }}
+	<fieldset class="field">
+		<legend class="label">{ label }</legend>
+		<div class="space-y-2">
+			for _, opt := range config.Options {
+				<label class="radio">
+					<input
+						type="radio"
+						name={ name }
+						value={ opt.Value }
+						if opt.Disabled || config.Disabled {
+							disabled
+						}
+						{ config.InputAttrs()... }
+					/>
+					<span>{ opt.Label }</span>
+				</label>
+			}
+		</div>
+		if config.Error != "" {
+			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
+		}
+	</fieldset>
+}
+
+// InputLabel provides a simple label wrapper for custom input content (legacy support).
 templ InputLabel(label string) {
 	<div class="grid gap-2">
 		<label class="label" for="par-info">{ label }</label>

@@ -1,0 +1,100 @@
+package components
+
+// Stack renders a vertical or horizontal flex container with consistent spacing.
+//
+// Example:
+//
+//	@Stack(WithGap("md")) {
+//	    @FormInput("Name", "name", WithModel("form.name"))
+//	    @FormInput("Email", "email", WithModel("form.email"))
+//	    @Button("Submit", WithButtonType("submit"))
+//	}
+templ Stack(options ...StackOption) {
+	{{ config := ApplyStackOptions(options) }}
+	<div class={ stackClass(config) }>
+		{ children... }
+	</div>
+}
+
+// stackClass generates the CSS classes for a stack component
+func stackClass(config *StackConfig) string {
+	class := "flex"
+
+	// Direction
+	if config.Direction == "row" {
+		class += " flex-row"
+	} else {
+		class += " flex-col"
+	}
+
+	// Gap
+	switch config.Gap {
+	case "xs":
+		class += " gap-1"
+	case "sm":
+		class += " gap-2"
+	case "md":
+		class += " gap-4"
+	case "lg":
+		class += " gap-6"
+	case "xl":
+		class += " gap-8"
+	default:
+		if config.Gap != "" {
+			class += " gap-" + config.Gap
+		} else {
+			class += " gap-4"
+		}
+	}
+
+	if config.Class != "" {
+		class += " " + config.Class
+	}
+
+	return class
+}
+
+// FormGroup renders a form wrapper with optional Datastar submit handling.
+//
+// Example:
+//
+//	@FormGroup(WithFormSubmit("@post('/api/save')")) {
+//	    @Stack {
+//	        @FormInput("Name", "name", WithModel("form.name"))
+//	        @FormInput("Email", "email", WithModel("form.email"))
+//	        @Button("Submit", WithButtonType("submit"))
+//	    }
+//	}
+templ FormGroup(options ...FormGroupOption) {
+	{{ config := ApplyFormGroupOptions(options) }}
+	<form
+		class={ config.Class }
+		if config.OnSubmit != "" {
+			data-on:submit__prevent={ config.OnSubmit }
+		}
+		{ config.Datastar.ToAttrs()... }
+	>
+		{ children... }
+	</form>
+}
+
+// Row is a convenience wrapper for Stack with horizontal direction.
+//
+// Example:
+//
+//	@Row(WithGap("sm")) {
+//	    @Button("Cancel", WithVariant(VariantGhost))
+//	    @Button("Save", WithVariant(VariantPrimary))
+//	}
+templ Row(options ...StackOption) {
+	{{ options = append([]StackOption{WithDirection("row")}, options...) }}
+	{{ config := ApplyStackOptions(options) }}
+	<div class={ stackClass(config) }>
+		{ children... }
+	</div>
+}
+
+// Spacer renders a flexible spacer element for use in flex containers.
+templ Spacer() {
+	<div class="flex-1"></div>
+}

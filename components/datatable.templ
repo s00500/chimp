@@ -1,0 +1,179 @@
+package components
+
+import "strconv"
+import "fmt"
+
+// DataTable renders a server-driven data table with SSE pagination, sorting, and row actions.
+//
+// Example:
+//
+//	@DataTable("users-table",
+//	    WithColumns([]Column{
+//	        {Field: "name", Header: "Name", Sortable: true},
+//	        {Field: "email", Header: "Email", Sortable: true},
+//	        {Field: "role", Header: "Role"},
+//	        {Field: "actions", Header: "", Type: ColumnActions},
+//	    }),
+//	    WithDataEndpoint("/api/users"),
+//	    WithPageSize(25),
+//	    WithSelectable(),
+//	)
+//
+// The SSE endpoint receives query params: page, pageSize, sortField, sortDir
+// It should return signals:
+//
+//	datastar.MergeSignals(sse, map[string]any{
+//	    "rows": users,
+//	    "totalRows": total,
+//	    "loading": false,
+//	})
+templ DataTable(id string, options ...DataTableOption) {
+	{{ config := ApplyDataTableOptions(options) }}
+	{{ prefix := id }}
+	{{ if config.SignalPrefix != "" { prefix = config.SignalPrefix } }}
+	{{ pageSize := strconv.Itoa(config.PageSize) }}
+	{{ signalsInit := fmt.Sprintf("{%s: {page: 1, pageSize: %s, sortField: '', sortDir: 'asc', rows: [], totalRows: 0, selected: [], loading: false}}", prefix, pageSize) }}
+	{{ loadDataExpr := fmt.Sprintf("@get('%s?page=$%s.page&pageSize=$%s.pageSize&sortField=$%s.sortField&sortDir=$%s.sortDir')", config.DataEndpoint, prefix, prefix, prefix, prefix) }}
+	<div
+		id={ id }
+		class="w-full"
+		data-signals={ signalsInit }
+		data-on:load={ fmt.Sprintf("$%s.loading = true; %s", prefix, loadDataExpr) }
+	>
+		<!-- Loading overlay -->
+		<div
+			class="absolute inset-0 bg-background/50 flex items-center justify-center z-10"
+			data-show={ fmt.Sprintf("$%s.loading", prefix) }
+		>
+			<div class="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+		</div>
+		<!-- Table -->
+		<div class="relative overflow-x-auto">
+			<table class="table w-full">
+				<thead class="table-header">
+					<tr class="table-row">
+						if config.Selectable {
+							<th class="table-head w-10">
+								<input
+									type="checkbox"
+									class="checkbox"
+									data-on:change={ fmt.Sprintf("$%s.selected = this.checked ? $%s.rows.map((_, i) => i) : []", prefix, prefix) }
+								/>
+							</th>
+						}
+						for _, col := range config.Columns {
+							<th
+								class={ "table-head", templ.KV("cursor-pointer hover:bg-muted", col.Sortable) }
+								if col.Width != "" {
+									style={ "width: " + col.Width }
+								}
+								if col.Sortable {
+									data-on:click={ fmt.Sprintf("$%s.sortField = '%s'; $%s.sortDir = $%s.sortField === '%s' && $%s.sortDir === 'asc' ? 'desc' : 'asc'; $%s.loading = true; %s",
+										prefix, col.Field, prefix, prefix, col.Field, prefix, prefix, loadDataExpr) }
+								}
+							>
+								<div class="flex items-center gap-1">
+									{ col.Header }
+									if col.Sortable {
+										<span data-show={ fmt.Sprintf("$%s.sortField === '%s'", prefix, col.Field) }>
+											<span data-show={ fmt.Sprintf("$%s.sortDir === 'asc'", prefix) }>
+												<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path>
+												</svg>
+											</span>
+											<span data-show={ fmt.Sprintf("$%s.sortDir === 'desc'", prefix) }>
+												<svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+												</svg>
+											</span>
+										</span>
+									}
+								</div>
+							</th>
+						}
+					</tr>
+				</thead>
+				<tbody class="table-body">
+					<template data-for={ fmt.Sprintf("(row, rowIndex) in $%s.rows", prefix) }>
+						<tr class="table-row">
+							if config.Selectable {
+								<td class="table-cell">
+									<input
+										type="checkbox"
+										class="checkbox"
+										data-bind:checked={ fmt.Sprintf("$%s.selected.includes(rowIndex)", prefix) }
+										data-on:change={ fmt.Sprintf("this.checked ? $%s.selected.push(rowIndex) : $%s.selected = $%s.selected.filter(i => i !== rowIndex)", prefix, prefix, prefix) }
+									/>
+								</td>
+							}
+							for _, col := range config.Columns {
+								<td class="table-cell">
+									if col.Type == ColumnActions {
+										{ children... }
+									} else {
+										<span data-text={ "row." + col.Field }></span>
+									}
+								</td>
+							}
+						</tr>
+					</template>
+				</tbody>
+			</table>
+		</div>
+		<!-- Empty state -->
+		<div
+			class="text-center py-8 text-muted-foreground"
+			data-show={ fmt.Sprintf("!$%s.loading && $%s.rows.length === 0", prefix, prefix) }
+		>
+			No data found
+		</div>
+		<!-- Pagination -->
+		<div class="pagination flex items-center justify-between py-4">
+			<div class="text-sm text-muted-foreground">
+				<span>Showing </span>
+				<span data-text={ fmt.Sprintf("(($%s.page - 1) * $%s.pageSize) + 1", prefix, prefix) }></span>
+				<span> to </span>
+				<span data-text={ fmt.Sprintf("Math.min($%s.page * $%s.pageSize, $%s.totalRows)", prefix, prefix, prefix) }></span>
+				<span> of </span>
+				<span data-text={ fmt.Sprintf("$%s.totalRows", prefix) }></span>
+				<span> results</span>
+			</div>
+			<div class="flex gap-2">
+				<button
+					type="button"
+					class="btn btn-outline"
+					data-bind:disabled={ fmt.Sprintf("$%s.page <= 1", prefix) }
+					data-on:click={ fmt.Sprintf("$%s.page = $%s.page - 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
+				>
+					Previous
+				</button>
+				<button
+					type="button"
+					class="btn btn-outline"
+					data-bind:disabled={ fmt.Sprintf("$%s.page * $%s.pageSize >= $%s.totalRows", prefix, prefix, prefix) }
+					data-on:click={ fmt.Sprintf("$%s.page = $%s.page + 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
+				>
+					Next
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+// DataTableRowActions is a helper component for rendering row action buttons.
+// Use this inside DataTable children to render action buttons for each row.
+//
+// Example:
+//
+//	@DataTable("users", ...) {
+//	    @DataTableRowActions() {
+//	        <button class="btn-icon btn-ghost" data-on:click="@get('/users/' + row.id + '/edit')">
+//	            Edit
+//	        </button>
+//	    }
+//	}
+templ DataTableRowActions() {
+	<div class="flex items-center gap-1">
+		{ children... }
+	</div>
+}

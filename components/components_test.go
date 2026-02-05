@@ -66,18 +66,177 @@ func TestNotification(t *testing.T) {
 	}()
 	b, _ := io.ReadAll(r)
 	t.Log(string(b))
-	//t.Fail()
-	// doc, err := goquery.NewDocumentFromReader(r)
-	// if err != nil {
-	// 	t.Fatalf("failed to read template: %v", err)
-	// }
-	// // Expect the component to be present.
-	// if doc.Find(`[data-testid="headerTemplate"]`).Length() == 0 {
-	// 	t.Error("expected data-testid attribute to be rendered, but it wasn't")
-	// }
-	// // Expect the page name to be set correctly.
-	// expectedPageName := "Posts"
-	// if actualPageName := doc.Find("h1").Text(); actualPageName != expectedPageName {
-	// 	t.Errorf("expected page name %q, got %q", expectedPageName, actualPageName)
-	// }
+}
+
+func TestFormInput(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := FormInput("Email", "email",
+		WithType("email"),
+		WithModel("form.email"),
+		WithPlaceholder("you@example.com"),
+		WithRequired(),
+		WithError("$errors.email"),
+	).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	// Verify label
+	if !strings.Contains(output, `<label class="label"`) {
+		t.Error("expected label element")
+	}
+	if !strings.Contains(output, "Email") {
+		t.Error("expected label text 'Email'")
+	}
+
+	// Verify input attributes
+	if !strings.Contains(output, `type="email"`) {
+		t.Error("expected type='email'")
+	}
+	if !strings.Contains(output, `data-model="form.email"`) {
+		t.Error("expected data-model attribute")
+	}
+	if !strings.Contains(output, `placeholder="you@example.com"`) {
+		t.Error("expected placeholder")
+	}
+	if !strings.Contains(output, `required`) {
+		t.Error("expected required attribute")
+	}
+
+	// Verify error element
+	if !strings.Contains(output, `data-show="$errors.email"`) {
+		t.Error("expected error element with data-show")
+	}
+}
+
+func TestFormSelect(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := FormSelect("Country", "country",
+		WithModel("form.country"),
+		WithOptions([]SelectOption{
+			{Value: "us", Label: "United States"},
+			{Value: "de", Label: "Germany"},
+		}),
+		WithEmptyOption("Select a country"),
+	).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	// Verify select element
+	if !strings.Contains(output, `<select`) {
+		t.Error("expected select element")
+	}
+
+	// Verify options
+	if !strings.Contains(output, "United States") {
+		t.Error("expected 'United States' option")
+	}
+	if !strings.Contains(output, "Germany") {
+		t.Error("expected 'Germany' option")
+	}
+	if !strings.Contains(output, "Select a country") {
+		t.Error("expected empty option placeholder")
+	}
+}
+
+func TestFormCheckbox(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := FormCheckbox("Accept terms", "terms",
+		WithModel("form.acceptTerms"),
+	).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	if !strings.Contains(output, `type="checkbox"`) {
+		t.Error("expected checkbox input")
+	}
+	if !strings.Contains(output, "Accept terms") {
+		t.Error("expected label text")
+	}
+	if !strings.Contains(output, `data-model="form.acceptTerms"`) {
+		t.Error("expected data-model attribute")
+	}
+}
+
+func TestButton(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := Button("Save",
+		WithVariant(VariantPrimary),
+		WithButtonOn("click", "@post('/save')"),
+	).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	if !strings.Contains(output, "Save") {
+		t.Error("expected button text 'Save'")
+	}
+	if !strings.Contains(output, "btn-primary") {
+		t.Error("expected btn-primary class")
+	}
+	if !strings.Contains(output, `data-on:click="@post(&#39;/save&#39;)"`) && !strings.Contains(output, `data-on:click="@post('/save')"`) {
+		t.Error("expected data-on:click attribute")
+	}
+}
+
+func TestStack(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := Stack(WithGap("lg")).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	if !strings.Contains(output, "flex") {
+		t.Error("expected flex class")
+	}
+	if !strings.Contains(output, "gap-6") {
+		t.Error("expected gap-6 class for lg gap")
+	}
+}
+
+func TestRow(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := Row(WithGap("sm")).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	if !strings.Contains(output, "flex-row") {
+		t.Error("expected flex-row class")
+	}
+	if !strings.Contains(output, "gap-2") {
+		t.Error("expected gap-2 class for sm gap")
+	}
 }

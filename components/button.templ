@@ -1,0 +1,111 @@
+package components
+
+import "github.com/s00500/chimp/icon/base"
+
+// Button renders a button with configurable variants and Datastar integration.
+//
+// Example:
+//
+//	@Button("Save", WithVariant(VariantPrimary), WithButtonOn("click", "@post('/save')"))
+//	@Button("Delete", WithVariant(VariantDestructive), WithLoading("$deleting"))
+templ Button(text string, options ...ButtonOption) {
+	{{ config := ApplyButtonOptions(options) }}
+	<button
+		type={ config.Type }
+		class={ buttonClass(config) }
+		if config.Disabled {
+			disabled
+		}
+		{ config.ButtonAttrs()... }
+	>
+		if config.Loading != "" {
+			<span data-show={ config.Loading } class="animate-spin mr-2">
+				<svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+					<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+				</svg>
+			</span>
+		}
+		{ text }
+		{ children... }
+	</button>
+}
+
+// ButtonIcon renders an icon-only button.
+//
+// Example:
+//
+//	@ButtonIcon(icon.Trash, WithVariant(VariantGhost), WithButtonOn("click", "$confirmDelete()"))
+templ ButtonIcon(icon base.IconBase, options ...ButtonOption) {
+	{{ config := ApplyButtonOptions(options) }}
+	<button
+		type={ config.Type }
+		class={ iconButtonClass(config) }
+		if config.Disabled {
+			disabled
+		}
+		{ config.ButtonAttrs()... }
+	>
+		if config.Loading != "" {
+			<span data-show={ config.Loading }>
+				<svg class="h-4 w-4 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+					<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+					<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+				</svg>
+			</span>
+			<span data-show={ "!(" + config.Loading + ")" }>
+				@templ.Raw(icon)
+			</span>
+		} else {
+			@templ.Raw(icon)
+		}
+	</button>
+}
+
+// buttonClass generates the CSS classes for a button
+func buttonClass(config *ButtonConfig) string {
+	class := "btn"
+
+	switch config.Variant {
+	case VariantPrimary:
+		class += " btn-primary"
+	case VariantSecondary:
+		class += " btn-secondary"
+	case VariantOutline:
+		class += " btn-outline"
+	case VariantGhost:
+		class += " btn-ghost"
+	case VariantDestructive:
+		class += " btn-destructive"
+	}
+
+	if config.Class != "" {
+		class += " " + config.Class
+	}
+
+	return class
+}
+
+// iconButtonClass generates the CSS classes for an icon button
+func iconButtonClass(config *ButtonConfig) string {
+	class := "btn-icon"
+
+	switch config.Variant {
+	case VariantPrimary:
+		class += " btn-primary"
+	case VariantSecondary:
+		class += " btn-secondary"
+	case VariantOutline:
+		class += " btn-outline"
+	case VariantGhost:
+		class += " btn-ghost"
+	case VariantDestructive:
+		class += " btn-destructive"
+	}
+
+	if config.Class != "" {
+		class += " " + config.Class
+	}
+
+	return class
+}
