@@ -24,7 +24,7 @@ import "fmt"
 //	    "open": len(customers) > 0,
 //	})
 templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
-	{{ config := ApplyAutocompleteOptions(options) }}
+	{{ config := applyAutocompleteOptions(options) }}
 	{{ signalName := name + "_ac" }}
 	{{ debounceMs := strconv.Itoa(config.Debounce) }}
 	{{ searchExpr := fmt.Sprintf("$%s.search.length >= %d", signalName, config.MinChars) }}

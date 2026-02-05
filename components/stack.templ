@@ -10,7 +10,7 @@ package components
 //	    @Button("Submit", WithButtonType("submit"))
 //	}
 templ Stack(options ...StackOption) {
-	{{ config := ApplyStackOptions(options) }}
+	{{ config := applyStackOptions(options) }}
 	<div class={ stackClass(config) }>
 		{ children... }
 	</div>
@@ -66,7 +66,7 @@ func stackClass(config *StackConfig) string {
 //	    }
 //	}
 templ FormGroup(options ...FormGroupOption) {
-	{{ config := ApplyFormGroupOptions(options) }}
+	{{ config := applyFormGroupOptions(options) }}
 	<form
 		class={ config.Class }
 		if config.OnSubmit != "" {
@@ -88,7 +88,7 @@ templ FormGroup(options ...FormGroupOption) {
 //	}
 templ Row(options ...StackOption) {
 	{{ options = append([]StackOption{WithDirection("row")}, options...) }}
-	{{ config := ApplyStackOptions(options) }}
+	{{ config := applyStackOptions(options) }}
 	<div class={ stackClass(config) }>
 		{ children... }
 	</div>

@@ -9,7 +9,7 @@ import "github.com/s00500/chimp/icon/base"
 //	@Button("Save", WithVariant(VariantPrimary), WithButtonOn("click", "@post('/save')"))
 //	@Button("Delete", WithVariant(VariantDestructive), WithLoading("$deleting"))
 templ Button(text string, options ...ButtonOption) {
-	{{ config := ApplyButtonOptions(options) }}
+	{{ config := applyButtonOptions(options) }}
 	<button
 		type={ config.Type }
 		class={ buttonClass(config) }
@@ -37,7 +37,7 @@ templ Button(text string, options ...ButtonOption) {
 //
 //	@ButtonIcon(icon.Trash, WithVariant(VariantGhost), WithButtonOn("click", "$confirmDelete()"))
 templ ButtonIcon(icon base.IconBase, options ...ButtonOption) {
-	{{ config := ApplyButtonOptions(options) }}
+	{{ config := applyButtonOptions(options) }}
 	<button
 		type={ config.Type }
 		class={ iconButtonClass(config) }

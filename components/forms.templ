@@ -15,7 +15,7 @@ import "strconv"
 //	    WithError("$errors.email"),
 //	)
 templ FormInput(label, name string, options ...FormOption) {
-	{{ config := ApplyFormOptions(options) }}
+	{{ config := applyFormOptions(options) }}
 	<div class="field grid gap-2 flex-1">
 		<label class="label" for={ name }>{ label }</label>
 		<input
@@ -74,7 +74,7 @@ templ FormInput(label, name string, options ...FormOption) {
 //	    WithPlaceholder("Tell us about yourself..."),
 //	)
 templ FormTextarea(label, name string, options ...FormOption) {
-	{{ config := ApplyFormOptions(options) }}
+	{{ config := applyFormOptions(options) }}
 	<div class="field grid gap-2 flex-1">
 		<label class="label" for={ name }>{ label }</label>
 		<textarea
@@ -126,7 +126,7 @@ templ FormTextarea(label, name string, options ...FormOption) {
 //	    WithEmptyOption("Select a country"),
 //	)
 templ FormSelect(label, name string, options ...FormOption) {
-	{{ config := ApplyFormOptions(options) }}
+	{{ config := applyFormOptions(options) }}
 	<div class="field grid gap-2 flex-1">
 		<label class="label" for={ name }>{ label }</label>
 		<select
@@ -168,7 +168,7 @@ templ FormSelect(label, name string, options ...FormOption) {
 //
 //	@FormCheckbox("Accept terms", "terms", WithModel("form.acceptTerms"))
 templ FormCheckbox(label, name string, options ...FormOption) {
-	{{ config := ApplyFormOptions(options) }}
+	{{ config := applyFormOptions(options) }}
 	<div class="field">
 		<label class="checkbox">
 			<input
@@ -197,7 +197,7 @@ templ FormCheckbox(label, name string, options ...FormOption) {
 //
 //	@FormSwitch("Notifications", "notifications", WithModel("form.notifications"))
 templ FormSwitch(label, name string, options ...FormOption) {
-	{{ config := ApplyFormOptions(options) }}
+	{{ config := applyFormOptions(options) }}
 	<div class="field">
 		<label class="switch">
 			<input
@@ -233,7 +233,7 @@ templ FormSwitch(label, name string, options ...FormOption) {
 //	    }),
 //	)
 templ FormRadioGroup(label, name string, options ...FormOption) {
-	{{ config := ApplyFormOptions(options) }}
+	{{ config := applyFormOptions(options) }}
 	<fieldset class="field grid gap-2 flex-1">
 		<legend class="label">{ label }</legend>
 		<div class="space-y-2">

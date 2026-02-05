@@ -304,7 +304,7 @@ func WithShow(expr string) FormOption {
 }
 
 // ApplyOptions applies all options to a FormConfig and returns it
-func ApplyFormOptions(options []FormOption) *FormConfig {
+func applyFormOptions(options []FormOption) *FormConfig {
 	config := &FormConfig{
 		Type: "text", // default type
 		Rows: 3,      // default textarea rows
@@ -429,8 +429,8 @@ func WithButtonBind(attr, expr string) ButtonOption {
 	}
 }
 
-// ApplyButtonOptions applies all options to a ButtonConfig and returns it
-func ApplyButtonOptions(options []ButtonOption) *ButtonConfig {
+// applyButtonOptions applies all options to a ButtonConfig and returns it
+func applyButtonOptions(options []ButtonOption) *ButtonConfig {
 	config := &ButtonConfig{
 		Variant: VariantPrimary,
 		Type:    "button",
@@ -546,8 +546,8 @@ func WithAutocompleteError(expr string) AutocompleteOption {
 	}
 }
 
-// ApplyAutocompleteOptions applies all options and returns config
-func ApplyAutocompleteOptions(options []AutocompleteOption) *AutocompleteConfig {
+// applyAutocompleteOptions applies all options and returns config
+func applyAutocompleteOptions(options []AutocompleteOption) *AutocompleteConfig {
 	config := &AutocompleteConfig{
 		DisplayField: "name",
 		ValueField:   "id",
@@ -620,8 +620,8 @@ func WithRowActions(fn func(rowIndex int) templ.Component) DataTableOption {
 	}
 }
 
-// ApplyDataTableOptions applies all options and returns config
-func ApplyDataTableOptions(options []DataTableOption) *DataTableConfig {
+// applyDataTableOptions applies all options and returns config
+func applyDataTableOptions(options []DataTableOption) *DataTableConfig {
 	config := &DataTableConfig{
 		PageSize: 25,
 		Sortable: true,
@@ -663,8 +663,8 @@ func WithStackClass(class string) StackOption {
 	}
 }
 
-// ApplyStackOptions applies all options and returns config
-func ApplyStackOptions(options []StackOption) *StackConfig {
+// applyStackOptions applies all options and returns config
+func applyStackOptions(options []StackOption) *StackConfig {
 	config := &StackConfig{
 		Gap:       "md",
 		Direction: "col",
@@ -708,8 +708,8 @@ func WithFormSignals(signals map[string]string) FormGroupOption {
 	}
 }
 
-// ApplyFormGroupOptions applies all options and returns config
-func ApplyFormGroupOptions(options []FormGroupOption) *FormGroupConfig {
+// applyFormGroupOptions applies all options and returns config
+func applyFormGroupOptions(options []FormGroupOption) *FormGroupConfig {
 	config := &FormGroupConfig{}
 	for _, opt := range options {
 		opt(config)
@@ -719,6 +719,7 @@ func ApplyFormGroupOptions(options []FormGroupOption) *FormGroupConfig {
 
 // CardConfig holds configuration for card components
 type CardConfig struct {
+	ID      string // optional id attribute
 	Title   string // optional title for card header
 	Padding string // padding size: none, sm, md (default), lg
 	Class   string // additional classes
@@ -726,6 +727,13 @@ type CardConfig struct {
 
 // CardOption is a function that modifies CardConfig
 type CardOption func(*CardConfig)
+
+// WithID sets the id attribute for card
+func WithID(id string) CardOption {
+	return func(c *CardConfig) {
+		c.ID = id
+	}
+}
 
 // WithCardTitle sets the card title (renders a header)
 func WithCardTitle(title string) CardOption {
@@ -748,8 +756,8 @@ func WithCardClass(class string) CardOption {
 	}
 }
 
-// ApplyCardOptions applies all options and returns config
-func ApplyCardOptions(options []CardOption) *CardConfig {
+// applyCardOptions applies all options and returns config
+func applyCardOptions(options []CardOption) *CardConfig {
 	config := &CardConfig{
 		Padding: "md",
 	}
@@ -761,6 +769,7 @@ func ApplyCardOptions(options []CardOption) *CardConfig {
 
 // SectionConfig holds configuration for section components
 type SectionConfig struct {
+	ID      string // optional id attribute
 	Title   string // optional title for section header
 	Padding string // padding size: none, sm, md (default), lg
 	Class   string // additional classes
@@ -768,6 +777,13 @@ type SectionConfig struct {
 
 // SectionOption is a function that modifies SectionConfig
 type SectionOption func(*SectionConfig)
+
+// WithSectionID sets the id attribute for section
+func WithSectionID(id string) SectionOption {
+	return func(c *SectionConfig) {
+		c.ID = id
+	}
+}
 
 // WithSectionTitle sets the section title (renders a header)
 func WithSectionTitle(title string) SectionOption {
@@ -790,8 +806,8 @@ func WithSectionClass(class string) SectionOption {
 	}
 }
 
-// ApplySectionOptions applies all options and returns config
-func ApplySectionOptions(options []SectionOption) *SectionConfig {
+// applySectionOptions applies all options and returns config
+func applySectionOptions(options []SectionOption) *SectionConfig {
 	config := &SectionConfig{
 		Padding: "md",
 	}

@@ -8,8 +8,13 @@ package components
 //	    @FormInput("Name", "name", WithModel("form.name"))
 //	}
 templ Card(options ...CardOption) {
-	{{ config := ApplyCardOptions(options) }}
-	<div class={ "card", config.Class }>
+	{{ config := applyCardOptions(options) }}
+	<div
+		class={ "card", config.Class }
+		if config.ID != "" {
+			id={ config.ID }
+		}
+	>
 		if config.Title != "" {
 			<header class="flex items-center justify-between pb-4">
 				<h2>{ config.Title }</h2>
@@ -66,8 +71,13 @@ templ CardContent() {
 //	    }
 //	}
 templ Section(options ...SectionOption) {
-	{{ config := ApplySectionOptions(options) }}
-	<section class={ "w-full rounded-lg border scroll-mt-14", config.Class }>
+	{{ config := applySectionOptions(options) }}
+	<section
+		class={ "w-full rounded-lg border scroll-mt-14", config.Class }
+		if config.ID != "" {
+			id={ config.ID }
+		}
+	>
 		if config.Title != "" {
 			<header class="border-b px-4 py-3 flex items-center justify-between">
 				<h2 class="font-medium">{ config.Title }</h2>

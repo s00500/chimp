@@ -28,7 +28,7 @@ import "fmt"
 //	    "loading": false,
 //	})
 templ DataTable(id string, options ...DataTableOption) {
-	{{ config := ApplyDataTableOptions(options) }}
+	{{ config := applyDataTableOptions(options) }}
 	{{ prefix := id }}
 	{{ if config.SignalPrefix != "" { prefix = config.SignalPrefix } }}
 	{{ pageSize := strconv.Itoa(config.PageSize) }}
