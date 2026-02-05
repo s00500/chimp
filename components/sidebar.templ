@@ -1,7 +1,6 @@
 package components
 
 import (
-	"strings"
 	"github.com/s00500/chimp/icon/base"
 )
 
@@ -147,7 +146,7 @@ templ SimpleSidebarLayout(title string, items []SidebarItem, config SidebarConfi
 // sidebarMain provides the main content area for sidebar layouts
 templ sidebarMain() {
 	<main class="min-h-screen">
-		<header class="sticky top-0 z-10 flex h-14 items-center gap-4 border-b bg-background px-4">
+		<header class="sticky top-0 z-10 flex flex-wrap h-auto min-h-14 items-center gap-4 border-b bg-background px-4 py-2">
 			<button
 				type="button"
 				class="btn-ghost btn-icon"
@@ -236,43 +235,92 @@ templ cardSidebar(title string, items []SidebarItem, render func(item SidebarIte
 	</section>
 }
 
-// renderMobileItemFlattened recursively renders sidebar items as flat select options with indentation
-templ renderMobileItemFlattened(item SidebarItem, level int) {
-	if !item.IsSpacer {
-		if item.IsTitle {
-			<option disabled>
-				{ strings.Repeat("　", level) }— { item.Label } —
-			</option>
-		} else if item.Href != "" {
-			<option
-				value={ item.Href }
-				if item.Current {
-					selected
-				}
-			>
-				{ strings.Repeat("　", level) }{ item.Label }
-			</option>
-		}
-		for _, child := range item.Children {
-			@renderMobileItemFlattened(child, level+1)
-		}
+// renderMobileDropdownItem recursively renders sidebar items as dropdown menu items
+templ renderMobileDropdownItem(item SidebarItem, level int) {
+	if item.IsSpacer {
+		<hr role="separator"/>
+	} else if item.IsTitle {
+		<div role="heading" class="px-2 py-1.5 text-sm font-medium text-muted-foreground">
+			{ item.Label }
+		</div>
+	} else if len(item.Children) == 0 {
+		// Leaf item - render as menu item link
+		<a
+			href={ templ.SafeURL(item.Href) }
+			role="menuitem"
+			class={ templ.KV("bg-accent", item.Current), templ.KV("pl-6", level > 0) }
+		>
+			if item.Icon != "" {
+				@templ.Raw(item.Icon)
+			}
+			{ item.Label }
+		</a>
+	}
+	for _, child := range item.Children {
+		@renderMobileDropdownItem(child, level+1)
 	}
 }
 
-// mobileNavDropdown renders a native select navigation for mobile view
-// Spacers are skipped in the dropdown since they don't translate to select elements
+// mobileNavDropdown renders a BaseCoat dropdown menu navigation for mobile view
 templ mobileNavDropdown(items []SidebarItem, render func(item SidebarItem) templ.Component) {
-	<select class="select w-full h-12 text-base py-3" onchange="window.location.href = this.value">
-		if render != nil {
-			for _, item := range items {
-				@render(item)
-			}
-		} else {
-			for _, item := range items {
-				@renderMobileItemFlattened(item, 0)
-			}
+	{{ currentItem := getCurrentItem(items) }}
+	<div class="dropdown-menu w-full">
+		<button
+			type="button"
+			id="mobile-nav-trigger"
+			aria-haspopup="menu"
+			aria-controls="mobile-nav-menu"
+			aria-expanded="false"
+			class="btn-outline w-full h-12 text-base py-3 justify-between"
+		>
+			<span class="flex items-center gap-2">
+				if currentItem.Icon != "" {
+					@templ.Raw(currentItem.Icon)
+				}
+				{ currentItem.Label }
+			</span>
+			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="opacity-50"><path d="m6 9 6 6 6-6"></path></svg>
+		</button>
+		<div id="mobile-nav-popover" data-popover aria-hidden="true" class="min-w-56 max-h-80 overflow-y-auto">
+			<div role="menu" id="mobile-nav-menu" aria-labelledby="mobile-nav-trigger">
+				if render != nil {
+					for _, item := range items {
+						@render(item)
+					}
+				} else {
+					for _, item := range items {
+						@renderMobileDropdownItem(item, 0)
+					}
+				}
+			</div>
+		</div>
+	</div>
+}
+
+// MobileDropdownMenuItem renders a single menu item for use in custom ItemRendererMobile callbacks
+templ MobileDropdownMenuItem(item SidebarItem) {
+	<a
+		href={ templ.SafeURL(item.Href) }
+		role="menuitem"
+		class={ templ.KV("bg-accent", item.Current) }
+	>
+		if item.Icon != "" {
+			@templ.Raw(item.Icon)
 		}
-	</select>
+		{ item.Label }
+	</a>
+}
+
+// MobileDropdownSeparator renders a separator line in the dropdown menu
+templ MobileDropdownSeparator() {
+	<hr role="separator"/>
+}
+
+// MobileDropdownHeading renders a non-clickable heading in the dropdown menu
+templ MobileDropdownHeading(label string) {
+	<div role="heading" class="px-2 py-1.5 text-sm font-medium text-muted-foreground">
+		{ label }
+	</div>
 }
 
 // SectionSidebarLayout provides a section-based sidebar layout using bordered sections instead of cards
