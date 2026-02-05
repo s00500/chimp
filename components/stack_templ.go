@@ -111,18 +111,18 @@ func stackClass(config *StackConfig) string {
 	return class
 }
 
-// FormGroup renders a form wrapper with optional Datastar submit handling.
+// Form renders a form wrapper with optional Datastar submit handling.
 //
 // Example:
 //
-//	@FormGroup(WithFormSubmit("@post('/api/save')")) {
+//	@Form(WithFormSubmit("@post('/api/save')")) {
 //	    @Stack {
 //	        @FormInput("Name", "name", WithModel("form.name"))
 //	        @FormInput("Email", "email", WithModel("form.email"))
 //	        @Button("Submit", WithButtonType("submit"))
 //	    }
 //	}
-func FormGroup(options ...FormGroupOption) templ.Component {
+func Form(options ...FormGroupOption) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -144,7 +144,7 @@ func FormGroup(options ...FormGroupOption) templ.Component {
 		}
 		ctx = templ.ClearChildren(ctx)
 		config := applyFormGroupOptions(options)
-		var templ_7745c5c3_Var5 = []any{config.Class}
+		var templ_7745c5c3_Var5 = []any{formClass(config)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var5...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
@@ -203,6 +203,15 @@ func FormGroup(options ...FormGroupOption) templ.Component {
 		}
 		return nil
 	})
+}
+
+// formClass generates the CSS classes for a form component
+func formClass(config *FormGroupConfig) string {
+	class := "form"
+	if config.Class != "" {
+		class += " " + config.Class
+	}
+	return class
 }
 
 // Row is a convenience wrapper for Stack with horizontal direction.

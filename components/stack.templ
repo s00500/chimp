@@ -54,21 +54,21 @@ func stackClass(config *StackConfig) string {
 	return class
 }
 
-// FormGroup renders a form wrapper with optional Datastar submit handling.
+// Form renders a form wrapper with optional Datastar submit handling.
 //
 // Example:
 //
-//	@FormGroup(WithFormSubmit("@post('/api/save')")) {
+//	@Form(WithFormSubmit("@post('/api/save')")) {
 //	    @Stack {
 //	        @FormInput("Name", "name", WithModel("form.name"))
 //	        @FormInput("Email", "email", WithModel("form.email"))
 //	        @Button("Submit", WithButtonType("submit"))
 //	    }
 //	}
-templ FormGroup(options ...FormGroupOption) {
+templ Form(options ...FormGroupOption) {
 	{{ config := applyFormGroupOptions(options) }}
 	<form
-		class={ config.Class }
+		class={ formClass(config) }
 		if config.OnSubmit != "" {
 			data-on:submit__prevent={ config.OnSubmit }
 		}
@@ -76,6 +76,15 @@ templ FormGroup(options ...FormGroupOption) {
 	>
 		{ children... }
 	</form>
+}
+
+// formClass generates the CSS classes for a form component
+func formClass(config *FormGroupConfig) string {
+	class := "form"
+	if config.Class != "" {
+		class += " " + config.Class
+	}
+	return class
 }
 
 // Row is a convenience wrapper for Stack with horizontal direction.
