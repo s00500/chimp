@@ -1,10 +1,15 @@
 package components
 
 import (
+	"fmt"
+	"github.com/s00500/chimp/icon"
 	"github.com/s00500/chimp/icon/base"
 )
 
 var CacheBust = false
+
+// ChevronIcon is the icon used for expandable menu items (MdiChevronDown)
+var ChevronIcon base.IconBase = `<path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />`
 
 // SidebarItem represents a navigation item in the sidebar
 type SidebarItem struct {
@@ -50,6 +55,26 @@ func hasCurrentChild(items []SidebarItem) bool {
 	return false
 }
 
+// indentStyle returns inline style for indentation based on depth
+func indentStyle(depth int) string {
+	if depth > 0 {
+		return fmt.Sprintf("margin-left: %dpx", depth*16)
+	}
+	return ""
+}
+
+// sidebarStyles renders CSS for sidebar chevron animations (include once per page)
+templ sidebarStyles() {
+	<style>
+		details > summary .chevron-icon {
+			transform: rotate(-90deg);
+		}
+		details[open] > summary .chevron-icon {
+			transform: rotate(0deg);
+		}
+	</style>
+}
+
 // renderSidebarItemRecursive renders a sidebar item and its children recursively
 templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 	if item.IsSpacer {
@@ -58,7 +83,11 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 		</li>
 	} else if item.IsTitle {
 		<li class="pt-4 first:pt-0">
-			<div>
+			<div
+				if depth > 0 {
+					style={ indentStyle(depth) }
+				}
+			>
 				<h3 class="text-lg font-bold">
 					if item.Icon != "" {
 						@templ.Raw(item.Icon)
@@ -69,15 +98,22 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 		</li>
 	} else if len(item.Children) > 0 {
 		// Collapsible item with children
-		<li>
+		<li
+			if depth > 0 {
+				style={ indentStyle(depth) }
+			}
+		>
 			<details open?={ item.DefaultOpen || hasCurrentChild(item.Children) }>
 				<summary
-					class={ templ.KV("font-medium", hasCurrentChild(item.Children)) }
+					class={ "flex items-center justify-between", templ.KV("font-medium", hasCurrentChild(item.Children)) }
 				>
-					if item.Icon != "" {
-						@templ.Raw(item.Icon)
-					}
-					<span>{ item.Label }</span>
+					<span class="flex items-center gap-2">
+						if item.Icon != "" {
+							@templ.Raw(item.Icon)
+						}
+						{ item.Label }
+					</span>
+					@icon.Icon(ChevronIcon, "size-4 transition-transform duration-200 chevron-icon", icon.WithFill("currentColor"), icon.WithStroke("none"))
 				</summary>
 				<ul>
 					for _, child := range item.Children {
@@ -88,7 +124,11 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 		</li>
 	} else {
 		// Regular item without children
-		<li>
+		<li
+			if depth > 0 {
+				style={ indentStyle(depth) }
+			}
+		>
 			<a
 				href={ templ.SafeURL(item.Href) }
 				if item.Current {
@@ -107,6 +147,7 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 // SimpleSidebarLayout provides a simpler sidebar layout without groups
 templ SimpleSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
 	@BaseHTML(title, CacheBust) {
+		@sidebarStyles()
 		<aside class="sidebar" data-side="left" aria-hidden="false">
 			<nav aria-label="Sidebar navigation">
 				<header>
@@ -172,6 +213,7 @@ type SidebarConfig struct {
 // CardSidebarLayout provides a card-based sidebar layout with mobile dropdown support
 templ CardSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
 	@BaseHTML(title, CacheBust) {
+		@sidebarStyles()
 		<main>
 			<div class="flex flex-col md:flex-row justify-center gap-5 p-2 md:p-5  md:h-screen">
 				@templ.Fragment("Sidebar") {
@@ -240,7 +282,13 @@ templ renderMobileDropdownItem(item SidebarItem, level int) {
 	if item.IsSpacer {
 		<hr role="separator"/>
 	} else if item.IsTitle {
-		<div role="heading" class="px-2 py-1.5 text-sm font-medium text-muted-foreground">
+		<div
+			role="heading"
+			class="px-2 py-1.5 text-sm font-medium text-muted-foreground"
+			if level > 0 {
+				style={ indentStyle(level) }
+			}
+		>
 			{ item.Label }
 		</div>
 	} else if len(item.Children) == 0 {
@@ -248,7 +296,10 @@ templ renderMobileDropdownItem(item SidebarItem, level int) {
 		<a
 			href={ templ.SafeURL(item.Href) }
 			role="menuitem"
-			class={ templ.KV("bg-accent", item.Current), templ.KV("pl-6", level > 0) }
+			class={ templ.KV("bg-accent", item.Current) }
+			if level > 0 {
+				style={ indentStyle(level) }
+			}
 		>
 			if item.Icon != "" {
 				@templ.Raw(item.Icon)
@@ -326,6 +377,7 @@ templ MobileDropdownHeading(label string) {
 // SectionSidebarLayout provides a section-based sidebar layout using bordered sections instead of cards
 templ SectionSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
 	@BaseHTML(title, CacheBust) {
+		@sidebarStyles()
 		<main>
 			<div class="flex flex-col md:flex-row justify-center gap-5 p-5 md:p-5 md:h-screen">
 				@templ.Fragment("Sidebar") {
