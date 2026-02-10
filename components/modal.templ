@@ -34,15 +34,17 @@ func WithOnConfirm(action string) ModalOption {
 
 // Modal returns a extensible Modal based on Basecoat
 templ ConfirmModal(text string, options ...ModalOption) {
-	{{config := &ModalConfig{
-	HeaderText:        "Confirm",
-	ConfirmButtonText: "Confirm",
-	OnConfirm:         "",
-}
+	{{
+		config := &ModalConfig{
+			HeaderText:        "Confirm",
+			ConfirmButtonText: "Confirm",
+			OnConfirm:         "",
+		}
 	}}
-	{{for _, option := range options {
-	option(config)
-}
+	{{
+		for _, option := range options {
+			option(config)
+		}
 	}}
 	<div
 		id="global-basecoat-modal"
@@ -60,7 +62,12 @@ templ ConfirmModal(text string, options ...ModalOption) {
 					</section>
 					<footer>
 						<button class="btn" data-on:click__viewtransition="$modalOpen = false">Cancel</button>
-						<button class="btn" data-on:click={ config.OnConfirm }>{ config.ConfirmButtonText }</button>
+						<button
+							class="btn"
+							if config.OnConfirm != "" {
+								data-on:click={ config.OnConfirm }
+							}
+						>{ config.ConfirmButtonText }</button>
 					</footer>
 				</article>
 			</dialog>
