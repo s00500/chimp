@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/starfederation/datastar-go/datastar"
 )
@@ -36,39 +37,39 @@ func (a Action) String() string {
 // SSE Request Builders (wraps datastar helpers with Action type)
 // ============================================================================
 
-// Get creates a GET SSE request action.
-// Example: Get("/api/users") -> @get('/api/users')
-func Get(urlFormat string, args ...any) Action {
+// GetSSE creates a GET SSE request action.
+// Example: GetSSE("/api/users") -> @get('/api/users')
+func GetSSE(urlFormat string, args ...any) Action {
 	return Action{action: datastar.GetSSE(urlFormat, args...)}
 }
 
-// Post creates a POST SSE request action.
-// Example: Post("/api/users") -> @post('/api/users')
-func Post(urlFormat string, args ...any) Action {
+// PostSSE creates a POST SSE request action.
+// Example: PostSSE("/api/users") -> @post('/api/users')
+func PostSSE(urlFormat string, args ...any) Action {
 	return Action{action: datastar.PostSSE(urlFormat, args...)}
 }
 
-// Put creates a PUT SSE request action.
-// Example: Put("/api/users/%d", id) -> @put('/api/users/123')
-func Put(urlFormat string, args ...any) Action {
+// PutSSE creates a PUT SSE request action.
+// Example: PutSSE("/api/users/%d", id) -> @put('/api/users/123')
+func PutSSE(urlFormat string, args ...any) Action {
 	return Action{action: datastar.PutSSE(urlFormat, args...)}
 }
 
-// Patch creates a PATCH SSE request action.
-// Example: Patch("/api/users/%d", id) -> @patch('/api/users/123')
-func Patch(urlFormat string, args ...any) Action {
+// PatchSSE creates a PATCH SSE request action.
+// Example: PatchSSE("/api/users/%d", id) -> @patch('/api/users/123')
+func PatchSSE(urlFormat string, args ...any) Action {
 	return Action{action: datastar.PatchSSE(urlFormat, args...)}
 }
 
-// Delete creates a DELETE SSE request action.
-// Example: Delete("/api/users/%d", id) -> @delete('/api/users/123')
-func Delete(urlFormat string, args ...any) Action {
+// DeleteSSE creates a DELETE SSE request action.
+// Example: DeleteSSE("/api/users/%d", id) -> @delete('/api/users/123')
+func DeleteSSE(urlFormat string, args ...any) Action {
 	return Action{action: datastar.DeleteSSE(urlFormat, args...)}
 }
 
-// Raw creates an action from a raw action string.
-// Example: Raw("$count++") -> $count++
-func Raw(action string) Action {
+// RawAction creates an action from a raw action string.
+// Example: RawAction("$count++") -> $count++
+func RawAction(action string) Action {
 	return Action{action: action}
 }
 
@@ -190,4 +191,154 @@ func Chain(actions ...Action) Action {
 		result = result.Then(next)
 	}
 	return result
+}
+
+// ============================================================================
+// Key Types and Constants
+// ============================================================================
+
+// Key represents a keyboard key for use with OnKeydownKey/OnKeyupKey.
+type Key struct {
+	name      string
+	modifiers []string
+}
+
+// String returns the key as a dot-separated modifier string for Datastar.
+// Example: KeyEnter.Ctrl() -> "ctrl.enter"
+func (k Key) String() string {
+	if len(k.modifiers) == 0 {
+		return k.name
+	}
+	var sb strings.Builder
+	for _, mod := range k.modifiers {
+		sb.WriteString(mod)
+		sb.WriteByte('.')
+	}
+	sb.WriteString(k.name)
+	return sb.String()
+}
+
+// Ctrl adds the Ctrl modifier to the key.
+// Example: KeyS.Ctrl() -> Ctrl+S
+func (k Key) Ctrl() Key {
+	return Key{name: k.name, modifiers: append(k.modifiers, "ctrl")}
+}
+
+// Alt adds the Alt modifier to the key.
+// Example: KeyEnter.Alt() -> Alt+Enter
+func (k Key) Alt() Key {
+	return Key{name: k.name, modifiers: append(k.modifiers, "alt")}
+}
+
+// Shift adds the Shift modifier to the key.
+// Example: KeyTab.Shift() -> Shift+Tab
+func (k Key) Shift() Key {
+	return Key{name: k.name, modifiers: append(k.modifiers, "shift")}
+}
+
+// Meta adds the Meta (Cmd on Mac, Win on Windows) modifier to the key.
+// Example: KeyS.Meta() -> Cmd+S / Win+S
+func (k Key) Meta() Key {
+	return Key{name: k.name, modifiers: append(k.modifiers, "meta")}
+}
+
+// CtrlOrMeta adds ctrl on non-Mac and meta on Mac (common for cross-platform shortcuts).
+// Example: KeyS.CtrlOrMeta() -> Ctrl+S on Windows/Linux, Cmd+S on Mac
+func (k Key) CtrlOrMeta() Key {
+	return Key{name: k.name, modifiers: append(k.modifiers, "ctrlormeta")}
+}
+
+// Common key constants
+var (
+	// Navigation keys
+	KeyEnter     = Key{name: "enter"}
+	KeyEscape    = Key{name: "escape"}
+	KeyTab       = Key{name: "tab"}
+	KeyBackspace = Key{name: "backspace"}
+	KeyDelete    = Key{name: "delete"}
+	KeySpace     = Key{name: "space"}
+
+	// Arrow keys
+	KeyArrowUp    = Key{name: "arrowup"}
+	KeyArrowDown  = Key{name: "arrowdown"}
+	KeyArrowLeft  = Key{name: "arrowleft"}
+	KeyArrowRight = Key{name: "arrowright"}
+
+	// Function keys
+	KeyF1  = Key{name: "f1"}
+	KeyF2  = Key{name: "f2"}
+	KeyF3  = Key{name: "f3"}
+	KeyF4  = Key{name: "f4"}
+	KeyF5  = Key{name: "f5"}
+	KeyF6  = Key{name: "f6"}
+	KeyF7  = Key{name: "f7"}
+	KeyF8  = Key{name: "f8"}
+	KeyF9  = Key{name: "f9"}
+	KeyF10 = Key{name: "f10"}
+	KeyF11 = Key{name: "f11"}
+	KeyF12 = Key{name: "f12"}
+
+	// Common letter keys (for shortcuts)
+	KeyA = Key{name: "a"}
+	KeyB = Key{name: "b"}
+	KeyC = Key{name: "c"}
+	KeyD = Key{name: "d"}
+	KeyE = Key{name: "e"}
+	KeyF = Key{name: "f"}
+	KeyG = Key{name: "g"}
+	KeyH = Key{name: "h"}
+	KeyI = Key{name: "i"}
+	KeyJ = Key{name: "j"}
+	KeyK = Key{name: "k"}
+	KeyL = Key{name: "l"}
+	KeyM = Key{name: "m"}
+	KeyN = Key{name: "n"}
+	KeyO = Key{name: "o"}
+	KeyP = Key{name: "p"}
+	KeyQ = Key{name: "q"}
+	KeyR = Key{name: "r"}
+	KeyS = Key{name: "s"}
+	KeyT = Key{name: "t"}
+	KeyU = Key{name: "u"}
+	KeyV = Key{name: "v"}
+	KeyW = Key{name: "w"}
+	KeyX = Key{name: "x"}
+	KeyY = Key{name: "y"}
+	KeyZ = Key{name: "z"}
+
+	// Number keys
+	Key0 = Key{name: "0"}
+	Key1 = Key{name: "1"}
+	Key2 = Key{name: "2"}
+	Key3 = Key{name: "3"}
+	Key4 = Key{name: "4"}
+	Key5 = Key{name: "5"}
+	Key6 = Key{name: "6"}
+	Key7 = Key{name: "7"}
+	Key8 = Key{name: "8"}
+	Key9 = Key{name: "9"}
+
+	// Other common keys
+	KeyHome     = Key{name: "home"}
+	KeyEnd      = Key{name: "end"}
+	KeyPageUp   = Key{name: "pageup"}
+	KeyPageDown = Key{name: "pagedown"}
+	KeyInsert   = Key{name: "insert"}
+)
+
+// ============================================================================
+// Key-Specific Event Handlers
+// ============================================================================
+
+// OnKeydownKey creates a keydown handler that only fires for a specific key.
+// Example: OnKeydownKey(KeyEnter, Post("/api/submit"))
+// Example: OnKeydownKey(KeyS.Ctrl(), Post("/api/save"))
+func OnKeydownKey(key Key, action Action) onOption {
+	return onOption{event: "keydown." + key.String(), action: action.String()}
+}
+
+// OnKeyupKey creates a keyup handler that only fires for a specific key.
+// Example: OnKeyupKey(KeyEscape, Raw("$open = false"))
+func OnKeyupKey(key Key, action Action) onOption {
+	return onOption{event: "keyup." + key.String(), action: action.String()}
 }

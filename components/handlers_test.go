@@ -12,37 +12,37 @@ func TestAction_String(t *testing.T) {
 	}{
 		{
 			name:     "simple get",
-			action:   Get("/api/users"),
+			action:   GetSSE("/api/users"),
 			expected: "@get('/api/users')",
 		},
 		{
 			name:     "get with debounce",
-			action:   Get("/api/search").Debounce(300),
+			action:   GetSSE("/api/search").Debounce(300),
 			expected: "__debounce_300ms: @get('/api/search')",
 		},
 		{
 			name:     "post",
-			action:   Post("/api/users"),
+			action:   PostSSE("/api/users"),
 			expected: "@post('/api/users')",
 		},
 		{
 			name:     "put with format args",
-			action:   Put("/api/users/%d", 123),
+			action:   PutSSE("/api/users/%d", 123),
 			expected: "@put('/api/users/123')",
 		},
 		{
 			name:     "delete",
-			action:   Delete("/api/users/%d", 456),
+			action:   DeleteSSE("/api/users/%d", 456),
 			expected: "@delete('/api/users/456')",
 		},
 		{
 			name:     "raw action",
-			action:   Raw("$count++"),
+			action:   RawAction("$count++"),
 			expected: "$count++",
 		},
 		{
 			name:     "raw with debounce",
-			action:   Raw("$search = $evt.target.value").Debounce(150),
+			action:   RawAction("$search = $evt.target.value").Debounce(150),
 			expected: "__debounce_150ms: $search = $evt.target.value",
 		},
 	}
@@ -66,13 +66,13 @@ func TestWhen(t *testing.T) {
 		{
 			name:      "conditional get",
 			condition: "$search.length >= 2",
-			action:    Get("/api/search"),
+			action:    GetSSE("/api/search"),
 			expected:  "$search.length >= 2 && @get('/api/search')",
 		},
 		{
 			name:      "conditional with debounce",
 			condition: "$query !== ''",
-			action:    Get("/api/autocomplete").Debounce(300),
+			action:    GetSSE("/api/autocomplete").Debounce(300),
 			expected:  "__debounce_300ms: $query !== '' && @get('/api/autocomplete')",
 		},
 	}
@@ -95,17 +95,17 @@ func TestChain(t *testing.T) {
 	}{
 		{
 			name:     "two actions",
-			actions:  []Action{Raw("$loading = true"), Post("/api/save")},
+			actions:  []Action{RawAction("$loading = true"), PostSSE("/api/save")},
 			expected: "$loading = true; @post('/api/save')",
 		},
 		{
 			name:     "three actions",
-			actions:  []Action{Raw("$loading = true"), Post("/api/save"), Raw("$loading = false")},
+			actions:  []Action{RawAction("$loading = true"), PostSSE("/api/save"), RawAction("$loading = false")},
 			expected: "$loading = true; @post('/api/save'); $loading = false",
 		},
 		{
 			name:     "single action",
-			actions:  []Action{Get("/api/data")},
+			actions:  []Action{GetSSE("/api/data")},
 			expected: "@get('/api/data')",
 		},
 	}
@@ -121,7 +121,7 @@ func TestChain(t *testing.T) {
 }
 
 func TestThen(t *testing.T) {
-	action := Raw("$loading = true").Then(Post("/api/save")).Then(Raw("$loading = false"))
+	action := RawAction("$loading = true").Then(PostSSE("/api/save")).Then(RawAction("$loading = false"))
 	expected := "$loading = true; @post('/api/save'); $loading = false"
 
 	if got := action.String(); got != expected {
@@ -130,7 +130,7 @@ func TestThen(t *testing.T) {
 }
 
 func TestIfElse(t *testing.T) {
-	action := IfElse("$active", Raw("$active = false"), Raw("$active = true"))
+	action := IfElse("$active", RawAction("$active = false"), RawAction("$active = true"))
 	expected := "$active ? $active = false : $active = true"
 
 	if got := action.String(); got != expected {
@@ -147,37 +147,37 @@ func TestEventHandlers(t *testing.T) {
 	}{
 		{
 			name:   "OnClick",
-			option: OnClick(Post("/api/delete")),
+			option: OnClick(PostSSE("/api/delete")),
 			event:  "click",
 			action: "@post('/api/delete')",
 		},
 		{
 			name:   "OnChange",
-			option: OnChange(Get("/api/validate")),
+			option: OnChange(GetSSE("/api/validate")),
 			event:  "change",
 			action: "@get('/api/validate')",
 		},
 		{
 			name:   "OnInput with debounce",
-			option: OnInput(Get("/api/search").Debounce(300)),
+			option: OnInput(GetSSE("/api/search").Debounce(300)),
 			event:  "input",
 			action: "__debounce_300ms: @get('/api/search')",
 		},
 		{
 			name:   "OnSubmit",
-			option: OnSubmit(Post("/api/form")),
+			option: OnSubmit(PostSSE("/api/form")),
 			event:  "submit",
 			action: "@post('/api/form')",
 		},
 		{
 			name:   "OnLoad",
-			option: OnLoad(Get("/api/init")),
+			option: OnLoad(GetSSE("/api/init")),
 			event:  "load",
 			action: "@get('/api/init')",
 		},
 		{
 			name:   "OnBlur",
-			option: OnBlur(Get("/api/validate")),
+			option: OnBlur(GetSSE("/api/validate")),
 			event:  "blur",
 			action: "@get('/api/validate')",
 		},
@@ -192,5 +192,134 @@ func TestEventHandlers(t *testing.T) {
 				t.Errorf("action = %q, want %q", tt.option.action, tt.action)
 			}
 		})
+	}
+}
+
+func TestKeyString(t *testing.T) {
+	tests := []struct {
+		name     string
+		key      Key
+		expected string
+	}{
+		{
+			name:     "simple key",
+			key:      KeyEnter,
+			expected: "enter",
+		},
+		{
+			name:     "escape key",
+			key:      KeyEscape,
+			expected: "escape",
+		},
+		{
+			name:     "arrow key",
+			key:      KeyArrowDown,
+			expected: "arrowdown",
+		},
+		{
+			name:     "ctrl modifier",
+			key:      KeyS.Ctrl(),
+			expected: "ctrl.s",
+		},
+		{
+			name:     "alt modifier",
+			key:      KeyEnter.Alt(),
+			expected: "alt.enter",
+		},
+		{
+			name:     "shift modifier",
+			key:      KeyTab.Shift(),
+			expected: "shift.tab",
+		},
+		{
+			name:     "meta modifier",
+			key:      KeyS.Meta(),
+			expected: "meta.s",
+		},
+		{
+			name:     "ctrlormeta modifier",
+			key:      KeyS.CtrlOrMeta(),
+			expected: "ctrlormeta.s",
+		},
+		{
+			name:     "multiple modifiers",
+			key:      KeyS.Ctrl().Shift(),
+			expected: "ctrl.shift.s",
+		},
+		{
+			name:     "ctrl+alt+delete",
+			key:      KeyDelete.Ctrl().Alt(),
+			expected: "ctrl.alt.delete",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := tt.key.String(); got != tt.expected {
+				t.Errorf("Key.String() = %q, want %q", got, tt.expected)
+			}
+		})
+	}
+}
+
+func TestOnKeydownKey(t *testing.T) {
+	tests := []struct {
+		name   string
+		option onOption
+		event  string
+		action string
+	}{
+		{
+			name:   "enter key",
+			option: OnKeydownKey(KeyEnter, PostSSE("/api/submit")),
+			event:  "keydown.enter",
+			action: "@post('/api/submit')",
+		},
+		{
+			name:   "escape key",
+			option: OnKeydownKey(KeyEscape, RawAction("$open = false")),
+			event:  "keydown.escape",
+			action: "$open = false",
+		},
+		{
+			name:   "ctrl+s",
+			option: OnKeydownKey(KeyS.Ctrl(), PostSSE("/api/save")),
+			event:  "keydown.ctrl.s",
+			action: "@post('/api/save')",
+		},
+		{
+			name:   "ctrl+shift+s",
+			option: OnKeydownKey(KeyS.Ctrl().Shift(), PostSSE("/api/save-as")),
+			event:  "keydown.ctrl.shift.s",
+			action: "@post('/api/save-as')",
+		},
+		{
+			name:   "arrow navigation",
+			option: OnKeydownKey(KeyArrowDown, RawAction("$selectedIndex++")),
+			event:  "keydown.arrowdown",
+			action: "$selectedIndex++",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.option.event != tt.event {
+				t.Errorf("event = %q, want %q", tt.option.event, tt.event)
+			}
+			if tt.option.action != tt.action {
+				t.Errorf("action = %q, want %q", tt.option.action, tt.action)
+			}
+		})
+	}
+}
+
+func TestOnKeyupKey(t *testing.T) {
+	option := OnKeyupKey(KeyEscape, RawAction("$modal = false"))
+
+	if option.event != "keyup.escape" {
+		t.Errorf("event = %q, want %q", option.event, "keyup.escape")
+	}
+	if option.action != "$modal = false" {
+		t.Errorf("action = %q, want %q", option.action, "$modal = false")
 	}
 }
