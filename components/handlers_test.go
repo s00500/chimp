@@ -195,7 +195,7 @@ func TestEventHandlers(t *testing.T) {
 	}
 }
 
-func TestKeyString(t *testing.T) {
+func TestKeyCondition(t *testing.T) {
 	tests := []struct {
 		name     string
 		key      Key
@@ -204,59 +204,59 @@ func TestKeyString(t *testing.T) {
 		{
 			name:     "simple key",
 			key:      KeyEnter,
-			expected: "enter",
+			expected: "evt.key === 'Enter'",
 		},
 		{
 			name:     "escape key",
 			key:      KeyEscape,
-			expected: "escape",
+			expected: "evt.key === 'Escape'",
 		},
 		{
 			name:     "arrow key",
 			key:      KeyArrowDown,
-			expected: "arrowdown",
+			expected: "evt.key === 'ArrowDown'",
 		},
 		{
 			name:     "ctrl modifier",
 			key:      KeyS.Ctrl(),
-			expected: "ctrl.s",
+			expected: "evt.ctrlKey && evt.key === 's'",
 		},
 		{
 			name:     "alt modifier",
 			key:      KeyEnter.Alt(),
-			expected: "alt.enter",
+			expected: "evt.altKey && evt.key === 'Enter'",
 		},
 		{
 			name:     "shift modifier",
 			key:      KeyTab.Shift(),
-			expected: "shift.tab",
+			expected: "evt.shiftKey && evt.key === 'Tab'",
 		},
 		{
 			name:     "meta modifier",
 			key:      KeyS.Meta(),
-			expected: "meta.s",
+			expected: "evt.metaKey && evt.key === 's'",
 		},
 		{
-			name:     "ctrlormeta modifier",
-			key:      KeyS.CtrlOrMeta(),
-			expected: "ctrlormeta.s",
+			name:     "ctrlOrCmd modifier",
+			key:      KeyS.CtrlOrCmd(),
+			expected: "(evt.ctrlKey || evt.metaKey) && evt.key === 's'",
 		},
 		{
 			name:     "multiple modifiers",
 			key:      KeyS.Ctrl().Shift(),
-			expected: "ctrl.shift.s",
+			expected: "evt.ctrlKey && evt.shiftKey && evt.key === 's'",
 		},
 		{
 			name:     "ctrl+alt+delete",
 			key:      KeyDelete.Ctrl().Alt(),
-			expected: "ctrl.alt.delete",
+			expected: "evt.ctrlKey && evt.altKey && evt.key === 'Delete'",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.key.String(); got != tt.expected {
-				t.Errorf("Key.String() = %q, want %q", got, tt.expected)
+			if got := tt.key.Condition(); got != tt.expected {
+				t.Errorf("Key.Condition() = %q, want %q", got, tt.expected)
 			}
 		})
 	}
@@ -272,32 +272,32 @@ func TestOnKeydownKey(t *testing.T) {
 		{
 			name:   "enter key",
 			option: OnKeydownKey(KeyEnter, PostSSE("/api/submit")),
-			event:  "keydown.enter",
-			action: "@post('/api/submit')",
+			event:  "keydown",
+			action: "evt.key === 'Enter' && @post('/api/submit')",
 		},
 		{
 			name:   "escape key",
 			option: OnKeydownKey(KeyEscape, RawAction("$open = false")),
-			event:  "keydown.escape",
-			action: "$open = false",
+			event:  "keydown",
+			action: "evt.key === 'Escape' && $open = false",
 		},
 		{
 			name:   "ctrl+s",
 			option: OnKeydownKey(KeyS.Ctrl(), PostSSE("/api/save")),
-			event:  "keydown.ctrl.s",
-			action: "@post('/api/save')",
+			event:  "keydown",
+			action: "evt.ctrlKey && evt.key === 's' && @post('/api/save')",
 		},
 		{
 			name:   "ctrl+shift+s",
 			option: OnKeydownKey(KeyS.Ctrl().Shift(), PostSSE("/api/save-as")),
-			event:  "keydown.ctrl.shift.s",
-			action: "@post('/api/save-as')",
+			event:  "keydown",
+			action: "evt.ctrlKey && evt.shiftKey && evt.key === 's' && @post('/api/save-as')",
 		},
 		{
 			name:   "arrow navigation",
 			option: OnKeydownKey(KeyArrowDown, RawAction("$selectedIndex++")),
-			event:  "keydown.arrowdown",
-			action: "$selectedIndex++",
+			event:  "keydown",
+			action: "evt.key === 'ArrowDown' && $selectedIndex++",
 		},
 	}
 
@@ -316,10 +316,23 @@ func TestOnKeydownKey(t *testing.T) {
 func TestOnKeyupKey(t *testing.T) {
 	option := OnKeyupKey(KeyEscape, RawAction("$modal = false"))
 
-	if option.event != "keyup.escape" {
-		t.Errorf("event = %q, want %q", option.event, "keyup.escape")
+	if option.event != "keyup" {
+		t.Errorf("event = %q, want %q", option.event, "keyup")
 	}
-	if option.action != "$modal = false" {
-		t.Errorf("action = %q, want %q", option.action, "$modal = false")
+	expected := "evt.key === 'Escape' && $modal = false"
+	if option.action != expected {
+		t.Errorf("action = %q, want %q", option.action, expected)
+	}
+}
+
+func TestOnKeydownWindow(t *testing.T) {
+	option := OnKeydownWindow(KeyS.CtrlOrCmd(), PostSSE("/api/save"))
+
+	if option.event != "keydown__window" {
+		t.Errorf("event = %q, want %q", option.event, "keydown__window")
+	}
+	expected := "(evt.ctrlKey || evt.metaKey) && evt.key === 's' && @post('/api/save')"
+	if option.action != expected {
+		t.Errorf("action = %q, want %q", option.action, expected)
 	}
 }

@@ -198,132 +198,154 @@ func Chain(actions ...Action) Action {
 // ============================================================================
 
 // Key represents a keyboard key for use with OnKeydownKey/OnKeyupKey.
+// Keys generate conditions like "evt.key === 'Enter'" for use in Datastar expressions.
 type Key struct {
-	name      string
-	modifiers []string
+	key       string // The evt.key value (e.g., "Enter", "Escape", "s")
+	ctrl      bool
+	alt       bool
+	shift     bool
+	meta      bool
+	ctrlOrCmd bool // Cross-platform: ctrl on Windows/Linux, meta on Mac
 }
 
-// String returns the key as a dot-separated modifier string for Datastar.
-// Example: KeyEnter.Ctrl() -> "ctrl.enter"
-func (k Key) String() string {
-	if len(k.modifiers) == 0 {
-		return k.name
+// Condition returns the JavaScript condition for matching this key.
+// Example: KeyEnter.Condition() -> "evt.key === 'Enter'"
+// Example: KeyS.Ctrl().Condition() -> "evt.ctrlKey && evt.key === 's'"
+func (k Key) Condition() string {
+	var parts []string
+
+	if k.ctrl {
+		parts = append(parts, "evt.ctrlKey")
 	}
-	var sb strings.Builder
-	for _, mod := range k.modifiers {
-		sb.WriteString(mod)
-		sb.WriteByte('.')
+	if k.alt {
+		parts = append(parts, "evt.altKey")
 	}
-	sb.WriteString(k.name)
-	return sb.String()
+	if k.shift {
+		parts = append(parts, "evt.shiftKey")
+	}
+	if k.meta {
+		parts = append(parts, "evt.metaKey")
+	}
+	if k.ctrlOrCmd {
+		parts = append(parts, "(evt.ctrlKey || evt.metaKey)")
+	}
+
+	parts = append(parts, fmt.Sprintf("evt.key === '%s'", k.key))
+
+	return strings.Join(parts, " && ")
 }
 
 // Ctrl adds the Ctrl modifier to the key.
-// Example: KeyS.Ctrl() -> Ctrl+S
+// Example: KeyS.Ctrl() -> evt.ctrlKey && evt.key === 's'
 func (k Key) Ctrl() Key {
-	return Key{name: k.name, modifiers: append(k.modifiers, "ctrl")}
+	k.ctrl = true
+	return k
 }
 
 // Alt adds the Alt modifier to the key.
-// Example: KeyEnter.Alt() -> Alt+Enter
+// Example: KeyEnter.Alt() -> evt.altKey && evt.key === 'Enter'
 func (k Key) Alt() Key {
-	return Key{name: k.name, modifiers: append(k.modifiers, "alt")}
+	k.alt = true
+	return k
 }
 
 // Shift adds the Shift modifier to the key.
-// Example: KeyTab.Shift() -> Shift+Tab
+// Example: KeyTab.Shift() -> evt.shiftKey && evt.key === 'Tab'
 func (k Key) Shift() Key {
-	return Key{name: k.name, modifiers: append(k.modifiers, "shift")}
+	k.shift = true
+	return k
 }
 
 // Meta adds the Meta (Cmd on Mac, Win on Windows) modifier to the key.
-// Example: KeyS.Meta() -> Cmd+S / Win+S
+// Example: KeyS.Meta() -> evt.metaKey && evt.key === 's'
 func (k Key) Meta() Key {
-	return Key{name: k.name, modifiers: append(k.modifiers, "meta")}
+	k.meta = true
+	return k
 }
 
-// CtrlOrMeta adds ctrl on non-Mac and meta on Mac (common for cross-platform shortcuts).
-// Example: KeyS.CtrlOrMeta() -> Ctrl+S on Windows/Linux, Cmd+S on Mac
-func (k Key) CtrlOrMeta() Key {
-	return Key{name: k.name, modifiers: append(k.modifiers, "ctrlormeta")}
+// CtrlOrCmd adds a cross-platform modifier (Ctrl on Windows/Linux, Cmd on Mac).
+// Example: KeyS.CtrlOrCmd() -> (evt.ctrlKey || evt.metaKey) && evt.key === 's'
+func (k Key) CtrlOrCmd() Key {
+	k.ctrlOrCmd = true
+	return k
 }
 
-// Common key constants
+// Common key constants (using standard KeyboardEvent.key values)
 var (
 	// Navigation keys
-	KeyEnter     = Key{name: "enter"}
-	KeyEscape    = Key{name: "escape"}
-	KeyTab       = Key{name: "tab"}
-	KeyBackspace = Key{name: "backspace"}
-	KeyDelete    = Key{name: "delete"}
-	KeySpace     = Key{name: "space"}
+	KeyEnter     = Key{key: "Enter"}
+	KeyEscape    = Key{key: "Escape"}
+	KeyTab       = Key{key: "Tab"}
+	KeyBackspace = Key{key: "Backspace"}
+	KeyDelete    = Key{key: "Delete"}
+	KeySpace     = Key{key: " "}
 
 	// Arrow keys
-	KeyArrowUp    = Key{name: "arrowup"}
-	KeyArrowDown  = Key{name: "arrowdown"}
-	KeyArrowLeft  = Key{name: "arrowleft"}
-	KeyArrowRight = Key{name: "arrowright"}
+	KeyArrowUp    = Key{key: "ArrowUp"}
+	KeyArrowDown  = Key{key: "ArrowDown"}
+	KeyArrowLeft  = Key{key: "ArrowLeft"}
+	KeyArrowRight = Key{key: "ArrowRight"}
 
 	// Function keys
-	KeyF1  = Key{name: "f1"}
-	KeyF2  = Key{name: "f2"}
-	KeyF3  = Key{name: "f3"}
-	KeyF4  = Key{name: "f4"}
-	KeyF5  = Key{name: "f5"}
-	KeyF6  = Key{name: "f6"}
-	KeyF7  = Key{name: "f7"}
-	KeyF8  = Key{name: "f8"}
-	KeyF9  = Key{name: "f9"}
-	KeyF10 = Key{name: "f10"}
-	KeyF11 = Key{name: "f11"}
-	KeyF12 = Key{name: "f12"}
+	KeyF1  = Key{key: "F1"}
+	KeyF2  = Key{key: "F2"}
+	KeyF3  = Key{key: "F3"}
+	KeyF4  = Key{key: "F4"}
+	KeyF5  = Key{key: "F5"}
+	KeyF6  = Key{key: "F6"}
+	KeyF7  = Key{key: "F7"}
+	KeyF8  = Key{key: "F8"}
+	KeyF9  = Key{key: "F9"}
+	KeyF10 = Key{key: "F10"}
+	KeyF11 = Key{key: "F11"}
+	KeyF12 = Key{key: "F12"}
 
-	// Common letter keys (for shortcuts)
-	KeyA = Key{name: "a"}
-	KeyB = Key{name: "b"}
-	KeyC = Key{name: "c"}
-	KeyD = Key{name: "d"}
-	KeyE = Key{name: "e"}
-	KeyF = Key{name: "f"}
-	KeyG = Key{name: "g"}
-	KeyH = Key{name: "h"}
-	KeyI = Key{name: "i"}
-	KeyJ = Key{name: "j"}
-	KeyK = Key{name: "k"}
-	KeyL = Key{name: "l"}
-	KeyM = Key{name: "m"}
-	KeyN = Key{name: "n"}
-	KeyO = Key{name: "o"}
-	KeyP = Key{name: "p"}
-	KeyQ = Key{name: "q"}
-	KeyR = Key{name: "r"}
-	KeyS = Key{name: "s"}
-	KeyT = Key{name: "t"}
-	KeyU = Key{name: "u"}
-	KeyV = Key{name: "v"}
-	KeyW = Key{name: "w"}
-	KeyX = Key{name: "x"}
-	KeyY = Key{name: "y"}
-	KeyZ = Key{name: "z"}
+	// Common letter keys (lowercase - standard for evt.key with no shift)
+	KeyA = Key{key: "a"}
+	KeyB = Key{key: "b"}
+	KeyC = Key{key: "c"}
+	KeyD = Key{key: "d"}
+	KeyE = Key{key: "e"}
+	KeyF = Key{key: "f"}
+	KeyG = Key{key: "g"}
+	KeyH = Key{key: "h"}
+	KeyI = Key{key: "i"}
+	KeyJ = Key{key: "j"}
+	KeyK = Key{key: "k"}
+	KeyL = Key{key: "l"}
+	KeyM = Key{key: "m"}
+	KeyN = Key{key: "n"}
+	KeyO = Key{key: "o"}
+	KeyP = Key{key: "p"}
+	KeyQ = Key{key: "q"}
+	KeyR = Key{key: "r"}
+	KeyS = Key{key: "s"}
+	KeyT = Key{key: "t"}
+	KeyU = Key{key: "u"}
+	KeyV = Key{key: "v"}
+	KeyW = Key{key: "w"}
+	KeyX = Key{key: "x"}
+	KeyY = Key{key: "y"}
+	KeyZ = Key{key: "z"}
 
 	// Number keys
-	Key0 = Key{name: "0"}
-	Key1 = Key{name: "1"}
-	Key2 = Key{name: "2"}
-	Key3 = Key{name: "3"}
-	Key4 = Key{name: "4"}
-	Key5 = Key{name: "5"}
-	Key6 = Key{name: "6"}
-	Key7 = Key{name: "7"}
-	Key8 = Key{name: "8"}
-	Key9 = Key{name: "9"}
+	Key0 = Key{key: "0"}
+	Key1 = Key{key: "1"}
+	Key2 = Key{key: "2"}
+	Key3 = Key{key: "3"}
+	Key4 = Key{key: "4"}
+	Key5 = Key{key: "5"}
+	Key6 = Key{key: "6"}
+	Key7 = Key{key: "7"}
+	Key8 = Key{key: "8"}
+	Key9 = Key{key: "9"}
 
 	// Other common keys
-	KeyHome     = Key{name: "home"}
-	KeyEnd      = Key{name: "end"}
-	KeyPageUp   = Key{name: "pageup"}
-	KeyPageDown = Key{name: "pagedown"}
-	KeyInsert   = Key{name: "insert"}
+	KeyHome     = Key{key: "Home"}
+	KeyEnd      = Key{key: "End"}
+	KeyPageUp   = Key{key: "PageUp"}
+	KeyPageDown = Key{key: "PageDown"}
+	KeyInsert   = Key{key: "Insert"}
 )
 
 // ============================================================================
@@ -331,14 +353,43 @@ var (
 // ============================================================================
 
 // OnKeydownKey creates a keydown handler that only fires for a specific key.
-// Example: OnKeydownKey(KeyEnter, Post("/api/submit"))
-// Example: OnKeydownKey(KeyS.Ctrl(), Post("/api/save"))
+// Uses evt.key matching as per Datastar documentation.
+// Example: OnKeydownKey(KeyEnter, PostSSE("/api/submit"))
+//   -> data-on:keydown="evt.key === 'Enter' && @post('/api/submit')"
+// Example: OnKeydownKey(KeyS.Ctrl(), PostSSE("/api/save"))
+//   -> data-on:keydown="evt.ctrlKey && evt.key === 's' && @post('/api/save')"
 func OnKeydownKey(key Key, action Action) onOption {
-	return onOption{event: "keydown." + key.String(), action: action.String()}
+	return onOption{
+		event:  "keydown",
+		action: fmt.Sprintf("%s && %s", key.Condition(), action.String()),
+	}
 }
 
 // OnKeyupKey creates a keyup handler that only fires for a specific key.
-// Example: OnKeyupKey(KeyEscape, Raw("$open = false"))
+// Example: OnKeyupKey(KeyEscape, RawAction("$open = false"))
+//   -> data-on:keyup="evt.key === 'Escape' && $open = false"
 func OnKeyupKey(key Key, action Action) onOption {
-	return onOption{event: "keyup." + key.String(), action: action.String()}
+	return onOption{
+		event:  "keyup",
+		action: fmt.Sprintf("%s && %s", key.Condition(), action.String()),
+	}
+}
+
+// OnKeydownWindow creates a global keydown handler (listens on window).
+// Useful for keyboard shortcuts that should work regardless of focus.
+// Example: OnKeydownWindow(KeyS.CtrlOrCmd(), PostSSE("/api/save"))
+//   -> data-on:keydown__window="(evt.ctrlKey || evt.metaKey) && evt.key === 's' && @post('/api/save')"
+func OnKeydownWindow(key Key, action Action) onOption {
+	return onOption{
+		event:  "keydown__window",
+		action: fmt.Sprintf("%s && %s", key.Condition(), action.String()),
+	}
+}
+
+// OnKeyupWindow creates a global keyup handler (listens on window).
+func OnKeyupWindow(key Key, action Action) onOption {
+	return onOption{
+		event:  "keyup__window",
+		action: fmt.Sprintf("%s && %s", key.Condition(), action.String()),
+	}
 }
