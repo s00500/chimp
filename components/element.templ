@@ -1,0 +1,53 @@
+package components
+
+// Div renders a div element with full Datastar support.
+// Use this when you need a simple container with event handlers, signals, or bindings.
+//
+// Example:
+//
+//	@Div(WithID("container"), OnKeydownWindow(KeyEscape, RawAction("$open = false"))) {
+//	    // content
+//	}
+//
+//	@Div(WithClass("card"), WithShow("$visible"), OnClick(PostSSE("/api/action"))) {
+//	    // content
+//	}
+templ Div(options ...ElementOption) {
+	{{ config := applyElementOptions(options) }}
+	<div
+		if config.ID != "" {
+			id={ config.ID }
+		}
+		if config.Class != "" {
+			class={ config.Class }
+		}
+		{ config.CommonAttrs()... }
+		{ config.Datastar.ToAttrs()... }
+	>
+		{ children... }
+	</div>
+}
+
+// Span renders a span element with full Datastar support.
+// Use this for inline elements with dynamic text, visibility, or event handlers.
+//
+// Example:
+//
+//	@Span(WithText("$count"), WithClass("badge"))
+//
+//	@Span(WithShow("$loading"), WithClass("spinner"))
+templ Span(options ...ElementOption) {
+	{{ config := applyElementOptions(options) }}
+	<span
+		if config.ID != "" {
+			id={ config.ID }
+		}
+		if config.Class != "" {
+			class={ config.Class }
+		}
+		{ config.CommonAttrs()... }
+		{ config.Datastar.ToAttrs()... }
+	>
+		{ children... }
+	</span>
+}

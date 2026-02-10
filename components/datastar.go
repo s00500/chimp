@@ -725,3 +725,50 @@ func applySectionOptions(options []SectionOption) *SectionConfig {
 	}
 	return config
 }
+
+// ============================================================================
+// Element Config & Options (for Div, Span, etc.)
+// ============================================================================
+
+// ElementOption is implemented by options that can be applied to generic elements
+type ElementOption interface{ applyToElement(*ElementConfig) }
+
+// ElementConfig holds configuration for generic element components (Div, Span, etc.)
+type ElementConfig struct {
+	CommonConfig // embedded
+}
+
+// Common options for Element
+func (o idOption) applyToElement(c *ElementConfig)    { c.ID = string(o) }
+func (o classOption) applyToElement(c *ElementConfig) { o.apply(&c.CommonConfig) }
+func (o onOption) applyToElement(c *ElementConfig)    { o.apply(&c.CommonConfig) }
+func (o bindOption) applyToElement(c *ElementConfig)  { o.apply(&c.CommonConfig) }
+func (o showOption) applyToElement(c *ElementConfig)  { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToElement(c *ElementConfig) { o.apply(&c.CommonConfig) }
+
+// Element-specific options
+type elementModelOption string
+
+func (o elementModelOption) applyToElement(c *ElementConfig) { c.Datastar.Model = string(o) }
+
+type elementSignalsOption map[string]string
+
+func (o elementSignalsOption) applyToElement(c *ElementConfig) { c.Datastar.Signals = o }
+
+type elementTextOption string
+
+func (o elementTextOption) applyToElement(c *ElementConfig) { c.Datastar.Text = string(o) }
+
+// Element option constructors
+func WithElementModel(expr string) elementModelOption             { return elementModelOption(expr) }
+func WithSignals(signals map[string]string) elementSignalsOption  { return elementSignalsOption(signals) }
+func WithText(expr string) elementTextOption                      { return elementTextOption(expr) }
+
+// applyElementOptions applies all options and returns config
+func applyElementOptions(options []ElementOption) *ElementConfig {
+	config := &ElementConfig{}
+	for _, opt := range options {
+		opt.applyToElement(config)
+	}
+	return config
+}

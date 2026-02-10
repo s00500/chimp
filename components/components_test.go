@@ -61,7 +61,7 @@ func TestNotification(t *testing.T) {
 	// Pipe the rendered template into goquery.
 	r, w := io.Pipe()
 	go func() {
-		_ = Notification("Test", "a test notification").Render(context.Background(), w)
+		_ = Notification(NotificationSuccess, "a test notification").Render(context.Background(), w)
 		_ = w.Close()
 	}()
 	b, _ := io.ReadAll(r)

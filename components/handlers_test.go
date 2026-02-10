@@ -336,3 +336,34 @@ func TestOnKeydownWindow(t *testing.T) {
 		t.Errorf("action = %q, want %q", option.action, expected)
 	}
 }
+
+func TestElementOptions(t *testing.T) {
+	// Test that element options apply correctly
+	config := applyElementOptions([]ElementOption{
+		WithID("test-div"),
+		WithClass("container"),
+		OnClick(PostSSE("/api/click")),
+		OnKeydownWindow(KeyEscape, RawAction("$open = false")),
+		WithShow("$visible"),
+	})
+
+	if config.ID != "test-div" {
+		t.Errorf("ID = %q, want %q", config.ID, "test-div")
+	}
+	if config.Class != "container" {
+		t.Errorf("Class = %q, want %q", config.Class, "container")
+	}
+	if config.Datastar.Show != "$visible" {
+		t.Errorf("Show = %q, want %q", config.Datastar.Show, "$visible")
+	}
+
+	// Check that event handlers are set
+	attrs := config.CommonAttrs()
+	if attrs["data-on:click"] != "@post('/api/click')" {
+		t.Errorf("click handler = %q, want %q", attrs["data-on:click"], "@post('/api/click')")
+	}
+	expectedKeydown := "evt.key === 'Escape' && $open = false"
+	if attrs["data-on:keydown__window"] != expectedKeydown {
+		t.Errorf("keydown handler = %q, want %q", attrs["data-on:keydown__window"], expectedKeydown)
+	}
+}

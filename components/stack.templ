@@ -11,7 +11,13 @@ package components
 //	}
 templ Stack(options ...StackOption) {
 	{{ config := applyStackOptions(options) }}
-	<div class={ stackClass(config) }>
+	<div
+		class={ stackClass(config) }
+		if config.ID != "" {
+			id={ config.ID }
+		}
+		{ config.CommonAttrs()... }
+	>
 		{ children... }
 	</div>
 }
@@ -98,7 +104,13 @@ func formClass(config *FormGroupConfig) string {
 templ Row(options ...StackOption) {
 	{{ options = append([]StackOption{WithDirection("row")}, options...) }}
 	{{ config := applyStackOptions(options) }}
-	<div class={ stackClass(config) }>
+	<div
+		class={ stackClass(config) }
+		if config.ID != "" {
+			id={ config.ID }
+		}
+		{ config.CommonAttrs()... }
+	>
 		{ children... }
 	</div>
 }
