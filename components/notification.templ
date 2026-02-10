@@ -17,58 +17,67 @@ templ SuccessNotification(text string) {
 	@Notification(NotificationSuccess, text)
 }
 
+// NotificationContainer is the target for appending notifications. Place once in your layout.
+templ NotificationContainer() {
+	@NotificationStyles()
+	<div id="notifications" class="fixed top-4 right-4 z-50 flex flex-col gap-3 pointer-events-none"></div>
+}
+
+// Notification renders a single notification. Use with Datastar append mode to #notifications.
 templ Notification(msgType string, text string) {
-	<div id="toastmessage">
-		@NotificationStyles()
-		if text !="" {
-			<div style="display:none" data-init__viewtransition="$toastActive = false;$toastActive = true; el.remove()"></div>
-			<div
-				id="toast-content"
-				data-class:hidden="!$toastActive"
-				data-init__delay.3s__viewtransition="el.remove();$toastActive = false"
-				class={
-					"fixed top-4 right-4 px-4 py-3 rounded-lg flex items-center gap-3 min-w-[280px] max-w-md text-white shadow-[0_0_20px_rgba(255,255,255,0.25)]",
-					templ.KV("bg-[#C53030]/90", msgType == NotificationError),
-					templ.KV("bg-[#F89406]/90", msgType == NotificationWarning),
-					templ.KV("bg-[#51A351]/90", msgType == NotificationSuccess),
-					templ.KV("bg-[#3182CE]/90", msgType == NotificationInfo),
-				}
-				role="alert"
-				style="view-transition-name: toast-slide"
-			>
-				<!-- Icon -->
-				<div class="shrink-0">
-					if msgType == NotificationError {
-						@icon.Icon(icon.MdiShieldAlert, "w-8 h-8", icon.WithFill("currentColor"), icon.WithStroke("none"))
-					}
-					if msgType == NotificationWarning {
-						@icon.Icon(icon.MdiAlert, "w-8 h-8", icon.WithFill("currentColor"), icon.WithStroke("none"))
-					}
-					if msgType == NotificationSuccess {
-						@icon.Icon(icon.MdiCheck, "w-8 h-8", icon.WithFill("currentColor"), icon.WithStroke("none"))
-					}
-					if msgType == NotificationInfo {
-						@icon.Icon(icon.MdiInformation, "w-8 h-8", icon.WithFill("currentColor"), icon.WithStroke("none"))
-					}
-				</div>
-				<!-- Content -->
-				<div class="flex flex-col">
-					if msgType == NotificationError {
-						<span class="font-semibold">Error</span>
-					}
-					if msgType == NotificationWarning {
-						<span class="font-semibold">Warning</span>
-					}
-					if msgType == NotificationSuccess {
-						<span class="font-semibold">Success</span>
-					}
-					if msgType == NotificationInfo {
-						<span class="font-semibold">Info</span>
-					}
-					<span class="text-sm opacity-90">{ text }</span>
-				</div>
-			</div>
+	<div
+		class={
+			"notification-item pointer-events-auto px-4 py-3 rounded-lg flex items-center gap-3 min-w-[280px] max-w-md text-white shadow-[0_0_20px_rgba(255,255,255,0.25)]",
+			templ.KV("bg-[#C53030]/90", msgType == NotificationError),
+			templ.KV("bg-[#F89406]/90", msgType == NotificationWarning),
+			templ.KV("bg-[#51A351]/90", msgType == NotificationSuccess),
+			templ.KV("bg-[#3182CE]/90", msgType == NotificationInfo),
 		}
+		role="alert"
+		data-init__delay.3s="el.classList.add('notification-exit'); setTimeout(() => el.remove(), 300)"
+	>
+		<!-- Icon -->
+		<div class="shrink-0">
+			if msgType == NotificationError {
+				@icon.Icon(icon.MdiShieldAlert, "w-8 h-8", icon.WithFill("currentColor"), icon.WithStroke("none"))
+			}
+			if msgType == NotificationWarning {
+				@icon.Icon(icon.MdiAlert, "w-8 h-8", icon.WithFill("currentColor"), icon.WithStroke("none"))
+			}
+			if msgType == NotificationSuccess {
+				@icon.Icon(icon.MdiCheck, "w-8 h-8", icon.WithFill("currentColor"), icon.WithStroke("none"))
+			}
+			if msgType == NotificationInfo {
+				@icon.Icon(icon.MdiInformation, "w-8 h-8", icon.WithFill("currentColor"), icon.WithStroke("none"))
+			}
+		</div>
+		<!-- Content -->
+		<div class="flex-1 flex flex-col">
+			if msgType == NotificationError {
+				<span class="font-semibold">Error</span>
+			}
+			if msgType == NotificationWarning {
+				<span class="font-semibold">Warning</span>
+			}
+			if msgType == NotificationSuccess {
+				<span class="font-semibold">Success</span>
+			}
+			if msgType == NotificationInfo {
+				<span class="font-semibold">Info</span>
+			}
+			<span class="text-sm opacity-90">{ text }</span>
+		</div>
+		<!-- Close button -->
+		<button
+			type="button"
+			class="shrink-0 opacity-70 hover:opacity-100 transition-opacity cursor-pointer pointer-events-auto"
+			data-on:click="el.parentElement.remove()"
+			aria-label="Dismiss"
+		>
+			<svg class="w-5 h-5 pointer-events-none" viewBox="0 0 24 24" fill="currentColor">
+				<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path>
+			</svg>
+		</button>
 	</div>
 }
 
@@ -77,25 +86,32 @@ var sty templ.OnceHandle
 templ NotificationStyles() {
 	@sty.Once() {
 		<style>
-		/* Toast starts off-screen */
-	@keyframes toast-slide-in {
-		from {
-			transform: translateY(-200%);
-			opacity: 0;
+		@keyframes notification-enter {
+			from {
+				transform: translateX(100%);
+				opacity: 0;
+			}
+			to {
+				transform: translateX(0);
+				opacity: 1;
+			}
 		}
-		to {
-			transform: translateY(0);
-			opacity: 1;
+		@keyframes notification-exit {
+			from {
+				transform: translateX(0);
+				opacity: 1;
+			}
+			to {
+				transform: translateX(100%);
+				opacity: 0;
+			}
 		}
-	}
-	::view-transition-old(toast-slide) {
-		  animation: none;
-	}
-
-	::view-transition-new(toast-slide) {
-		animation: toast-slide-in 0.5s ease-out;
-	}
-
+		.notification-item {
+			animation: notification-enter 0.3s ease-out;
+		}
+		.notification-item.notification-exit {
+			animation: notification-exit 0.3s ease-out forwards;
+		}
 		</style>
 	}
 }

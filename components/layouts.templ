@@ -21,6 +21,7 @@ templ BaseHTML(title string, cacheBust bool) {
 		</head>
 		<body>
 			@ConfirmModal("")
+			@NotificationContainer()
 			{ children... }
 			@chimp.HotReload(cacheBust)
 		</body>
