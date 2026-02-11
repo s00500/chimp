@@ -52,6 +52,29 @@ func baseCoatJSHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeContent(w, r, "basecoat.min.js", modTime, buf)
 }
 
+//go:embed static/neo-sans-std-m.otf
+var neoSansFontBytes []byte
+
+func neoSansFontHandler(w http.ResponseWriter, r *http.Request) {
+	buf := bytes.NewReader(neoSansFontBytes)
+	http.ServeContent(w, r, "neo-sans-std-m.otf", modTime, buf)
+}
+
+func IncludedFont() templ.Component {
+	return templ.Raw(`<style>
+@font-face {
+    font-family: 'Neo Sans';
+    src: url('static/neo-sans-std-m.otf') format('opentype');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+body {
+    font-family: 'Neo Sans', sans-serif;
+}
+</style>`)
+}
+
 // ServeIncludedAssets serves included datastar, basecoat, and chimp assets
 func ServeIncludedAssets(r chi.Router, baseURL string) {
 	p := strings.Trim(baseURL, "/")
@@ -61,4 +84,5 @@ func ServeIncludedAssets(r chi.Router, baseURL string) {
 	r.Get(p+"/static/datastar.min.js", datastarHandler)
 	r.Get(p+"/static/basecoat.min.css", baseCoatCSSHandler)
 	r.Get(p+"/static/basecoat.min.js", baseCoatJSHandler)
+	r.Get(p+"/static/neo-sans-std-m.otf", neoSansFontHandler)
 }

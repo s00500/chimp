@@ -8,6 +8,39 @@ import (
 )
 
 // ============================================================================
+// Notification Helpers
+// ============================================================================
+
+// SendNotification sends a notification via SSE with append mode to #notifications.
+func SendNotification(sse *datastar.ServerSentEventGenerator, msgType string, text string) error {
+	return sse.PatchElementTempl(
+		Notification(msgType, text),
+		datastar.WithModeAppend(),
+		datastar.WithSelector("#notifications"),
+	)
+}
+
+// SendError sends an error notification.
+func SendError(sse *datastar.ServerSentEventGenerator, text string) error {
+	return SendNotification(sse, NotificationError, text)
+}
+
+// SendSuccess sends a success notification.
+func SendSuccess(sse *datastar.ServerSentEventGenerator, text string) error {
+	return SendNotification(sse, NotificationSuccess, text)
+}
+
+// SendWarning sends a warning notification.
+func SendWarning(sse *datastar.ServerSentEventGenerator, text string) error {
+	return SendNotification(sse, NotificationWarning, text)
+}
+
+// SendInfo sends an info notification.
+func SendInfo(sse *datastar.ServerSentEventGenerator, text string) error {
+	return SendNotification(sse, NotificationInfo, text)
+}
+
+// ============================================================================
 // Datastar Action Builder
 // ============================================================================
 

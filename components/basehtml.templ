@@ -1,0 +1,95 @@
+package components
+
+import "github.com/s00500/chimp"
+
+type BaseHTMLConfig struct {
+	IncludeFont             bool
+	TweakCN                 bool
+	AdditionalHeaderContent templ.Component
+}
+
+type BaseHTMLOption func(*BaseHTMLConfig)
+
+// Defaults holds the global default values for BaseHTML.
+// These can be modified using SetDefaults() at application startup.
+var defaults = BaseHTMLConfig{
+	IncludeFont: true,
+	TweakCN:     false,
+}
+
+// SetDefaults configures the global default values for all BaseHTML calls.
+func SetDefaults(opts ...BaseHTMLOption) {
+	for _, opt := range opts {
+		opt(&defaults)
+	}
+}
+
+func WithoutFont() BaseHTMLOption {
+	return func(c *BaseHTMLConfig) {
+		c.IncludeFont = false
+	}
+}
+
+func WithFont() BaseHTMLOption {
+	return func(c *BaseHTMLConfig) {
+		c.IncludeFont = true
+	}
+}
+
+func WithTweakCN() BaseHTMLOption {
+	return func(c *BaseHTMLConfig) {
+		c.TweakCN = true
+	}
+}
+
+func WithoutTweakCN() BaseHTMLOption {
+	return func(c *BaseHTMLConfig) {
+		c.TweakCN = false
+	}
+}
+
+func WithHeadComponent(comp templ.Component) BaseHTMLOption {
+	return func(c *BaseHTMLConfig) {
+		c.AdditionalHeaderContent = append(c.HeadComponents, comp)
+	}
+}
+
+// Base provides the shared html/head/body structure with ToastBar
+templ BaseHTML(title string, cacheBust bool, opts ...BaseHTMLOption) {
+	{{
+		config := BaseHTMLConfig{
+			IncludeFont:             defaults.IncludeFont,
+			TweakCN:                 defaults.TweakCN,
+			AdditionalHeaderContent: defaults.AdditionalHeaderContent,
+		}
+		for _, opt := range opts {
+			opt(&config)
+		}
+	}}
+	<html class="dark">
+		<head>
+			@chimp.Base()
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			@chimp.IncludedDatastar()
+			// we do not include the BasecoatCSS, as this is created by ourself
+			@chimp.IncludedBaseCoatJS()
+			if config.IncludeFont {
+				@chimp.IncludedFont()
+			}
+			@chimp.StyleWithCacheBust("assets/output.css", cacheBust)
+			if config.TweakCN {
+				<script src="https://tweakcn.com/live-preview.min.js"></script>
+			}
+			if config.AdditionalHeaderContent {
+				@config.AdditionalHeaderContent
+			}
+			<title>{ title }</title>
+		</head>
+		<body>
+			@ConfirmModal("")
+			@NotificationContainer()
+			{ children... }
+			@chimp.HotReload(cacheBust)
+		</body>
+	</html>
+}
