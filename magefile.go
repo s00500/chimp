@@ -10,6 +10,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"time"
+
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
@@ -183,7 +185,12 @@ func Dev() {
 
 // ExtractClasses scans all .templ files and extracts Tailwind class names to css/classes.txt
 func ExtractClasses() error {
-	return sh.RunV("go", "run", "./tools/extract-classes")
+	if err := sh.RunV("go", "run", "./tools/extract-classes"); err != nil {
+		return err
+	}
+	classesFile := filepath.Join("cli", "chimp", "templates", "classes.txt")
+	now := time.Now()
+	return os.Chtimes(classesFile, now, now)
 }
 
 // downloadFile downloads a file from a URL to a local path
