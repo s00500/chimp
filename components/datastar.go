@@ -8,9 +8,9 @@ import (
 
 // DatastarAttrs holds common Datastar attributes that can be applied to components
 type DatastarAttrs struct {
-	Model   string            // data-model
+	Bind    string            // data-bind (two-way binding for form inputs)
 	On      map[string]string // data-on:event -> action
-	Bind    map[string]string // data-bind:attr -> expression
+	BindMap map[string]string // data-bind:attr -> expression (for attribute bindings)
 	Signals map[string]string // data-signals
 	Attrs   map[string]string // data-attr:name -> expression
 	Show    string            // data-show expression
@@ -21,15 +21,15 @@ type DatastarAttrs struct {
 func (d *DatastarAttrs) ToAttrs() templ.Attributes {
 	attrs := templ.Attributes{}
 
-	if d.Model != "" {
-		attrs["data-model"] = d.Model
+	if d.Bind != "" {
+		attrs["data-bind"] = d.Bind
 	}
 
 	for event, action := range d.On {
 		attrs["data-on:"+event] = action
 	}
 
-	for attr, expr := range d.Bind {
+	for attr, expr := range d.BindMap {
 		attrs["data-bind:"+attr] = expr
 	}
 
@@ -88,7 +88,7 @@ func (c *CommonConfig) CommonAttrs() templ.Attributes {
 	for event, action := range c.Datastar.On {
 		attrs["data-on:"+event] = action
 	}
-	for attr, expr := range c.Datastar.Bind {
+	for attr, expr := range c.Datastar.BindMap {
 		attrs["data-bind:"+attr] = expr
 	}
 	for name, expr := range c.Datastar.Attrs {
@@ -183,29 +183,30 @@ func (o onOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonCo
 // WithOn adds a data-on:event handler (works on any component)
 func WithOn(event, action string) onOption { return onOption{event, action} }
 
-// bindOption adds a data-bind:attr binding
-type bindOption struct {
+// bindAttrOption adds a data-bind:attr binding
+type bindAttrOption struct {
 	attr string
 	expr string
 }
 
-func (o bindOption) apply(c *CommonConfig) {
-	if c.Datastar.Bind == nil {
-		c.Datastar.Bind = make(map[string]string)
+func (o bindAttrOption) apply(c *CommonConfig) {
+	if c.Datastar.BindMap == nil {
+		c.Datastar.BindMap = make(map[string]string)
 	}
-	c.Datastar.Bind[o.attr] = o.expr
+	c.Datastar.BindMap[o.attr] = o.expr
 }
-func (o bindOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
-func (o bindOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
-func (o bindOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
-func (o bindOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
-func (o bindOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
-func (o bindOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
-func (o bindOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
-func (o bindOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
 
-// WithBind adds a data-bind:attr binding (works on any component)
-func WithBind(attr, expr string) bindOption { return bindOption{attr, expr} }
+// WithBindAttr adds a data-bind:attr binding for attribute bindings (works on any component)
+// Example: WithBindAttr("class", "$active ? 'selected' : ''")
+func WithBindAttr(attr, expr string) bindAttrOption { return bindAttrOption{attr, expr} }
 
 // showOption sets the data-show expression
 type showOption string
@@ -333,8 +334,8 @@ func (o formEmptyOptionOption) applyToForm(c *FormConfig) { c.EmptyOption = stri
 type formErrorOption string
 func (o formErrorOption) applyToForm(c *FormConfig) { c.Error = string(o) }
 
-type formModelOption string
-func (o formModelOption) applyToForm(c *FormConfig) { c.Datastar.Model = string(o) }
+type formBindOption string
+func (o formBindOption) applyToForm(c *FormConfig) { c.Datastar.Bind = string(o) }
 
 type formSignalOption struct {
 	name  string
@@ -377,7 +378,7 @@ func WithOptions(options []SelectOption) formOptionsOption { return formOptionsO
 func WithMultiple() formMultipleOption             { return formMultipleOption{} }
 func WithEmptyOption(text string) formEmptyOptionOption { return formEmptyOptionOption(text) }
 func WithError(expr string) formErrorOption        { return formErrorOption(expr) }
-func WithModel(expr string) formModelOption        { return formModelOption(expr) }
+func WithBind(expr string) formBindOption          { return formBindOption(expr) }
 func WithSignal(name, value string) formSignalOption { return formSignalOption{name, value} }
 func WithDataAttr(name, expr string) formDataAttrOption { return formDataAttrOption{name, expr} }
 
@@ -397,8 +398,8 @@ func applyFormOptions(options []FormOption) *FormConfig {
 func (c *FormConfig) InputAttrs() templ.Attributes {
 	attrs := c.CommonAttrs()
 
-	if c.Datastar.Model != "" {
-		attrs["data-model"] = c.Datastar.Model
+	if c.Datastar.Bind != "" {
+		attrs["data-bind"] = c.Datastar.Bind
 	}
 
 	return attrs
@@ -498,8 +499,8 @@ func (o acDebounceOption) applyToAutocomplete(c *AutocompleteConfig) { c.Debounc
 type acPlaceholderOption string
 func (o acPlaceholderOption) applyToAutocomplete(c *AutocompleteConfig) { c.Placeholder = string(o) }
 
-type acModelOption string
-func (o acModelOption) applyToAutocomplete(c *AutocompleteConfig) { c.Datastar.Model = string(o) }
+type acBindOption string
+func (o acBindOption) applyToAutocomplete(c *AutocompleteConfig) { c.Datastar.Bind = string(o) }
 
 type acRequiredOption struct{}
 func (o acRequiredOption) applyToAutocomplete(c *AutocompleteConfig) { c.Required = true }
@@ -517,7 +518,7 @@ func WithValueField(field string) acValueFieldOption           { return acValueF
 func WithMinChars(n int) acMinCharsOption                      { return acMinCharsOption(n) }
 func WithDebounce(ms int) acDebounceOption                     { return acDebounceOption(ms) }
 func WithAutocompletePlaceholder(p string) acPlaceholderOption { return acPlaceholderOption(p) }
-func WithAutocompleteModel(expr string) acModelOption          { return acModelOption(expr) }
+func WithAutocompleteBind(expr string) acBindOption            { return acBindOption(expr) }
 func WithAutocompleteRequired() acRequiredOption               { return acRequiredOption{} }
 func WithAutocompleteDisabled() acDisabledOption               { return acDisabledOption{} }
 func WithAutocompleteError(expr string) acErrorOption          { return acErrorOption(expr) }
@@ -742,14 +743,14 @@ type ElementConfig struct {
 func (o idOption) applyToElement(c *ElementConfig)    { c.ID = string(o) }
 func (o classOption) applyToElement(c *ElementConfig) { o.apply(&c.CommonConfig) }
 func (o onOption) applyToElement(c *ElementConfig)    { o.apply(&c.CommonConfig) }
-func (o bindOption) applyToElement(c *ElementConfig)  { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToElement(c *ElementConfig)  { o.apply(&c.CommonConfig) }
 func (o showOption) applyToElement(c *ElementConfig)  { o.apply(&c.CommonConfig) }
 func (o attrsOption) applyToElement(c *ElementConfig) { o.apply(&c.CommonConfig) }
 
 // Element-specific options
-type elementModelOption string
+type elementBindOption string
 
-func (o elementModelOption) applyToElement(c *ElementConfig) { c.Datastar.Model = string(o) }
+func (o elementBindOption) applyToElement(c *ElementConfig) { c.Datastar.Bind = string(o) }
 
 type elementSignalsOption map[string]string
 
@@ -760,7 +761,7 @@ type elementTextOption string
 func (o elementTextOption) applyToElement(c *ElementConfig) { c.Datastar.Text = string(o) }
 
 // Element option constructors
-func WithElementModel(expr string) elementModelOption             { return elementModelOption(expr) }
+func WithElementBind(expr string) elementBindOption               { return elementBindOption(expr) }
 func WithSignals(signals map[string]string) elementSignalsOption  { return elementSignalsOption(signals) }
 func WithText(expr string) elementTextOption                      { return elementTextOption(expr) }
 

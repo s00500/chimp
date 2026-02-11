@@ -74,7 +74,7 @@ func TestFormInput(t *testing.T) {
 
 	err := FormInput("Email", "email",
 		WithType("email"),
-		WithModel("form.email"),
+		WithBind("form.email"),
 		WithPlaceholder("you@example.com"),
 		WithRequired(),
 		WithError("$errors.email"),
@@ -98,8 +98,8 @@ func TestFormInput(t *testing.T) {
 	if !strings.Contains(output, `type="email"`) {
 		t.Error("expected type='email'")
 	}
-	if !strings.Contains(output, `data-model="form.email"`) {
-		t.Error("expected data-model attribute")
+	if !strings.Contains(output, `data-bind="form.email"`) {
+		t.Error("expected data-bind attribute")
 	}
 	if !strings.Contains(output, `placeholder="you@example.com"`) {
 		t.Error("expected placeholder")
@@ -119,7 +119,7 @@ func TestFormSelect(t *testing.T) {
 	var buf strings.Builder
 
 	err := FormSelect("Country", "country",
-		WithModel("form.country"),
+		WithBind("form.country"),
 		WithOptions([]SelectOption{
 			{Value: "us", Label: "United States"},
 			{Value: "de", Label: "Germany"},
@@ -155,7 +155,7 @@ func TestFormCheckbox(t *testing.T) {
 	var buf strings.Builder
 
 	err := FormCheckbox("Accept terms", "terms",
-		WithModel("form.acceptTerms"),
+		WithBind("form.acceptTerms"),
 	).Render(ctx, &buf)
 	if err != nil {
 		t.Fatalf("render failed: %v", err)
@@ -170,8 +170,8 @@ func TestFormCheckbox(t *testing.T) {
 	if !strings.Contains(output, "Accept terms") {
 		t.Error("expected label text")
 	}
-	if !strings.Contains(output, `data-model="form.acceptTerms"`) {
-		t.Error("expected data-model attribute")
+	if !strings.Contains(output, `data-bind="form.acceptTerms"`) {
+		t.Error("expected data-bind attribute")
 	}
 }
 

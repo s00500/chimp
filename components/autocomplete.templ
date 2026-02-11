@@ -11,7 +11,7 @@ import "fmt"
 //	@FormAutocomplete("Customer", "customer_id",
 //	    WithSearchEndpoint("/api/customers/search"),
 //	    WithAutocompletePlaceholder("Search customers..."),
-//	    WithAutocompleteModel("form.customerId"),
+//	    WithAutocompleteBind("form.customerId"),
 //	    WithDisplayField("name"),
 //	    WithValueField("id"),
 //	    WithMinChars(2),
@@ -40,7 +40,7 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 				type="text"
 				id={ name + "_search" }
 				autocomplete="off"
-				data-model={ fmt.Sprintf("%s.search", signalName) }
+				data-bind={ fmt.Sprintf("$%s.search", signalName) }
 				data-on:input={ fmt.Sprintf("__debounce_%sms: %s && @get('%s')", debounceMs, searchExpr, endpoint) }
 				data-on:focus={ fmt.Sprintf("$%s.open = $%s.results.length > 0", signalName, signalName) }
 				data-on:blur__debounce_200ms={ fmt.Sprintf("$%s.open = false", signalName) }
@@ -75,8 +75,8 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 				type="hidden"
 				name={ name }
 				data-bind:value={ fmt.Sprintf("$%s.value", signalName) }
-				if config.Datastar.Model != "" {
-					data-model={ config.Datastar.Model }
+				if config.Datastar.Bind != "" {
+					data-bind={ config.Datastar.Bind }
 				}
 			/>
 		</div>
