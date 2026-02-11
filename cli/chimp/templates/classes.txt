@@ -2,6 +2,7 @@ absolute
 animate-spin
 bg-background
 bg-background/50
+bg-popover
 border
 border-4
 border-b
@@ -15,9 +16,7 @@ btn-icon
 btn-outline
 card
 checkbox
-combobox
-combobox-content
-combobox-item
+cursor-default
 cursor-pointer
 dark
 dialog
@@ -47,8 +46,9 @@ h-8
 h-auto
 h-full
 hidden
-hover:bg-muted
+hover:bg-accent
 hover:opacity-100
+hover:text-accent-foreground
 inner
 inner-value
 input
@@ -75,7 +75,6 @@ min-h-14
 min-h-screen
 min-w-56
 mr-2
-mt-1
 my-2
 opacity-25
 opacity-50
@@ -84,9 +83,9 @@ opacity-75
 opacity-90
 outer
 outer-value
-overflow-auto
 overflow-x-auto
 overflow-y-auto
+p-1
 p-2
 p-4
 p-5
@@ -97,7 +96,6 @@ pointer-events-auto
 pointer-events-none
 pt-4
 px-2
-px-3
 px-4
 py-1
 py-1.5
@@ -111,7 +109,9 @@ right-4
 rounded-full
 rounded-lg
 rounded-md
-shadow-lg
+rounded-sm
+select-none
+shadow-md
 shrink-0
 sidebar
 sm:max-w-[425px]
@@ -130,9 +130,9 @@ table-header
 table-row
 text-base
 text-center
-text-left
 text-lg
 text-muted-foreground
+text-popover-foreground
 text-sm
 toast
 toast-content
