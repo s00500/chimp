@@ -56,9 +56,9 @@ func WithoutTweakCN() BaseHTMLOption {
 	}
 }
 
-func WithHeadComponent(comp templ.Component) BaseHTMLOption {
+func WithHeaderComponent(comp templ.Component) BaseHTMLOption {
 	return func(c *BaseHTMLConfig) {
-		c.AdditionalHeaderContent = append(c.HeadComponents, comp)
+		c.AdditionalHeaderContent = comp
 	}
 }
 
@@ -128,7 +128,7 @@ func BaseHTML(title string, cacheBust bool, opts ...BaseHTMLOption) templ.Compon
 				return templ_7745c5c3_Err
 			}
 		}
-		if config.AdditionalHeaderContent {
+		if config.AdditionalHeaderContent != nil {
 			templ_7745c5c3_Err = config.AdditionalHeaderContent.Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err

@@ -48,9 +48,9 @@ func WithoutTweakCN() BaseHTMLOption {
 	}
 }
 
-func WithHeadComponent(comp templ.Component) BaseHTMLOption {
+func WithHeaderComponent(comp templ.Component) BaseHTMLOption {
 	return func(c *BaseHTMLConfig) {
-		c.AdditionalHeaderContent = append(c.HeadComponents, comp)
+		c.AdditionalHeaderContent = comp
 	}
 }
 
@@ -80,7 +80,7 @@ templ BaseHTML(title string, cacheBust bool, opts ...BaseHTMLOption) {
 			if config.TweakCN {
 				<script src="https://tweakcn.com/live-preview.min.js"></script>
 			}
-			if config.AdditionalHeaderContent {
+			if config.AdditionalHeaderContent != nil {
 				@config.AdditionalHeaderContent
 			}
 			<title>{ title }</title>
