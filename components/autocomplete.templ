@@ -50,11 +50,13 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 				type="text"
 				id={ name + "_search" }
 				autocomplete="off"
-				data-bind={ fmt.Sprintf("$%s.search", signalName) }
+				data-bind={ fmt.Sprintf("%s.search", signalName) }
 				{ templ.Attributes{"data-on:" + inputEvent: onInputAction}... }
 				data-on:focus={ onFocusAction }
 				{ templ.Attributes{"data-on:" + blurEvent: onBlurAction}... }
-				placeholder={ config.Placeholder }
+				if config.Placeholder !="" {
+					placeholder={ config.Placeholder }
+				}
 				if config.Disabled {
 					disabled
 				}
