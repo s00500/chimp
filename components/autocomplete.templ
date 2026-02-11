@@ -12,17 +12,16 @@ import "fmt"
 //	    WithSearchEndpoint("/api/customers/search"),
 //	    WithAutocompletePlaceholder("Search customers..."),
 //	    WithAutocompleteBind("form.customerId"),
-//	    WithDisplayField("name"),
-//	    WithValueField("id"),
 //	    WithMinChars(2),
 //	)
 //
-// The SSE endpoint should return signals like:
+// The SSE endpoint should use SendAutocompleteResults:
 //
-//	datastar.MergeSignals(sse, map[string]any{
-//	    "results": customers,  // array of objects with displayField and valueField
-//	    "open": len(customers) > 0,
-//	})
+//	results := []components.SelectOption{
+//	    {Value: "1", Label: "Acme Corp"},
+//	    {Value: "2", Label: "Globex Inc"},
+//	}
+//	components.SendAutocompleteResults(sse, "customer_id", results)
 templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 	{{ config := applyAutocompleteOptions(options) }}
 	{{ signalName := name + "_ac" }}
@@ -74,7 +73,7 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 			<input
 				type="hidden"
 				name={ name }
-				data-bind:value={ fmt.Sprintf("$%s.value", signalName) }
+				data-attr:value={ fmt.Sprintf("$%s.value", signalName) }
 				if config.Datastar.Bind != "" {
 					data-bind={ config.Datastar.Bind }
 				}

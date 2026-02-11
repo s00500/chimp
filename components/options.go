@@ -24,9 +24,9 @@ const (
 
 // SelectOption represents an option in a select, radio group, or autocomplete
 type SelectOption struct {
-	Value    string
-	Label    string
-	Disabled bool
+	Value    string `json:"value"`
+	Label    string `json:"label"`
+	Disabled bool   `json:"disabled,omitempty"`
 }
 
 // Column represents a column definition for DataTable

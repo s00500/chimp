@@ -526,8 +526,8 @@ func WithAutocompleteError(expr string) acErrorOption          { return acErrorO
 // applyAutocompleteOptions applies all options and returns config
 func applyAutocompleteOptions(options []AutocompleteOption) *AutocompleteConfig {
 	config := &AutocompleteConfig{
-		DisplayField: "name",
-		ValueField:   "id",
+		DisplayField: "label",
+		ValueField:   "value",
 		MinChars:     2,
 		Debounce:     300,
 	}
