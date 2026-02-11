@@ -40,29 +40,37 @@ func SendInfo(sse *datastar.ServerSentEventGenerator, text string) error {
 	return SendNotification(sse, NotificationInfo, text)
 }
 
+// SendAutocompleteResults sends search results to an autocomplete component via SSE.
+// The name parameter must match the name passed to FormAutocomplete.
+//
+// Example:
+//
+//	results := []components.SelectOption{
+//	    {Value: "1", Label: "Customer A"},
+//	    {Value: "2", Label: "Customer B"},
+//	}
+//	components.SendAutocompleteResults(sse, "customer_id", results)
+func SendAutocompleteResults(sse *datastar.ServerSentEventGenerator, name string, results []SelectOption) error {
+	signalName := name + "_ac"
+	return sse.MarshalAndPatchSignals(map[string]any{
+		signalName: map[string]any{
+			"results": results,
+			"open":    len(results) > 0,
+		},
+	})
+}
+
 // ============================================================================
 // Datastar Action Builder
 // ============================================================================
 
-// Action represents a Datastar action that can be used in event handlers.
-// It supports method chaining for adding modifiers like debounce.
+// Action represents a Datastar action expression.
 type Action struct {
-	action   string
-	debounce int // milliseconds, 0 means no debounce
+	action string
 }
 
-// Debounce adds a debounce modifier to the action (in milliseconds).
-// Example: Get("/search").Debounce(300) -> "__debounce_300ms: @get('/search')"
-func (a Action) Debounce(ms int) Action {
-	a.debounce = ms
-	return a
-}
-
-// String returns the final action string for use in data-on attributes.
+// String returns the action string.
 func (a Action) String() string {
-	if a.debounce > 0 {
-		return fmt.Sprintf("__debounce_%dms: %s", a.debounce, a.action)
-	}
 	return a.action
 }
 
@@ -107,97 +115,19 @@ func RawAction(action string) Action {
 }
 
 // ============================================================================
-// Dedicated Event Handler Options
-// ============================================================================
-
-// OnClick creates a click event handler option.
-// Example: OnClick(Post("/api/delete/%d", id))
-func OnClick(action Action) onOption {
-	return onOption{event: "click", action: action.String()}
-}
-
-// OnChange creates a change event handler option.
-// Fires when input value changes and element loses focus.
-// Example: OnChange(Get("/api/validate"))
-func OnChange(action Action) onOption {
-	return onOption{event: "change", action: action.String()}
-}
-
-// OnInput creates an input event handler option.
-// Fires on every keystroke/input change.
-// Example: OnInput(Get("/api/search").Debounce(300))
-func OnInput(action Action) onOption {
-	return onOption{event: "input", action: action.String()}
-}
-
-// OnSubmit creates a submit event handler option.
-// Example: OnSubmit(Post("/api/form"))
-func OnSubmit(action Action) onOption {
-	return onOption{event: "submit", action: action.String()}
-}
-
-// OnLoad creates a load event handler option.
-// Fires when the element is loaded/mounted.
-// Example: OnLoad(Get("/api/init"))
-func OnLoad(action Action) onOption {
-	return onOption{event: "load", action: action.String()}
-}
-
-// OnFocus creates a focus event handler option.
-// Example: OnFocus(Raw("$focused = true"))
-func OnFocus(action Action) onOption {
-	return onOption{event: "focus", action: action.String()}
-}
-
-// OnBlur creates a blur event handler option.
-// Example: OnBlur(Get("/api/validate"))
-func OnBlur(action Action) onOption {
-	return onOption{event: "blur", action: action.String()}
-}
-
-// OnKeydown creates a keydown event handler option.
-// Example: OnKeydown(Raw("$evt.key === 'Enter' && @post('/api/submit')"))
-func OnKeydown(action Action) onOption {
-	return onOption{event: "keydown", action: action.String()}
-}
-
-// OnKeyup creates a keyup event handler option.
-// Example: OnKeyup(Raw("$evt.key === 'Escape' && $open = false"))
-func OnKeyup(action Action) onOption {
-	return onOption{event: "keyup", action: action.String()}
-}
-
-// OnMouseenter creates a mouseenter event handler option.
-// Example: OnMouseenter(Raw("$hovered = true"))
-func OnMouseenter(action Action) onOption {
-	return onOption{event: "mouseenter", action: action.String()}
-}
-
-// OnMouseleave creates a mouseleave event handler option.
-// Example: OnMouseleave(Raw("$hovered = false"))
-func OnMouseleave(action Action) onOption {
-	return onOption{event: "mouseleave", action: action.String()}
-}
-
-// ============================================================================
 // Conditional Actions
 // ============================================================================
 
 // When creates a conditional action that only executes if the condition is true.
-// Example: When("$search.length >= 2", Get("/api/search")) -> "$search.length >= 2 && @get('/api/search')"
+// Example: When("$search.length >= 2", GetSSE("/api/search")) -> "$search.length >= 2 && @get('/api/search')"
 func When(condition string, action Action) Action {
-	return Action{
-		action:   fmt.Sprintf("%s && %s", condition, action.action),
-		debounce: action.debounce,
-	}
+	return Action{action: fmt.Sprintf("%s && %s", condition, action.action)}
 }
 
 // IfElse creates a ternary conditional action.
-// Example: IfElse("$active", Raw("$active = false"), Raw("$active = true"))
+// Example: IfElse("$active", RawAction("$active = false"), RawAction("$active = true"))
 func IfElse(condition string, ifTrue, ifFalse Action) Action {
-	return Action{
-		action: fmt.Sprintf("%s ? %s : %s", condition, ifTrue.action, ifFalse.action),
-	}
+	return Action{action: fmt.Sprintf("%s ? %s : %s", condition, ifTrue.action, ifFalse.action)}
 }
 
 // ============================================================================
@@ -205,16 +135,13 @@ func IfElse(condition string, ifTrue, ifFalse Action) Action {
 // ============================================================================
 
 // Then chains multiple actions together with semicolons.
-// Example: Raw("$loading = true").Then(Post("/api/save")) -> "$loading = true; @post('/api/save')"
+// Example: RawAction("$loading = true").Then(PostSSE("/api/save")) -> "$loading = true; @post('/api/save')"
 func (a Action) Then(next Action) Action {
-	return Action{
-		action:   fmt.Sprintf("%s; %s", a.action, next.action),
-		debounce: a.debounce, // preserve debounce from first action
-	}
+	return Action{action: fmt.Sprintf("%s; %s", a.action, next.action)}
 }
 
 // Chain combines multiple actions into one, separated by semicolons.
-// Example: Chain(Raw("$loading = true"), Post("/api/save"), Raw("$loading = false"))
+// Example: Chain(RawAction("$loading = true"), PostSSE("/api/save"), RawAction("$loading = false"))
 func Chain(actions ...Action) Action {
 	if len(actions) == 0 {
 		return Action{}
@@ -224,6 +151,167 @@ func Chain(actions ...Action) Action {
 		result = result.Then(next)
 	}
 	return result
+}
+
+// ============================================================================
+// Event Handler with Modifiers
+// ============================================================================
+
+// EventHandler represents a Datastar event handler with modifiers.
+// Modifiers are appended to the event name with double underscores.
+// Example: click__window__debounce.300ms
+type EventHandler struct {
+	event  string   // base event name (e.g., "click", "keydown")
+	action string   // the action expression
+	mods   []string // modifiers (e.g., "window", "debounce.300ms", "prevent")
+}
+
+// buildEvent constructs the full event string with modifiers.
+func (h EventHandler) buildEvent() string {
+	if len(h.mods) == 0 {
+		return h.event
+	}
+	return h.event + "__" + strings.Join(h.mods, "__")
+}
+
+// toOption converts the EventHandler to an onOption for use with components.
+func (h EventHandler) toOption() onOption {
+	return onOption{event: h.buildEvent(), action: h.action}
+}
+
+// Window adds the __window modifier (listen on window instead of element).
+// Example: OnKeydown(KeyEscape, action).Window() -> data-on:keydown__window="..."
+func (h EventHandler) Window() EventHandler {
+	h.mods = append(h.mods, "window")
+	return h
+}
+
+// Debounce adds a debounce modifier with the specified milliseconds.
+// Example: OnInput(action).Debounce(300) -> data-on:input__debounce.300ms="..."
+func (h EventHandler) Debounce(ms int) EventHandler {
+	h.mods = append(h.mods, fmt.Sprintf("debounce.%dms", ms))
+	return h
+}
+
+// Throttle adds a throttle modifier with the specified milliseconds.
+// Example: OnScroll(action).Throttle(100) -> data-on:scroll__throttle.100ms="..."
+func (h EventHandler) Throttle(ms int) EventHandler {
+	h.mods = append(h.mods, fmt.Sprintf("throttle.%dms", ms))
+	return h
+}
+
+// Prevent adds the __prevent modifier (calls preventDefault).
+// Example: OnSubmit(action).Prevent() -> data-on:submit__prevent="..."
+func (h EventHandler) Prevent() EventHandler {
+	h.mods = append(h.mods, "prevent")
+	return h
+}
+
+// Stop adds the __stop modifier (calls stopPropagation).
+func (h EventHandler) Stop() EventHandler {
+	h.mods = append(h.mods, "stop")
+	return h
+}
+
+// Once adds the __once modifier (handler fires only once).
+func (h EventHandler) Once() EventHandler {
+	h.mods = append(h.mods, "once")
+	return h
+}
+
+// Passive adds the __passive modifier (passive event listener).
+func (h EventHandler) Passive() EventHandler {
+	h.mods = append(h.mods, "passive")
+	return h
+}
+
+// Capture adds the __capture modifier (capture phase listener).
+func (h EventHandler) Capture() EventHandler {
+	h.mods = append(h.mods, "capture")
+	return h
+}
+
+// Implement all component option interfaces for EventHandler
+func (h EventHandler) applyToForm(c *FormConfig)               { h.toOption().applyToForm(c) }
+func (h EventHandler) applyToButton(c *ButtonConfig)           { h.toOption().applyToButton(c) }
+func (h EventHandler) applyToAutocomplete(c *AutocompleteConfig) { h.toOption().applyToAutocomplete(c) }
+func (h EventHandler) applyToDataTable(c *DataTableConfig)     { h.toOption().applyToDataTable(c) }
+func (h EventHandler) applyToStack(c *StackConfig)             { h.toOption().applyToStack(c) }
+func (h EventHandler) applyToFormGroup(c *FormGroupConfig)     { h.toOption().applyToFormGroup(c) }
+func (h EventHandler) applyToCard(c *CardConfig)               { h.toOption().applyToCard(c) }
+func (h EventHandler) applyToSection(c *SectionConfig)         { h.toOption().applyToSection(c) }
+func (h EventHandler) applyToElement(c *ElementConfig)         { h.toOption().applyToElement(c) }
+
+// ============================================================================
+// Event Handler Constructors
+// ============================================================================
+
+// OnClick creates a click event handler.
+// Example: OnClick(PostSSE("/api/delete"))
+// Example: OnClick(PostSSE("/api/save")).Debounce(300)
+func OnClick(action Action) EventHandler {
+	return EventHandler{event: "click", action: action.String()}
+}
+
+// OnChange creates a change event handler.
+// Fires when input value changes and element loses focus.
+func OnChange(action Action) EventHandler {
+	return EventHandler{event: "change", action: action.String()}
+}
+
+// OnInput creates an input event handler.
+// Fires on every keystroke/input change.
+// Example: OnInput(GetSSE("/api/search")).Debounce(300)
+func OnInput(action Action) EventHandler {
+	return EventHandler{event: "input", action: action.String()}
+}
+
+// OnSubmit creates a submit event handler.
+// Example: OnSubmit(PostSSE("/api/form")).Prevent()
+func OnSubmit(action Action) EventHandler {
+	return EventHandler{event: "submit", action: action.String()}
+}
+
+// OnLoad creates a load event handler.
+// Fires when the element is loaded/mounted.
+func OnLoad(action Action) EventHandler {
+	return EventHandler{event: "load", action: action.String()}
+}
+
+// OnFocus creates a focus event handler.
+func OnFocus(action Action) EventHandler {
+	return EventHandler{event: "focus", action: action.String()}
+}
+
+// OnBlur creates a blur event handler.
+func OnBlur(action Action) EventHandler {
+	return EventHandler{event: "blur", action: action.String()}
+}
+
+// OnKeydown creates a keydown event handler for any key.
+func OnKeydown(action Action) EventHandler {
+	return EventHandler{event: "keydown", action: action.String()}
+}
+
+// OnKeyup creates a keyup event handler for any key.
+func OnKeyup(action Action) EventHandler {
+	return EventHandler{event: "keyup", action: action.String()}
+}
+
+// OnMouseenter creates a mouseenter event handler.
+func OnMouseenter(action Action) EventHandler {
+	return EventHandler{event: "mouseenter", action: action.String()}
+}
+
+// OnMouseleave creates a mouseleave event handler.
+func OnMouseleave(action Action) EventHandler {
+	return EventHandler{event: "mouseleave", action: action.String()}
+}
+
+// OnScroll creates a scroll event handler.
+// Example: OnScroll(action).Throttle(100)
+func OnScroll(action Action) EventHandler {
+	return EventHandler{event: "scroll", action: action.String()}
 }
 
 // ============================================================================
@@ -269,35 +357,30 @@ func (k Key) Condition() string {
 }
 
 // Ctrl adds the Ctrl modifier to the key.
-// Example: KeyS.Ctrl() -> evt.ctrlKey && evt.key === 's'
 func (k Key) Ctrl() Key {
 	k.ctrl = true
 	return k
 }
 
 // Alt adds the Alt modifier to the key.
-// Example: KeyEnter.Alt() -> evt.altKey && evt.key === 'Enter'
 func (k Key) Alt() Key {
 	k.alt = true
 	return k
 }
 
 // Shift adds the Shift modifier to the key.
-// Example: KeyTab.Shift() -> evt.shiftKey && evt.key === 'Tab'
 func (k Key) Shift() Key {
 	k.shift = true
 	return k
 }
 
 // Meta adds the Meta (Cmd on Mac, Win on Windows) modifier to the key.
-// Example: KeyS.Meta() -> evt.metaKey && evt.key === 's'
 func (k Key) Meta() Key {
 	k.meta = true
 	return k
 }
 
 // CtrlOrCmd adds a cross-platform modifier (Ctrl on Windows/Linux, Cmd on Mac).
-// Example: KeyS.CtrlOrCmd() -> (evt.ctrlKey || evt.metaKey) && evt.key === 's'
 func (k Key) CtrlOrCmd() Key {
 	k.ctrlOrCmd = true
 	return k
@@ -389,20 +472,18 @@ var (
 // Uses evt.key matching as per Datastar documentation.
 // Example: OnKeydownKey(KeyEnter, PostSSE("/api/submit"))
 //   -> data-on:keydown="evt.key === 'Enter' && @post('/api/submit')"
-// Example: OnKeydownKey(KeyS.Ctrl(), PostSSE("/api/save"))
-//   -> data-on:keydown="evt.ctrlKey && evt.key === 's' && @post('/api/save')"
-func OnKeydownKey(key Key, action Action) onOption {
-	return onOption{
+// Example: OnKeydownKey(KeyS.Ctrl(), PostSSE("/api/save")).Prevent()
+//   -> data-on:keydown__prevent="evt.ctrlKey && evt.key === 's' && @post('/api/save')"
+func OnKeydownKey(key Key, action Action) EventHandler {
+	return EventHandler{
 		event:  "keydown",
 		action: fmt.Sprintf("%s && %s", key.Condition(), action.String()),
 	}
 }
 
 // OnKeyupKey creates a keyup handler that only fires for a specific key.
-// Example: OnKeyupKey(KeyEscape, RawAction("$open = false"))
-//   -> data-on:keyup="evt.key === 'Escape' && $open = false"
-func OnKeyupKey(key Key, action Action) onOption {
-	return onOption{
+func OnKeyupKey(key Key, action Action) EventHandler {
+	return EventHandler{
 		event:  "keyup",
 		action: fmt.Sprintf("%s && %s", key.Condition(), action.String()),
 	}
@@ -410,19 +491,86 @@ func OnKeyupKey(key Key, action Action) onOption {
 
 // OnKeydownWindow creates a global keydown handler (listens on window).
 // Useful for keyboard shortcuts that should work regardless of focus.
-// Example: OnKeydownWindow(KeyS.CtrlOrCmd(), PostSSE("/api/save"))
-//   -> data-on:keydown__window="(evt.ctrlKey || evt.metaKey) && evt.key === 's' && @post('/api/save')"
-func OnKeydownWindow(key Key, action Action) onOption {
-	return onOption{
-		event:  "keydown__window",
+// Example: OnKeydownWindow(KeyS.CtrlOrCmd(), PostSSE("/api/save")).Prevent()
+func OnKeydownWindow(key Key, action Action) EventHandler {
+	return EventHandler{
+		event:  "keydown",
 		action: fmt.Sprintf("%s && %s", key.Condition(), action.String()),
+		mods:   []string{"window"},
 	}
 }
 
 // OnKeyupWindow creates a global keyup handler (listens on window).
-func OnKeyupWindow(key Key, action Action) onOption {
-	return onOption{
-		event:  "keyup__window",
+func OnKeyupWindow(key Key, action Action) EventHandler {
+	return EventHandler{
+		event:  "keyup",
 		action: fmt.Sprintf("%s && %s", key.Condition(), action.String()),
+		mods:   []string{"window"},
 	}
+}
+
+// ============================================================================
+// Template Helper Functions
+// ============================================================================
+// These functions return strings for use directly in templ templates.
+
+// Event creates an event name builder for use in templates.
+// Example: Event("input").Debounce(300).String() -> "input__debounce.300ms"
+func Event(name string) EventBuilder {
+	return EventBuilder{event: name}
+}
+
+// EventBuilder builds event names with modifiers for template use.
+type EventBuilder struct {
+	event string
+	mods  []string
+}
+
+// String returns the full event name with modifiers.
+func (e EventBuilder) String() string {
+	if len(e.mods) == 0 {
+		return e.event
+	}
+	return e.event + "__" + strings.Join(e.mods, "__")
+}
+
+// Debounce adds a debounce modifier.
+func (e EventBuilder) Debounce(ms int) EventBuilder {
+	e.mods = append(e.mods, fmt.Sprintf("debounce.%dms", ms))
+	return e
+}
+
+// Throttle adds a throttle modifier.
+func (e EventBuilder) Throttle(ms int) EventBuilder {
+	e.mods = append(e.mods, fmt.Sprintf("throttle.%dms", ms))
+	return e
+}
+
+// Window adds the window modifier.
+func (e EventBuilder) Window() EventBuilder {
+	e.mods = append(e.mods, "window")
+	return e
+}
+
+// Prevent adds the prevent modifier.
+func (e EventBuilder) Prevent() EventBuilder {
+	e.mods = append(e.mods, "prevent")
+	return e
+}
+
+// Stop adds the stop modifier.
+func (e EventBuilder) Stop() EventBuilder {
+	e.mods = append(e.mods, "stop")
+	return e
+}
+
+// Once adds the once modifier.
+func (e EventBuilder) Once() EventBuilder {
+	e.mods = append(e.mods, "once")
+	return e
+}
+
+// Attr returns the full attribute name (data-on:event__mods).
+func (e EventBuilder) Attr() string {
+	return "data-on:" + e.String()
 }

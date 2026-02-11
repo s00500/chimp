@@ -1,6 +1,5 @@
 package components
 
-import "strconv"
 import "fmt"
 
 // FormAutocomplete renders a server-driven autocomplete/combobox component.
@@ -25,27 +24,37 @@ import "fmt"
 templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 	{{ config := applyAutocompleteOptions(options) }}
 	{{ signalName := name + "_ac" }}
-	{{ debounceMs := strconv.Itoa(config.Debounce) }}
-	{{ searchExpr := fmt.Sprintf("$%s.search.length >= %d", signalName, config.MinChars) }}
-	{{ endpoint := config.SearchEndpoint + "?q=$" + signalName + ".search" }}
-	<div class="field grid gap-2 flex-1">
+	{{ searchCondition := fmt.Sprintf("$%s.search.length >= %d", signalName, config.MinChars) }}
+	{{ searchEndpoint := fmt.Sprintf("@get(`%s?q=${$%s.search}`)", config.SearchEndpoint, signalName) }}
+	{{ inputEvent := Event("input").String() }}
+	{{ blurEvent := Event("blur").Debounce(200).String() }}
+	{{ onInputAction := When(searchCondition, RawAction(searchEndpoint)).String() }}
+	{{ onFocusAction := fmt.Sprintf("$%s.open = $%s.results.length > 0", signalName, signalName) }}
+	{{ onBlurAction := fmt.Sprintf("$%s.open = false", signalName) }}
+	{{
+		onSelectAction := fmt.Sprintf("$%s.value = item.%s; $%s.search = item.%s; $%s.selectedDisplay = item.%s; $%s.open = false",
+			signalName, config.ValueField,
+			signalName, config.DisplayField,
+			signalName, config.DisplayField,
+			signalName)
+	}}
+	<div class="field grid gap-2 flex-1 ">
 		<label class="label" for={ name }>{ label }</label>
 		<div
 			class="combobox relative"
-			data-signals={ fmt.Sprintf("{%s: {search: '', results: [], open: false, selectedDisplay: ''}}", signalName) }
+			data-signals={ fmt.Sprintf("{%s: {search: '', results: [], open: false, selectedDisplay: '', value: ''}}", signalName) }
 		>
+			// placeholder={ config.Placeholder }
 			<input
 				class="input w-full"
 				type="text"
 				id={ name + "_search" }
 				autocomplete="off"
 				data-bind={ fmt.Sprintf("$%s.search", signalName) }
-				data-on:input={ fmt.Sprintf("__debounce_%sms: %s && @get('%s')", debounceMs, searchExpr, endpoint) }
-				data-on:focus={ fmt.Sprintf("$%s.open = $%s.results.length > 0", signalName, signalName) }
-				data-on:blur__debounce_200ms={ fmt.Sprintf("$%s.open = false", signalName) }
-				if config.Placeholder != "" {
-					placeholder={ config.Placeholder }
-				}
+				{ templ.Attributes{"data-on:" + inputEvent: onInputAction}... }
+				data-on:focus={ onFocusAction }
+				{ templ.Attributes{"data-on:" + blurEvent: onBlurAction}... }
+				placeholder={ config.Placeholder }
 				if config.Disabled {
 					disabled
 				}
@@ -61,11 +70,7 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 					<button
 						type="button"
 						class="combobox-item w-full text-left px-3 py-2 hover:bg-muted cursor-pointer"
-						data-on:mousedown={ fmt.Sprintf("$%s.value = item.%s; $%s.search = item.%s; $%s.selectedDisplay = item.%s; $%s.open = false",
-							signalName, config.ValueField,
-							signalName, config.DisplayField,
-							signalName, config.DisplayField,
-							signalName) }
+						data-on:mousedown={ onSelectAction }
 						data-text={ fmt.Sprintf("item.%s", config.DisplayField) }
 					></button>
 				</template>

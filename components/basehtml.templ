@@ -3,6 +3,7 @@ package components
 import "github.com/s00500/chimp"
 
 type BaseHTMLConfig struct {
+	CacheBust               bool
 	IncludeFont             bool
 	TweakCN                 bool
 	AdditionalHeaderContent templ.Component
@@ -48,6 +49,12 @@ func WithoutTweakCN() BaseHTMLOption {
 	}
 }
 
+func WithCacheBust(enabled bool) BaseHTMLOption {
+	return func(c *BaseHTMLConfig) {
+		c.CacheBust = enabled
+	}
+}
+
 func WithHeaderComponent(comp templ.Component) BaseHTMLOption {
 	return func(c *BaseHTMLConfig) {
 		c.AdditionalHeaderContent = comp
@@ -55,9 +62,10 @@ func WithHeaderComponent(comp templ.Component) BaseHTMLOption {
 }
 
 // Base provides the shared html/head/body structure with ToastBar
-templ BaseHTML(title string, cacheBust bool, opts ...BaseHTMLOption) {
+templ BaseHTML(title string, opts ...BaseHTMLOption) {
 	{{
 		config := BaseHTMLConfig{
+			CacheBust:               defaults.CacheBust,
 			IncludeFont:             defaults.IncludeFont,
 			TweakCN:                 defaults.TweakCN,
 			AdditionalHeaderContent: defaults.AdditionalHeaderContent,
@@ -76,7 +84,7 @@ templ BaseHTML(title string, cacheBust bool, opts ...BaseHTMLOption) {
 			if config.IncludeFont {
 				@chimp.IncludedFont()
 			}
-			@chimp.StyleWithCacheBust("assets/output.css", cacheBust)
+			@chimp.StyleWithCacheBust("assets/output.css", config.CacheBust)
 			if config.TweakCN {
 				<script src="https://tweakcn.com/live-preview.min.js"></script>
 			}
@@ -89,7 +97,7 @@ templ BaseHTML(title string, cacheBust bool, opts ...BaseHTMLOption) {
 			@ConfirmModal("")
 			@NotificationContainer()
 			{ children... }
-			@chimp.HotReload(cacheBust)
+			@chimp.HotReload(config.CacheBust)
 		</body>
 	</html>
 }

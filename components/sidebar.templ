@@ -6,7 +6,6 @@ import (
 	"github.com/s00500/chimp/icon/base"
 )
 
-var CacheBust = false
 
 // ChevronIcon is the icon used for expandable menu items (MdiChevronDown)
 var ChevronIcon base.IconBase = `<path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />`
@@ -146,7 +145,7 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 
 // SimpleSidebarLayout provides a simpler sidebar layout without groups
 templ SimpleSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
-	@BaseHTML(title, CacheBust) {
+	@BaseHTML(title) {
 		@sidebarStyles()
 		<aside class="sidebar" data-side="left" aria-hidden="false">
 			<nav aria-label="Sidebar navigation">
@@ -212,7 +211,7 @@ type SidebarConfig struct {
 
 // CardSidebarLayout provides a card-based sidebar layout with mobile dropdown support
 templ CardSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
-	@BaseHTML(title, CacheBust) {
+	@BaseHTML(title) {
 		@sidebarStyles()
 		<main>
 			<div class="flex flex-col md:flex-row justify-center gap-5 p-2 md:p-5  md:h-screen">
@@ -376,7 +375,7 @@ templ MobileDropdownHeading(label string) {
 
 // SectionSidebarLayout provides a section-based sidebar layout using bordered sections instead of cards
 templ SectionSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
-	@BaseHTML(title, CacheBust) {
+	@BaseHTML(title) {
 		@sidebarStyles()
 		<main>
 			<div class="flex flex-col md:flex-row justify-center gap-5 p-5 md:p-5 md:h-screen">
