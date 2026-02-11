@@ -41,6 +41,7 @@ func SendInfo(sse *datastar.ServerSentEventGenerator, text string) error {
 }
 
 // SendAutocompleteResults sends search results to an autocomplete component via SSE.
+// It patches the rendered options into the dropdown and updates the open/hasResults signals.
 // The name parameter must match the name passed to FormAutocomplete.
 //
 // Example:
@@ -52,10 +53,21 @@ func SendInfo(sse *datastar.ServerSentEventGenerator, text string) error {
 //	components.SendAutocompleteResults(sse, "customer_id", results)
 func SendAutocompleteResults(sse *datastar.ServerSentEventGenerator, name string, results []SelectOption) error {
 	signalName := name + "_ac"
+	resultsID := "#" + name + "_ac_results"
+	hasResults := len(results) > 0
+
+	if err := sse.PatchElementTempl(
+		autocompleteResults(signalName, results),
+		datastar.WithModeInner(),
+		datastar.WithSelector(resultsID),
+	); err != nil {
+		return err
+	}
+
 	return sse.MarshalAndPatchSignals(map[string]any{
 		signalName: map[string]any{
-			"results": results,
-			"open":    len(results) > 0,
+			"open":       hasResults,
+			"hasResults": hasResults,
 		},
 	})
 }
