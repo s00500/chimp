@@ -2,8 +2,8 @@ package components
 
 import "fmt"
 
-// FormAutocomplete renders a server-driven autocomplete/combobox component.
-// Searches are performed via SSE endpoint, results are patched as HTML fragments.
+// FormAutocomplete renders a server-driven searchable combobox component.
+// Uses BaseCoat's combobox UI with server-side search via Datastar SSE.
 //
 // Example:
 //
@@ -23,55 +23,77 @@ import "fmt"
 //	components.SendAutocompleteResults(sse, "customer_id", results)
 templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 	{{ config := applyAutocompleteOptions(options) }}
-	{{ signalName := name + "_ac" }}
-	{{ resultsID := name + "_ac_results" }}
-	{{ searchCondition := fmt.Sprintf("$%s.search.length >= %d", signalName, config.MinChars) }}
-	{{ searchEndpoint := fmt.Sprintf("@get(`%s?q=${$%s.search}`)", config.SearchEndpoint, signalName) }}
+	{{ selectID := name + "_ac" }}
+	{{ triggerID := selectID + "_trigger" }}
+	{{ popoverID := selectID + "_popover" }}
+	{{ listboxID := selectID + "_listbox" }}
+	{{ searchSignal := selectID + "_search" }}
+	// Search action
+	{{ searchCondition := fmt.Sprintf("$%s.length >= %d", searchSignal, config.MinChars) }}
+	{{ searchEndpoint := fmt.Sprintf("@get(`%s?q=${$%s}`)", config.SearchEndpoint, searchSignal) }}
 	{{ inputEvent := Event("input").Debounce(config.Debounce).String() }}
-	{{ blurEvent := Event("blur").Debounce(200).String() }}
 	{{ onInputAction := When(searchCondition, RawAction(searchEndpoint)).String() }}
-	{{ onFocusAction := fmt.Sprintf("$%s.open = $%s.hasResults", signalName, signalName) }}
-	{{ onBlurAction := fmt.Sprintf("$%s.open = false", signalName) }}
 	<div class="field grid gap-2 flex-1">
 		<label class="label" for={ name }>{ label }</label>
-		<div
-			class="relative"
-			data-signals={ fmt.Sprintf("{%s: {search: '', open: false, hasResults: false, value: ''}}", signalName) }
-		>
-			<input
-				class="input w-full"
-				type="text"
-				id={ name + "_search" }
-				autocomplete="off"
-				data-bind={ fmt.Sprintf("%s.search", signalName) }
-				{ templ.Attributes{"data-on:" + inputEvent: onInputAction}... }
-				data-on:focus={ onFocusAction }
-				{ templ.Attributes{"data-on:" + blurEvent: onBlurAction}... }
-				if config.Placeholder != "" {
-					placeholder={ config.Placeholder }
+		<chimp-autocomplete>
+			<div
+				class="select w-full"
+				id={ selectID }
+				if config.Datastar.Bind != "" {
+					data-on:change={ fmt.Sprintf("$%s = evt.detail.value", config.Datastar.Bind) }
 				}
+			>
+			<button
+				type="button"
+				class="btn-outline w-full justify-between"
+				id={ triggerID }
+				aria-haspopup="listbox"
+				aria-expanded="false"
+				aria-controls={ listboxID }
 				if config.Disabled {
 					disabled
 				}
-				if config.Required {
-					required
-				}
-			/>
-			<div
-				id={ resultsID }
-				class="max-h-60 overflow-y-auto"
-				data-popover
-				data-show={ fmt.Sprintf("$%s.open", signalName) }
-			></div>
-			<input
-				type="hidden"
-				name={ name }
-				data-bind={ fmt.Sprintf("%s.value", signalName) }
-				if config.Datastar.Bind != "" {
-					data-bind={ config.Datastar.Bind }
-				}
-			/>
-		</div>
+			>
+				<span class="truncate">
+					if config.Placeholder != "" {
+						{ config.Placeholder }
+					}
+				</span>
+				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted-foreground opacity-50 shrink-0"><path d="m7 15 5 5 5-5"></path><path d="m7 9 5-5 5 5"></path></svg>
+			</button>
+			<div id={ popoverID } data-popover aria-hidden="true">
+				<header>
+					<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+					<input
+						type="text"
+						value=""
+						if config.Placeholder != "" {
+							placeholder={ config.Placeholder }
+						}
+						autocomplete="off"
+						autocorrect="off"
+						spellcheck="false"
+						aria-autocomplete="list"
+						role="combobox"
+						aria-expanded="false"
+						aria-controls={ listboxID }
+						aria-labelledby={ triggerID }
+						data-signals={ fmt.Sprintf("{%s: ''}", searchSignal) }
+						data-bind={ searchSignal }
+						{ templ.Attributes{"data-on:" + inputEvent: onInputAction}... }
+					/>
+				</header>
+				<div
+					role="listbox"
+					id={ listboxID }
+					aria-orientation="vertical"
+					aria-labelledby={ triggerID }
+					data-empty="No results found."
+				></div>
+			</div>
+			<input type="hidden" name={ name } value=""/>
+			</div>
+		</chimp-autocomplete>
 		if config.Error != "" {
 			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
 		}
@@ -79,14 +101,10 @@ templ FormAutocomplete(label, name string, options ...AutocompleteOption) {
 }
 
 // autocompleteResults renders the dropdown options for an autocomplete.
-// This is used internally by SendAutocompleteResults.
-templ autocompleteResults(signalName string, results []SelectOption) {
+// Used internally by SendAutocompleteResults.
+templ autocompleteResults(results []SelectOption) {
 	for _, item := range results {
-		<div
-			role="option"
-			class="relative flex cursor-default items-center rounded-sm px-2 py-1.5 text-sm select-none hover:bg-accent hover:text-accent-foreground"
-			data-on:mousedown={ fmt.Sprintf("$%s.value = '%s'; $%s.search = '%s'; $%s.open = false", signalName, item.Value, signalName, item.Label, signalName) }
-		>
+		<div role="option" data-value={ item.Value }>
 			{ item.Label }
 		</div>
 	}

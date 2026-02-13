@@ -81,6 +81,7 @@ templ BaseHTML(title string, opts ...BaseHTMLOption) {
 			@chimp.IncludedDatastar()
 			// we do not include the BasecoatCSS, as this is created by ourself
 			@chimp.IncludedBaseCoatJS()
+			@chimp.IncludedChimpJS()
 			if config.IncludeFont {
 				@chimp.IncludedFont()
 			}

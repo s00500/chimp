@@ -120,6 +120,10 @@ func BaseHTML(title string, opts ...BaseHTMLOption) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		templ_7745c5c3_Err = chimp.IncludedChimpJS().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		if config.IncludeFont {
 			templ_7745c5c3_Err = chimp.IncludedFont().Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
@@ -149,7 +153,7 @@ func BaseHTML(title string, opts ...BaseHTMLOption) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/basehtml.templ`, Line: 94, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/basehtml.templ`, Line: 95, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
