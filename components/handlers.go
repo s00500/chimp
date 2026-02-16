@@ -73,6 +73,8 @@ func SendAutocompleteResults(sse *datastar.ServerSentEventGenerator, name string
 
 // SendDataTableRows sends rendered table rows to a DataTable component via SSE.
 // The rows parameter should be a templ component that renders <tr> elements.
+// Rows are wrapped in a <tbody> with the table's body ID so idiomorph matches
+// by element ID automatically — no explicit selector or mode needed.
 // If the DataTable uses WithSignalPrefix, pass the same prefix as signalPrefix.
 //
 // Example:
@@ -92,11 +94,7 @@ func SendDataTableRows(sse *datastar.ServerSentEventGenerator, id string, totalR
 		prefix = signalPrefix[0]
 	}
 
-	if err := sse.PatchElementTempl(
-		rows,
-		datastar.WithModeInner(),
-		datastar.WithSelector("#"+id+"-body"),
-	); err != nil {
+	if err := sse.PatchElementTempl(dataTableBody(id, rows)); err != nil {
 		return err
 	}
 
@@ -106,6 +104,42 @@ func SendDataTableRows(sse *datastar.ServerSentEventGenerator, id string, totalR
 			"loading":   false,
 		},
 	})
+}
+
+// DataTableRowID returns the conventional element ID for a table row.
+// Use this both in your row templates and in handlers to keep IDs consistent.
+//
+// Example:
+//
+//	<tr id={ components.DataTableRowID("users", user.ID) } class="table-row">
+func DataTableRowID(tableID string, rowID string) string {
+	return tableID + "-row-" + rowID
+}
+
+// SendDataTableRow patches a single table row via SSE.
+// The row component must render a <tr> with an id matching DataTableRowID(tableID, rowID).
+// Idiomorph matches the element by ID automatically — no explicit selector needed.
+//
+// Example:
+//
+//	// GET /users/{id}/edit — swap a row into edit mode
+//	func handleUserEdit(w http.ResponseWriter, r *http.Request) {
+//	    sse := datastar.NewSSE(w, r)
+//	    id := chi.URLParam(r, "id")
+//	    user := fetchUser(id)
+//	    components.SendDataTableRow(sse, "users", id, UserEditRow(user))
+//	}
+//
+//	// PUT /users/{id} — save and swap back to display mode
+//	func handleUserSave(w http.ResponseWriter, r *http.Request) {
+//	    sse := datastar.NewSSE(w, r)
+//	    id := chi.URLParam(r, "id")
+//	    // ... save ...
+//	    user := fetchUser(id)
+//	    components.SendDataTableRow(sse, "users", id, UserRow(user))
+//	}
+func SendDataTableRow(sse *datastar.ServerSentEventGenerator, tableID string, rowID string, row templ.Component) error {
+	return sse.PatchElementTempl(row)
 }
 
 // ============================================================================
