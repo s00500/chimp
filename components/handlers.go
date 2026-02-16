@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/a-h/templ"
 	"github.com/starfederation/datastar-go/datastar"
 )
 
@@ -41,7 +42,8 @@ func SendInfo(sse *datastar.ServerSentEventGenerator, text string) error {
 }
 
 // SendAutocompleteResults sends search results to an autocomplete component via SSE.
-// It patches the rendered options into the dropdown and updates the open/hasResults signals.
+// It patches the rendered options into the listbox. The <chimp-autocomplete>
+// web component automatically detects the DOM change and reinitializes BaseCoat.
 // The name parameter must match the name passed to FormAutocomplete.
 //
 // Example:
@@ -52,22 +54,56 @@ func SendInfo(sse *datastar.ServerSentEventGenerator, text string) error {
 //	}
 //	components.SendAutocompleteResults(sse, "customer_id", results)
 func SendAutocompleteResults(sse *datastar.ServerSentEventGenerator, name string, results []SelectOption) error {
-	signalName := name + "_ac"
-	resultsID := "#" + name + "_ac_results"
-	hasResults := len(results) > 0
+	selectID := name + "_ac"
+	listboxID := "#" + selectID + "_listbox"
+
+	// Patch the rendered options into the listbox.
+	// The <chimp-autocomplete> web component's MutationObserver will
+	// automatically reinit BaseCoat and preserve popover state.
+	return sse.PatchElementTempl(
+		autocompleteResults(results),
+		datastar.WithModeInner(),
+		datastar.WithSelector(listboxID),
+	)
+}
+
+// ============================================================================
+// DataTable Helpers
+// ============================================================================
+
+// SendDataTableRows sends rendered table rows to a DataTable component via SSE.
+// The rows parameter should be a templ component that renders <tr> elements.
+// If the DataTable uses WithSignalPrefix, pass the same prefix as signalPrefix.
+//
+// Example:
+//
+//	func handleUsers(w http.ResponseWriter, r *http.Request) {
+//	    sse := datastar.NewSSE(w, r)
+//	    page, _ := strconv.Atoi(r.URL.Query().Get("page"))
+//	    pageSize, _ := strconv.Atoi(r.URL.Query().Get("pageSize"))
+//	    sortField := r.URL.Query().Get("sortField")
+//	    sortDir := r.URL.Query().Get("sortDir")
+//	    users, total := fetchUsers(page, pageSize, sortField, sortDir)
+//	    components.SendDataTableRows(sse, "users", total, UsersRows(users))
+//	}
+func SendDataTableRows(sse *datastar.ServerSentEventGenerator, id string, totalRows int, rows templ.Component, signalPrefix ...string) error {
+	prefix := id
+	if len(signalPrefix) > 0 && signalPrefix[0] != "" {
+		prefix = signalPrefix[0]
+	}
 
 	if err := sse.PatchElementTempl(
-		autocompleteResults(signalName, results),
+		rows,
 		datastar.WithModeInner(),
-		datastar.WithSelector(resultsID),
+		datastar.WithSelector("#"+id+"-body"),
 	); err != nil {
 		return err
 	}
 
 	return sse.MarshalAndPatchSignals(map[string]any{
-		signalName: map[string]any{
-			"open":       hasResults,
-			"hasResults": hasResults,
+		prefix: map[string]any{
+			"totalRows": totalRows,
+			"loading":   false,
 		},
 	})
 }
