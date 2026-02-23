@@ -545,13 +545,14 @@ func applyAutocompleteOptions(options []AutocompleteOption) *AutocompleteConfig 
 type DataTableConfig struct {
 	CommonConfig // embedded
 
-	DataEndpoint string
-	Columns      []Column
-	PageSize     int
-	Selectable   bool
-	Sortable     bool
-	SignalPrefix string
-	RowActions   func(rowIndex int) templ.Component
+	DataEndpoint   string
+	Columns        []Column
+	PageSize       int
+	Selectable     bool
+	Sortable       bool
+	HidePagination bool
+	SignalPrefix   string
+	RowActions     func(rowIndex int) templ.Component
 }
 
 // DataTable-specific option types
@@ -567,6 +568,9 @@ func (o dtPageSizeOption) applyToDataTable(c *DataTableConfig) { c.PageSize = in
 type dtSelectableOption struct{}
 func (o dtSelectableOption) applyToDataTable(c *DataTableConfig) { c.Selectable = true }
 
+type dtHidePaginationOption struct{}
+func (o dtHidePaginationOption) applyToDataTable(c *DataTableConfig) { c.HidePagination = true }
+
 type dtSignalPrefixOption string
 func (o dtSignalPrefixOption) applyToDataTable(c *DataTableConfig) { c.SignalPrefix = string(o) }
 
@@ -578,6 +582,7 @@ func WithDataEndpoint(endpoint string) dtDataEndpointOption         { return dtD
 func WithColumns(columns []Column) dtColumnsOption                  { return dtColumnsOption(columns) }
 func WithPageSize(size int) dtPageSizeOption                        { return dtPageSizeOption(size) }
 func WithSelectable() dtSelectableOption                            { return dtSelectableOption{} }
+func WithHidePagination() dtHidePaginationOption                    { return dtHidePaginationOption{} }
 func WithSignalPrefix(prefix string) dtSignalPrefixOption           { return dtSignalPrefixOption(prefix) }
 func WithRowActions(fn func(rowIndex int) templ.Component) dtRowActionsOption { return dtRowActionsOption(fn) }
 

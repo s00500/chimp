@@ -69,7 +69,9 @@ components.DataTableRowID("users", "123")
 
 Always set this as the `id` on your `<tr>` elements so idiomorph can find them.
 
-### Edit Row Template
+### Edit Row Template (manual)
+
+You can write edit rows manually for full control:
 
 ```go
 templ UserEditRow(user User) {
@@ -97,6 +99,63 @@ templ UserEditRow(user User) {
 }
 ```
 
+### Edit Row Template (using DataTableEditRow)
+
+For columns with `EditType` set, use the built-in `DataTableEditRow` component. It automatically renders the correct input type per column and wires up Save/Cancel buttons for the actions column.
+
+Define columns with edit types:
+
+```go
+var userColumns = []components.Column{
+    {Field: "name", Header: "Name", Sortable: true, EditType: components.EditText},
+    {Field: "email", Header: "Email", Sortable: true, EditType: components.EditText},
+    {Field: "role", Header: "Role", EditType: components.EditSelect, EditOptions: []string{"admin", "user", "viewer"}},
+    {Field: "actions", Header: "", Type: components.ColumnActions, Width: "100px"},
+}
+```
+
+Then in your handler, build a values map and render:
+
+```go
+func handleUserEdit(w http.ResponseWriter, r *http.Request) {
+    sse := datastar.NewSSE(w, r)
+    id := chi.URLParam(r, "id")
+    user := fetchUser(id)
+    values := map[string]string{
+        "name":  user.Name,
+        "email": user.Email,
+        "role":  user.Role,
+    }
+    components.SendDataTableRow(sse, "users", id,
+        components.DataTableEditRow("users", id, values, userColumns, "/users"))
+}
+```
+
+The `DataTableEditRow` component:
+- Renders `<input type="text">` for `EditText` columns
+- Renders `<select>` for `EditSelect` columns (using `EditOptions`)
+- Renders read-only text for columns without `EditType`
+- Renders Save (POST to `endpoint/rowID`) and Cancel (GET to `endpoint/rowID/cancel`) buttons for `ColumnActions` columns
+- Automatically initializes edit signals via `data-signals`
+
+### ReadEditSignals
+
+Use `ReadEditSignals` in your save handler to read edited values from the Datastar request:
+
+```go
+func handleUserSave(w http.ResponseWriter, r *http.Request) {
+    sse := datastar.NewSSE(w, r)
+    id := chi.URLParam(r, "id")
+
+    edited, err := components.ReadEditSignals(r, userColumns)
+    // edited["name"], edited["email"], edited["role"] contain the new values
+
+    // ... save logic ...
+    user := fetchUser(id)
+    components.SendDataTableRow(sse, "users", id, UserRow(user))
+}
+```
+
 ### Handlers
 
 ```go
@@ -108,17 +167,18 @@ func handleUserEdit(w http.ResponseWriter, r *http.Request) {
     components.SendDataTableRow(sse, "users", id, UserEditRow(user))
 }
 
-// PUT /users/{id} — save and swap back to display mode
+// POST /users/{id} — save and swap back to display mode
 func handleUserSave(w http.ResponseWriter, r *http.Request) {
     sse := datastar.NewSSE(w, r)
     id := chi.URLParam(r, "id")
-    // ... save logic ...
+    edited, _ := components.ReadEditSignals(r, userColumns)
+    // ... save edited values ...
     user := fetchUser(id)
     components.SendDataTableRow(sse, "users", id, UserRow(user))
 }
 
-// GET /users/{id}/row — cancel edit, restore display row
-func handleUserRow(w http.ResponseWriter, r *http.Request) {
+// GET /users/{id}/cancel — cancel edit, restore display row
+func handleUserCancel(w http.ResponseWriter, r *http.Request) {
     sse := datastar.NewSSE(w, r)
     id := chi.URLParam(r, "id")
     user := fetchUser(id)
@@ -155,13 +215,32 @@ Not all SSE helpers can rely on idiomorph. Modes other than outer (the default) 
 | `DataTableRowID(tableID, rowID)` | Returns conventional row element ID (`"users-row-123"`) |
 | `SendDataTableRows(sse, id, total, rows)` | Patch all rows + update pagination signals |
 | `SendDataTableRow(sse, tableID, rowID, row)` | Patch a single row in place |
+| `ReadEditSignals(r, columns)` | Read edited values from Datastar request signals |
+| `EditSignalName(field)` | Returns signal name for a field (e.g. `"name"` → `"editName"`) |
+
+## Templates
+
+| Component | Description |
+|-----------|-------------|
+| `DataTable(id, options...)` | Main data table shell with pagination and sorting |
+| `DataTableRowActions()` | Wrapper for action buttons in a row cell |
+| `DataTableEditRow(tableID, rowID, values, columns, endpoint)` | Edit-mode row with inputs per column |
 
 ## Options
 
 | Option | Description |
 |--------|-------------|
-| `WithColumns(cols)` | Column definitions (Field, Header, Sortable, Width) |
+| `WithColumns(cols)` | Column definitions (Field, Header, Sortable, Width, EditType, EditOptions) |
 | `WithDataEndpoint(url)` | SSE endpoint for fetching rows |
 | `WithPageSize(n)` | Rows per page (default: 25) |
 | `WithSignalPrefix(p)` | Custom signal namespace (default: table ID) |
 | `WithSelectable()` | Enable row selection |
+| `WithHidePagination()` | Hide the pagination controls |
+
+## Column EditType
+
+| EditType | Description |
+|----------|-------------|
+| `EditNone` (default) | Column is read-only in edit mode |
+| `EditText` | Renders `<input type="text">` |
+| `EditSelect` | Renders `<select>` using `EditOptions` |

@@ -2,6 +2,8 @@ package components
 
 import "strconv"
 import "fmt"
+import "github.com/starfederation/datastar-go/datastar"
+import "github.com/s00500/chimp/icon"
 
 // DataTable renders a server-driven data table with SSE pagination and sorting.
 //
@@ -113,38 +115,53 @@ templ DataTable(id string, options ...DataTableOption) {
 			No data found
 		</div>
 		<!-- Pagination -->
+		if !config.HidePagination {
 		<div
-			class="pagination flex items-center justify-between py-4"
+			class="flex items-center justify-between pt-4"
 			data-show={ fmt.Sprintf("$%s.totalRows > 0", prefix) }
 		>
 			<div class="text-sm text-muted-foreground">
 				<span>Showing </span>
 				<span data-text={ fmt.Sprintf("(($%s.page - 1) * $%s.pageSize) + 1", prefix, prefix) }></span>
-				<span>to </span>
+				<span>–</span>
 				<span data-text={ fmt.Sprintf("Math.min($%s.page * $%s.pageSize, $%s.totalRows)", prefix, prefix, prefix) }></span>
 				<span>of </span>
 				<span data-text={ fmt.Sprintf("$%s.totalRows", prefix) }></span>
-				<span>results</span>
 			</div>
-			<div class="flex gap-2">
-				<button
-					type="button"
-					class="btn btn-outline"
-					data-attr:disabled={ fmt.Sprintf("$%s.page <= 1", prefix) }
-					data-on:click={ fmt.Sprintf("$%s.page = $%s.page - 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
-				>
-					Previous
-				</button>
-				<button
-					type="button"
-					class="btn btn-outline"
-					data-attr:disabled={ fmt.Sprintf("$%s.page * $%s.pageSize >= $%s.totalRows", prefix, prefix, prefix) }
-					data-on:click={ fmt.Sprintf("$%s.page = $%s.page + 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
-				>
-					Next
-				</button>
-			</div>
+			<nav role="navigation" aria-label="pagination" class="flex justify-center">
+				<ul class="flex flex-row items-center gap-1">
+					<li>
+						<button
+							type="button"
+							class="btn-ghost gap-1 pl-2.5"
+							data-attr:disabled={ fmt.Sprintf("$%s.page <= 1", prefix) }
+							data-on:click={ fmt.Sprintf("$%s.page = $%s.page - 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
+						>
+							@icon.Icon(icon.MdiChevronLeft, "size-4")
+							<span>Previous</span>
+						</button>
+					</li>
+					<li>
+						<span
+							class="btn-icon-ghost pointer-events-none text-sm tabular-nums"
+							data-text={ fmt.Sprintf("$%s.page + ' / ' + Math.ceil($%s.totalRows / $%s.pageSize)", prefix, prefix, prefix) }
+						></span>
+					</li>
+					<li>
+						<button
+							type="button"
+							class="btn-ghost gap-1 pr-2.5"
+							data-attr:disabled={ fmt.Sprintf("$%s.page * $%s.pageSize >= $%s.totalRows", prefix, prefix, prefix) }
+							data-on:click={ fmt.Sprintf("$%s.page = $%s.page + 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
+						>
+							<span>Next</span>
+							@icon.Icon(icon.MdiChevronRight, "size-4")
+						</button>
+					</li>
+				</ul>
+			</nav>
 		</div>
+		}
 	</div>
 }
 
@@ -179,4 +196,57 @@ templ DataTableRowActions() {
 	<div class="flex items-center gap-1">
 		{ children... }
 	</div>
+}
+
+// DataTableEditRow renders a table row in edit mode with appropriate inputs per column.
+// - tableID + rowID: used to generate the <tr id> matching DataTableRowID() convention
+// - values: map of field→current-value for pre-populating inputs
+// - columns: same Column slice as the DataTable
+// - endpoint: base endpoint for save/cancel (e.g. "users")
+templ DataTableEditRow(tableID string, rowID string, values map[string]string, columns []Column, endpoint string) {
+	<tr id={ DataTableRowID(tableID, rowID) } class="table-row" data-signals={ editSignalsInit(values, columns) }>
+		for _, col := range columns {
+			if col.Type == ColumnActions {
+				<td class="table-cell">
+					@DataTableRowActions() {
+						<button
+							type="button"
+							class="btn-ghost text-green-600"
+							title="Save"
+							data-on:click={ datastar.PostSSE("%s/%s", endpoint, rowID) }
+						>
+							@icon.Icon(icon.MdiCheck, "size-5")
+						</button>
+						<button
+							type="button"
+							class="btn-ghost text-destructive"
+							title="Cancel"
+							data-on:click={ datastar.GetSSE("%s/%s/cancel", endpoint, rowID) }
+						>
+							@icon.Icon(icon.MdiClose, "size-5")
+						</button>
+					}
+				</td>
+			} else if col.EditType == EditText {
+				<td class="table-cell">
+					<input
+						type="text"
+						class="input w-full"
+						data-bind={ EditSignalName(col.Field) }
+						value={ values[col.Field] }
+					/>
+				</td>
+			} else if col.EditType == EditSelect {
+				<td class="table-cell">
+					<select class="select w-full" data-bind={ EditSignalName(col.Field) }>
+						for _, opt := range col.EditOptions {
+							<option value={ opt } selected?={ values[col.Field] == opt }>{ opt }</option>
+						}
+					</select>
+				</td>
+			} else {
+				<td class="table-cell">{ values[col.Field] }</td>
+			}
+		}
+	</tr>
 }

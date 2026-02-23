@@ -12,6 +12,7 @@ border-t-transparent
 btn
 btn-ghost
 btn-icon
+btn-icon-ghost
 btn-outline
 card
 checkbox
@@ -26,6 +27,7 @@ fixed
 flex
 flex-1
 flex-col
+flex-row
 flex-wrap
 font-bold
 font-medium
@@ -47,6 +49,7 @@ hidden
 hover:opacity-100
 inner
 inner-value
+input
 inset-0
 items-center
 justify-between
@@ -83,10 +86,11 @@ p-2
 p-4
 p-5
 p-6
-pagination
 pb-4
+pl-2.5
 pointer-events-auto
 pointer-events-none
+pr-2.5
 pt-4
 px-2
 px-4
@@ -94,7 +98,6 @@ py-1
 py-1.5
 py-2
 py-3
-py-4
 py-8
 radio
 relative
@@ -117,8 +120,11 @@ table-body
 table-cell
 table-header
 table-row
+tabular-nums
 text-base
 text-center
+text-destructive
+text-green-600
 text-lg
 text-muted-foreground
 text-sm

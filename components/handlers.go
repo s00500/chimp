@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 
 	"github.com/a-h/templ"
@@ -140,6 +141,27 @@ func DataTableRowID(tableID string, rowID string) string {
 //	}
 func SendDataTableRow(sse *datastar.ServerSentEventGenerator, tableID string, rowID string, row templ.Component) error {
 	return sse.PatchElementTempl(row)
+}
+
+// ReadEditSignals reads edit signals from a Datastar request for the given columns.
+// Returns a map of field name → new value for each editable column.
+func ReadEditSignals(r *http.Request, columns []Column) (map[string]string, error) {
+	var allSignals map[string]any
+	if err := datastar.ReadSignals(r, &allSignals); err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]string)
+	for _, col := range columns {
+		if col.EditType == "" || col.EditType == EditNone {
+			continue
+		}
+		sigName := EditSignalName(col.Field)
+		if val, ok := allSignals[sigName]; ok {
+			result[col.Field] = fmt.Sprintf("%v", val)
+		}
+	}
+	return result, nil
 }
 
 // ============================================================================
