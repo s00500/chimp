@@ -70,8 +70,8 @@ func EditSignalName(field string) string {
 	return "edit" + strings.ToUpper(field[:1]) + field[1:]
 }
 
-// editSignalsInit builds a data-signals value string for initializing edit signals.
-func editSignalsInit(values map[string]string, columns []Column) string {
+// EditSignalsInit builds a data-signals value string for initializing edit signals.
+func EditSignalsInit(values map[string]string, columns []Column) string {
 	var sb strings.Builder
 	sb.WriteString("{")
 	first := true

@@ -50,7 +50,11 @@ templ DataTable(id string, options ...DataTableOption) {
 	prefix = config.SignalPrefix
 } }}
 	{{ pageSize := strconv.Itoa(config.PageSize) }}
-	{{ signalsInit := fmt.Sprintf("{%s: {page: 1, pageSize: %s, sortField: '', sortDir: 'asc', totalRows: 0, loading: false}}", prefix, pageSize) }}
+	{{ selectableSignals := "" }}
+	{{ if config.Selectable {
+	selectableSignals = ", selectedRows: {}, selectAll: false"
+} }}
+	{{ signalsInit := fmt.Sprintf("{%s: {page: 1, pageSize: %s, sortField: '', sortDir: 'asc', totalRows: 0, loading: false%s}}", prefix, pageSize, selectableSignals) }}
 	{{ loadDataExpr := fmt.Sprintf("@get(`%s?page=${$%s.page}&pageSize=${$%s.pageSize}&sortField=${$%s.sortField}&sortDir=${$%s.sortDir}`)", config.DataEndpoint, prefix, prefix, prefix, prefix) }}
 	<div
 		id={ id }
@@ -70,6 +74,16 @@ templ DataTable(id string, options ...DataTableOption) {
 			<table class="table w-full">
 				<thead class="table-header">
 					<tr class="table-row">
+						if config.Selectable {
+							<th class="table-head w-12">
+								<input
+									type="checkbox"
+									class="checkbox"
+									data-bind={ prefix + ".selectAll" }
+									data-on:change={ fmt.Sprintf("Object.keys($%s.selectedRows).forEach(k => $%s.selectedRows[k] = $%s.selectAll)", prefix, prefix, prefix) }
+								/>
+							</th>
+						}
 						for _, col := range config.Columns {
 							<th
 								class={ "table-head", templ.KV("cursor-pointer hover:bg-muted", col.Sortable) }
@@ -204,7 +218,7 @@ templ DataTableRowActions() {
 // - columns: same Column slice as the DataTable
 // - endpoint: base endpoint for save/cancel (e.g. "users")
 templ DataTableEditRow(tableID string, rowID string, values map[string]string, columns []Column, endpoint string) {
-	<tr id={ DataTableRowID(tableID, rowID) } class="table-row" data-signals={ editSignalsInit(values, columns) }>
+	<tr id={ DataTableRowID(tableID, rowID) } class="table-row" data-signals={ EditSignalsInit(values, columns) }>
 		for _, col := range columns {
 			if col.Type == ColumnActions {
 				<td class="table-cell">

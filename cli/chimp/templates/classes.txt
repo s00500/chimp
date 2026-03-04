@@ -118,6 +118,7 @@ switch
 table
 table-body
 table-cell
+table-head
 table-header
 table-row
 tabular-nums

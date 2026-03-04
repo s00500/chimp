@@ -164,6 +164,80 @@ func ReadEditSignals(r *http.Request, columns []Column) (map[string]string, erro
 	return result, nil
 }
 
+// PatchEditSignals sends an SSE signal patch to overwrite edit signals with the given values.
+// Use this before patching an edit row to prevent stale signals from a previous edit bleeding through
+// (data-signals uses merge semantics and won't overwrite existing signals).
+func PatchEditSignals(sse *datastar.ServerSentEventGenerator, values map[string]string, columns []Column) error {
+	signals := make(map[string]any)
+	for _, col := range columns {
+		if col.EditType == "" || col.EditType == EditNone {
+			continue
+		}
+		signals[EditSignalName(col.Field)] = values[col.Field]
+	}
+	return sse.MarshalAndPatchSignals(signals)
+}
+
+// ============================================================================
+// DataTable Selection Helpers
+// ============================================================================
+
+// SelectionSignalName returns the signal name for a row's selection checkbox.
+// Example: SelectionSignalName("devices", "dev-001") -> "devices.selectedRows.dev-001"
+func SelectionSignalName(prefix, rowID string) string {
+	return prefix + ".selectedRows." + rowID
+}
+
+// SelectionHighlightExpr returns a Datastar expression for conditional row highlighting.
+// Example: SelectionHighlightExpr("devices", "dev-001") -> "$devices.selectedRows['dev-001']"
+func SelectionHighlightExpr(prefix, rowID string) string {
+	return fmt.Sprintf("$%s.selectedRows['%s']", prefix, rowID)
+}
+
+// SelectedCountExpr returns a JS expression that counts selected rows.
+// Example: SelectedCountExpr("devices") -> "Object.values($devices.selectedRows).filter(Boolean).length"
+func SelectedCountExpr(prefix string) string {
+	return fmt.Sprintf("Object.values($%s.selectedRows).filter(Boolean).length", prefix)
+}
+
+// ReadSelectedRows reads the selectedRows signal from a Datastar request.
+// Returns a map of rowID -> selected (true/false).
+func ReadSelectedRows(r *http.Request, prefix string) (map[string]bool, error) {
+	var allSignals map[string]any
+	if err := datastar.ReadSignals(r, &allSignals); err != nil {
+		return nil, err
+	}
+
+	result := make(map[string]bool)
+
+	// Look for the nested prefix.selectedRows
+	if prefixData, ok := allSignals[prefix]; ok {
+		if prefixMap, ok := prefixData.(map[string]any); ok {
+			if selectedRows, ok := prefixMap["selectedRows"]; ok {
+				if rowsMap, ok := selectedRows.(map[string]any); ok {
+					for id, val := range rowsMap {
+						if b, ok := val.(bool); ok {
+							result[id] = b
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return result, nil
+}
+
+// ResetSelectionSignals sends SSE signal patches to clear all selections.
+func ResetSelectionSignals(sse *datastar.ServerSentEventGenerator, prefix string) error {
+	return sse.MarshalAndPatchSignals(map[string]any{
+		prefix: map[string]any{
+			"selectedRows": map[string]bool{},
+			"selectAll":    false,
+		},
+	})
+}
+
 // ============================================================================
 // Datastar Action Builder
 // ============================================================================
