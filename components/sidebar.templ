@@ -6,7 +6,6 @@ import (
 	"github.com/s00500/chimp/icon/base"
 )
 
-
 // ChevronIcon is the icon used for expandable menu items (MdiChevronDown)
 var ChevronIcon base.IconBase = `<path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" />`
 
@@ -209,12 +208,26 @@ type SidebarConfig struct {
 	FooterContent      templ.Component
 }
 
+// contentHeaderBar renders a title bar with sidebar toggle for the main content area
+templ contentHeaderBar(title string) {
+	<div class="mb-6">
+		<div class="flex items-center">
+			<div class="hidden md:block cursor-pointer text-muted-foreground hover:text-foreground" data-on:click="$_sidebarHidden = !$_sidebarHidden">
+				@icon.Icon(icon.LuPanelLeft, "size-5 mr-2", icon.WithFill("none"), icon.WithStroke("currentColor"))
+			</div>
+			<div class="hidden md:block w-px h-6 bg-border mx-2"></div>
+			<p class="font-semibold">{ title }</p>
+		</div>
+		<hr class="border-border mt-3"/>
+	</div>
+}
+
 // CardSidebarLayout provides a card-based sidebar layout with mobile dropdown support
 templ CardSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
 	@BaseHTML(title) {
 		@sidebarStyles()
-		<main>
-			<div class="flex flex-col md:flex-row justify-center gap-5 p-2 md:p-5  md:h-screen">
+		<main data-signals="{_sidebarHidden: false}">
+			<div class="flex flex-col md:flex-row justify-center gap-5 p-2 md:p-5 md:h-screen">
 				@templ.Fragment("Sidebar") {
 					<!-- Mobile: Dropdown navigation (hidden on desktop) -->
 					<div class="md:hidden w-full">
@@ -235,7 +248,7 @@ templ CardSidebarLayout(title string, items []SidebarItem, config SidebarConfig)
 						</div>
 					</div>
 					<!-- Desktop: Sidebar card (hidden on mobile) -->
-					<div class="hidden md:block md:w-1/5">
+					<div class="hidden md:block w-1/5 overflow-hidden transition-all duration-300 ease-in-out" data-class="{'w-[0px]': $_sidebarHidden, 'p-0': $_sidebarHidden}">
 						<div class="card py-2 md:h-full">
 							<div class="p-6 space-y-4">
 								if config.HeaderContent!= nil {
@@ -249,9 +262,10 @@ templ CardSidebarLayout(title string, items []SidebarItem, config SidebarConfig)
 						</div>
 					</div>
 				}
-				<!-- Content card (full width mobile, 4/5 desktop) -->
-				<div class="card py-2 w-full md:w-4/5 md:h-full md:overflow-auto">
+				<!-- Content card (full width mobile, flex on desktop) -->
+				<div class="card py-2 w-full md:flex-1 md:h-full md:overflow-auto transition-all duration-300 ease-in-out">
 					<div class="p-6">
+						@contentHeaderBar(title)
 						{ children... }
 					</div>
 				</div>
@@ -368,7 +382,7 @@ templ MobileDropdownSeparator() {
 
 // MobileDropdownHeading renders a non-clickable heading in the dropdown menu
 templ MobileDropdownHeading(label string) {
-	<div role="heading" class="px-2 py-1.5 text-sm font-medium text-muted-foreground">
+	<div role="heading" class="px-2 py-1.5 text-sm font-medium">
 		{ label }
 	</div>
 }
@@ -377,7 +391,7 @@ templ MobileDropdownHeading(label string) {
 templ SectionSidebarLayout(title string, items []SidebarItem, config SidebarConfig) {
 	@BaseHTML(title) {
 		@sidebarStyles()
-		<main>
+		<main data-signals="{_sidebarHidden: false}">
 			<div class="flex flex-col md:flex-row justify-center gap-5 p-5 md:p-5 md:h-screen">
 				@templ.Fragment("Sidebar") {
 					<!-- Mobile: Dropdown navigation (hidden on desktop) -->
@@ -392,14 +406,14 @@ templ SectionSidebarLayout(title string, items []SidebarItem, config SidebarConf
 								@mobileNavDropdown(items, config.ItemRendererMobile)
 								if config.FooterContent != nil {
 									<div class="py-3">
-										@config.HeaderContent
+										@config.FooterContent
 									</div>
 								}
 							</div>
 						</section>
 					</div>
 					<!-- Desktop: Sidebar section (hidden on mobile) -->
-					<div class="hidden md:block md:w-1/5 h-full">
+					<div class="hidden md:block w-1/5 h-full overflow-hidden transition-all duration-300 ease-in-out" data-class="{'w-[0px]': $_sidebarHidden, 'p-0': $_sidebarHidden}">
 						<section class="w-full rounded-lg border h-full">
 							<header class="border-b px-4 py-3">
 								if config.HeaderContent != nil {
@@ -417,9 +431,10 @@ templ SectionSidebarLayout(title string, items []SidebarItem, config SidebarConf
 						</section>
 					</div>
 				}
-				<!-- Content section (full width mobile, 4/5 desktop) -->
-				<section class="w-full md:w-4/5 rounded-lg border md:h-full md:overflow-auto">
+				<!-- Content section (full width mobile, flex on desktop) -->
+				<section class="w-full md:flex-1 rounded-lg border md:h-full md:overflow-auto transition-all duration-300 ease-in-out">
 					<div class="p-4">
+						@contentHeaderBar(title)
 						{ children... }
 					</div>
 				</section>
