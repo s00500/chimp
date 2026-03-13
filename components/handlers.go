@@ -228,6 +228,13 @@ func ReadSelectedRows(r *http.Request, prefix string) (map[string]bool, error) {
 	return result, nil
 }
 
+// DeselectAllExpr returns a JS expression that clears all row selections client-side.
+// Use this in "deselect all" buttons or batch action overlays.
+// Example: DeselectAllExpr("devices") -> "Object.keys($devices.selectedRows).forEach(k => $devices.selectedRows[k] = false); $devices.selectAll = false"
+func DeselectAllExpr(prefix string) string {
+	return fmt.Sprintf("Object.keys($%s.selectedRows).forEach(k => $%s.selectedRows[k] = false); $%s.selectAll = false", prefix, prefix, prefix)
+}
+
 // ResetSelectionSignals sends SSE signal patches to clear all selections.
 func ResetSelectionSignals(sse *datastar.ServerSentEventGenerator, prefix string) error {
 	return sse.MarshalAndPatchSignals(map[string]any{

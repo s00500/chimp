@@ -1,11 +1,13 @@
 $_sidebarHidden,
 $_sidebarHidden}
 'p-0':
+-translate-x-1/2
 absolute
 animate-spin
 bg-background
 bg-background/50
 bg-border
+bg-card
 border
 border-4
 border-b
@@ -13,6 +15,7 @@ border-blue-500
 border-border
 border-primary
 border-t-transparent
+bottom-6
 btn
 btn-ghost
 btn-icon
@@ -63,6 +66,7 @@ items-center
 justify-between
 justify-center
 label
+left-1/2
 m-4
 max-h-80
 max-h-[612px]
@@ -116,6 +120,7 @@ right-4
 rounded-full
 rounded-lg
 select
+shadow-lg
 shrink-0
 sidebar
 sm:max-w-[425px]

@@ -212,6 +212,36 @@ templ DataTableRowActions() {
 	</div>
 }
 
+// DataTableBatchOverlay renders a floating action bar for batch operations on selected rows.
+// The generic shell includes a "X selected" counter and a "Deselect all" close button.
+// Pass app-specific action buttons as children.
+//
+// Example:
+//
+//	@cc.DataTableBatchOverlay("devices") {
+//	    <button class="btn-ghost" data-on:click={ datastar.PostSSE("batch/delete") }>Delete</button>
+//	}
+templ DataTableBatchOverlay(prefix string) {
+	<div
+		id={ prefix + "-batch-action-overlay" }
+		class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-card border rounded-lg shadow-lg px-4 py-3 flex items-center gap-4 z-50"
+		data-class:hidden={ fmt.Sprintf("%s === 0", SelectedCountExpr(prefix)) }
+	>
+		<span class="text-sm font-medium" data-text={ fmt.Sprintf("%s + ' selected'", SelectedCountExpr(prefix)) }></span>
+		<div class="h-6 w-px bg-border"></div>
+		{ children... }
+		<div class="h-6 w-px bg-border"></div>
+		<button
+			type="button"
+			class="btn-ghost"
+			title="Deselect all"
+			data-on:click={ DeselectAllExpr(prefix) }
+		>
+			@icon.Icon(icon.MdiClose, "size-5")
+		</button>
+	</div>
+}
+
 // DataTableEditRow renders a table row in edit mode with appropriate inputs per column.
 // - tableID + rowID: used to generate the <tr id> matching DataTableRowID() convention
 // - values: map of field→current-value for pre-populating inputs
