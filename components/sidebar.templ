@@ -278,7 +278,7 @@ templ CardSidebarLayout(title string, items []SidebarItem, config SidebarConfig)
 templ cardSidebar(title string, items []SidebarItem, render func(item SidebarItem) templ.Component) {
 	<section>
 		<div role="group" aria-labelledby="group-label-content-1">
-			<ul class="space-y-1">
+			<ul class="space-y-2">
 				for _, item := range items {
 					if render != nil {
 						@render(item)
@@ -446,7 +446,7 @@ templ SectionSidebarLayout(title string, items []SidebarItem, config SidebarConf
 
 templ sectionSidebar(items []SidebarItem, render func(item SidebarItem) templ.Component) {
 	<nav aria-label="Section navigation">
-		<ul class="space-y-1">
+		<ul class="space-y-2">
 			for _, item := range items {
 				if render != nil {
 					@render(item)
