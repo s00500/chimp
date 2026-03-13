@@ -1,58 +1,68 @@
 package components
 
-// Card renders a card container with optional title and configurable padding.
+// Card renders a card container with optional title, description, and flexible content.
+// Children are rendered directly inside the card — use <section>, CardFooter, etc. as needed.
 //
 // Example:
 //
-//	@Card(WithCardTitle("User Profile"), WithPadding("lg")) {
-//	    @FormInput("Name", "name", WithModel("form.name"))
+//	@Card(WithCardTitle("User Profile"), WithCardDescription("Manage your profile."), WithID("profile")) {
+//	    <section class="space-y-4">
+//	        @FormInput("Name", "name", WithBind("name"))
+//	    </section>
+//	    @CardFooter() {
+//	        @Button("Save")
+//	    }
 //	}
 templ Card(options ...CardOption) {
 	{{ config := applyCardOptions(options) }}
-	<div
-		class={ "card", "flex-1", config.Class }
+	<article
+		class={ "card", config.Class }
 		if config.ID != "" {
 			id={ config.ID }
 		}
 		{ config.CommonAttrs()... }
 	>
 		if config.Title != "" {
-			<header class="flex items-center justify-between pb-4">
+			<header>
 				<h2>{ config.Title }</h2>
+				if config.Description != "" {
+					<p>{ config.Description }</p>
+				}
 			</header>
 		}
-		<section class={ cardPaddingClass(config.Padding) }>
-			{ children... }
-		</section>
-	</div>
+		{ children... }
+	</article>
 }
 
-// cardPaddingClass returns the padding class based on size
-func cardPaddingClass(size string) string {
-	switch size {
-	case "none":
-		return ""
-	case "sm":
-		return "p-2"
-	case "lg":
-		return "p-6"
-	default: // md
-		return ""
-	}
-}
-
-// CardHeader renders a card header with title and optional actions.
+// CardHeader renders a card header with title, optional description, and optional action children.
 //
 // Example:
 //
-//	@CardHeader("Settings") {
+//	@CardHeader("Settings", "Configure your preferences.") {
 //	    @Button("Save", WithVariant(VariantPrimary))
 //	}
-templ CardHeader(title string) {
-	<header class="flex items-center justify-between pb-4">
+templ CardHeader(title, description string) {
+	<header>
 		<h2>{ title }</h2>
+		if description != "" {
+			<p>{ description }</p>
+		}
 		{ children... }
 	</header>
+}
+
+// CardFooter renders the footer area of a card.
+//
+// Example:
+//
+//	@CardFooter() {
+//	    @Button("Cancel", WithVariant(VariantSecondary))
+//	    @Button("Save")
+//	}
+templ CardFooter() {
+	<footer>
+		{ children... }
+	</footer>
 }
 
 // CardContent renders the main content area of a card.

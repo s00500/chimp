@@ -4,5 +4,7 @@ package chimp
 templ Base() {
 	if BaseURL(ctx) != "/" {
 		<base href={ templ.URL(BaseURL(ctx) + "/") }/>
+	} else {
+		<base href="/"/>
 	}
 }

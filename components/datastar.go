@@ -698,20 +698,25 @@ func applyFormGroupOptions(options []FormGroupOption) *FormGroupConfig {
 type CardConfig struct {
 	CommonConfig // embedded
 
-	Title   string
-	Padding string
+	Title       string
+	Description string
+	Padding     string
 }
 
 // Card-specific option types
 type cardTitleOption string
 func (o cardTitleOption) applyToCard(c *CardConfig) { c.Title = string(o) }
 
+type cardDescriptionOption string
+func (o cardDescriptionOption) applyToCard(c *CardConfig) { c.Description = string(o) }
+
 type cardPaddingOption string
 func (o cardPaddingOption) applyToCard(c *CardConfig) { c.Padding = string(o) }
 
 // Card option constructors
-func WithCardTitle(title string) cardTitleOption { return cardTitleOption(title) }
-func WithPadding(size string) cardPaddingOption  { return cardPaddingOption(size) }
+func WithCardTitle(title string) cardTitleOption             { return cardTitleOption(title) }
+func WithCardDescription(text string) cardDescriptionOption  { return cardDescriptionOption(text) }
+func WithPadding(size string) cardPaddingOption              { return cardPaddingOption(size) }
 
 // applyCardOptions applies all options and returns config
 func applyCardOptions(options []CardOption) *CardConfig {

@@ -113,7 +113,6 @@ p-2
 p-4
 p-5
 p-6
-pb-4
 pl-2.5
 pointer-events-auto
 pointer-events-none
