@@ -208,8 +208,9 @@ templ FormCheckbox(label, name string, options ...FormOption) {
 templ FormSwitch(label, name string, options ...FormOption) {
 	{{ config := applyFormOptions(options) }}
 	<div class="field">
-		<label class="switch">
+		<label class="label">
 			<input
+				class="input"
 				type="checkbox"
 				role="switch"
 				id={ name }

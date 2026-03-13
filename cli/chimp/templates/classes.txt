@@ -140,7 +140,6 @@ space-y-2
 space-y-4
 spin
 sticky
-switch
 table
 table-body
 table-cell
