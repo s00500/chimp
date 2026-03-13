@@ -37,15 +37,9 @@ func WithFont() BaseHTMLOption {
 	}
 }
 
-func WithTweakCN() BaseHTMLOption {
+func WithTweakCN(enabled bool) BaseHTMLOption {
 	return func(c *BaseHTMLConfig) {
-		c.TweakCN = true
-	}
-}
-
-func WithoutTweakCN() BaseHTMLOption {
-	return func(c *BaseHTMLConfig) {
-		c.TweakCN = false
+		c.TweakCN = enabled
 	}
 }
 
