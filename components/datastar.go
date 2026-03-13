@@ -452,8 +452,17 @@ func WithLoading(expr string) buttonLoadingOption   { return buttonLoadingOption
 
 // applyButtonOptions applies all options to a ButtonConfig
 func applyButtonOptions(options []ButtonOption) *ButtonConfig {
+	return applyButtonOptionsWithDefault(VariantPrimary, options)
+}
+
+// applyIconButtonOptions applies all options to a ButtonConfig with ghost as default variant
+func applyIconButtonOptions(options []ButtonOption) *ButtonConfig {
+	return applyButtonOptionsWithDefault(VariantGhost, options)
+}
+
+func applyButtonOptionsWithDefault(defaultVariant Variant, options []ButtonOption) *ButtonConfig {
 	config := &ButtonConfig{
-		Variant: VariantPrimary,
+		Variant: defaultVariant,
 		Type:    "button",
 	}
 	for _, opt := range options {

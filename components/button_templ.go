@@ -8,7 +8,10 @@ package components
 import "github.com/a-h/templ"
 import templruntime "github.com/a-h/templ/runtime"
 
-import "github.com/s00500/chimp/icon/base"
+import (
+	"github.com/s00500/chimp/icon"
+	"github.com/s00500/chimp/icon/base"
+)
 
 // Button renders a button with configurable variants and Datastar integration.
 //
@@ -50,7 +53,7 @@ func Button(text string, options ...ButtonOption) templ.Component {
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(config.Type)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 14, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 17, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -95,7 +98,7 @@ func Button(text string, options ...ButtonOption) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(config.Loading)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 22, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 25, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -109,7 +112,7 @@ func Button(text string, options ...ButtonOption) templ.Component {
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(text)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 29, Col: 8}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 32, Col: 8}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -132,7 +135,7 @@ func Button(text string, options ...ButtonOption) templ.Component {
 // Example:
 //
 //	@ButtonIcon(icon.Trash, WithVariant(VariantGhost), WithOn("click", "$confirmDelete()"))
-func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
+func ButtonIcon(icn base.IconBase, options ...ButtonOption) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
 		if templ_7745c5c3_CtxErr := ctx.Err(); templ_7745c5c3_CtxErr != nil {
@@ -153,7 +156,7 @@ func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		config := applyButtonOptions(options)
+		config := applyIconButtonOptions(options)
 		var templ_7745c5c3_Var8 = []any{iconButtonClass(config)}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var8...)
 		if templ_7745c5c3_Err != nil {
@@ -166,7 +169,7 @@ func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
 		var templ_7745c5c3_Var9 string
 		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(config.Type)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 42, Col: 20}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 45, Col: 20}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -211,7 +214,7 @@ func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(config.Loading)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 50, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 53, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -224,7 +227,7 @@ func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
 			var templ_7745c5c3_Var12 string
 			templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs("!(" + config.Loading + ")")
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 56, Col: 48}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/button.templ`, Line: 59, Col: 48}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 			if templ_7745c5c3_Err != nil {
@@ -234,7 +237,7 @@ func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templ.Raw(icon).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = icon.Icon(icn, "").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -243,7 +246,7 @@ func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		} else {
-			templ_7745c5c3_Err = templ.Raw(icon).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = icon.Icon(icn, "").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -256,21 +259,21 @@ func ButtonIcon(icon base.IconBase, options ...ButtonOption) templ.Component {
 	})
 }
 
-// buttonClass generates the CSS classes for a button
-func buttonClass(config *ButtonConfig) string {
+// buildBtnClass builds a single BaseCoat button class.
+// Parts are joined with hyphens: btn, [size], [icon], [variant] → e.g. "btn-sm-icon-outline"
+func buildBtnClass(config *ButtonConfig, isIcon bool) string {
 	class := "btn"
 
-	switch config.Variant {
-	case VariantPrimary:
-		class += " btn-primary"
-	case VariantSecondary:
-		class += " btn-secondary"
-	case VariantOutline:
-		class += " btn-outline"
-	case VariantGhost:
-		class += " btn-ghost"
-	case VariantDestructive:
-		class += " btn-destructive"
+	if config.Size != "" {
+		class += "-" + string(config.Size)
+	}
+
+	if isIcon {
+		class += "-icon"
+	}
+
+	if config.Variant != "" {
+		class += "-" + string(config.Variant)
 	}
 
 	if config.Class != "" {
@@ -280,28 +283,14 @@ func buttonClass(config *ButtonConfig) string {
 	return class
 }
 
+// buttonClass generates the CSS classes for a button
+func buttonClass(config *ButtonConfig) string {
+	return buildBtnClass(config, false)
+}
+
 // iconButtonClass generates the CSS classes for an icon button
 func iconButtonClass(config *ButtonConfig) string {
-	class := "btn-icon"
-
-	switch config.Variant {
-	case VariantPrimary:
-		class += " btn-primary"
-	case VariantSecondary:
-		class += " btn-secondary"
-	case VariantOutline:
-		class += " btn-outline"
-	case VariantGhost:
-		class += " btn-ghost"
-	case VariantDestructive:
-		class += " btn-destructive"
-	}
-
-	if config.Class != "" {
-		class += " " + config.Class
-	}
-
-	return class
+	return buildBtnClass(config, true)
 }
 
 var _ = templruntime.GeneratedTemplate

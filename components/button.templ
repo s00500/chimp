@@ -1,6 +1,9 @@
 package components
 
-import "github.com/s00500/chimp/icon/base"
+import (
+	"github.com/s00500/chimp/icon"
+	"github.com/s00500/chimp/icon/base"
+)
 
 // Button renders a button with configurable variants and Datastar integration.
 //
@@ -36,8 +39,8 @@ templ Button(text string, options ...ButtonOption) {
 // Example:
 //
 //	@ButtonIcon(icon.Trash, WithVariant(VariantGhost), WithOn("click", "$confirmDelete()"))
-templ ButtonIcon(icon base.IconBase, options ...ButtonOption) {
-	{{ config := applyButtonOptions(options) }}
+templ ButtonIcon(icn base.IconBase, options ...ButtonOption) {
+	{{ config := applyIconButtonOptions(options) }}
 	<button
 		type={ config.Type }
 		class={ iconButtonClass(config) }
@@ -54,29 +57,29 @@ templ ButtonIcon(icon base.IconBase, options ...ButtonOption) {
 				</svg>
 			</span>
 			<span data-show={ "!(" + config.Loading + ")" }>
-				@templ.Raw(icon)
+				@icon.Icon(icn, "")
 			</span>
 		} else {
-			@templ.Raw(icon)
+			@icon.Icon(icn, "")
 		}
 	</button>
 }
 
-// buttonClass generates the CSS classes for a button
-func buttonClass(config *ButtonConfig) string {
+// buildBtnClass builds a single BaseCoat button class.
+// Parts are joined with hyphens: btn, [size], [icon], [variant] → e.g. "btn-sm-icon-outline"
+func buildBtnClass(config *ButtonConfig, isIcon bool) string {
 	class := "btn"
 
-	switch config.Variant {
-	case VariantPrimary:
-		class += " btn-primary"
-	case VariantSecondary:
-		class += " btn-secondary"
-	case VariantOutline:
-		class += " btn-outline"
-	case VariantGhost:
-		class += " btn-ghost"
-	case VariantDestructive:
-		class += " btn-destructive"
+	if config.Size != "" {
+		class += "-" + string(config.Size)
+	}
+
+	if isIcon {
+		class += "-icon"
+	}
+
+	if config.Variant != "" {
+		class += "-" + string(config.Variant)
 	}
 
 	if config.Class != "" {
@@ -86,26 +89,12 @@ func buttonClass(config *ButtonConfig) string {
 	return class
 }
 
+// buttonClass generates the CSS classes for a button
+func buttonClass(config *ButtonConfig) string {
+	return buildBtnClass(config, false)
+}
+
 // iconButtonClass generates the CSS classes for an icon button
 func iconButtonClass(config *ButtonConfig) string {
-	class := "btn-icon"
-
-	switch config.Variant {
-	case VariantPrimary:
-		class += " btn-primary"
-	case VariantSecondary:
-		class += " btn-secondary"
-	case VariantOutline:
-		class += " btn-outline"
-	case VariantGhost:
-		class += " btn-ghost"
-	case VariantDestructive:
-		class += " btn-destructive"
-	}
-
-	if config.Class != "" {
-		class += " " + config.Class
-	}
-
-	return class
+	return buildBtnClass(config, true)
 }
