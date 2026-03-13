@@ -12,8 +12,8 @@ import (
 
 const syncFile = "/tmp/chimp-sync"
 
-// touchSyncFile writes the current timestamp to the sync file (master/producer).
-func touchSyncFile() {
+// TouchSyncFile writes the current timestamp to the sync file (master/producer).
+func TouchSyncFile() {
 	err := os.WriteFile(syncFile, []byte(fmt.Sprintf("%d", time.Now().UnixNano())), 0644)
 	if err != nil {
 		log.Warnf("[chimp] failed to touch sync file: %v", err)

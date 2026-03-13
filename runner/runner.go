@@ -98,7 +98,7 @@ func (r *Runner) Run(ctx context.Context) error {
 			r.runHooks(r.config.PostHooks, "post-hook")
 
 			if r.config.Master {
-				touchSyncFile()
+				TouchSyncFile()
 			}
 		}
 	}
@@ -111,7 +111,7 @@ func (r *Runner) restart(ctx context.Context) {
 	r.runHooks(r.config.PostHooks, "post-hook")
 
 	if r.config.Master {
-		touchSyncFile()
+		TouchSyncFile()
 	}
 }
 
