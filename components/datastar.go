@@ -117,6 +117,7 @@ type StackOption interface{ applyToStack(*StackConfig) }
 type FormGroupOption interface{ applyToFormGroup(*FormGroupConfig) }
 type CardOption interface{ applyToCard(*CardConfig) }
 type SectionOption interface{ applyToSection(*SectionConfig) }
+type SimpleTableOption interface{ applyToSimpleTable(*SimpleTableConfig) }
 
 // ============================================================================
 // Common Options (implement multiple interfaces - work on many components)
@@ -133,6 +134,7 @@ func (o idOption) applyToStack(c *StackConfig)             { c.ID = string(o) }
 func (o idOption) applyToFormGroup(c *FormGroupConfig)     { c.ID = string(o) }
 func (o idOption) applyToCard(c *CardConfig)               { c.ID = string(o) }
 func (o idOption) applyToSection(c *SectionConfig)         { c.ID = string(o) }
+func (o idOption) applyToSimpleTable(c *SimpleTableConfig) { c.ID = string(o) }
 
 // WithID sets the id attribute (works on any component)
 func WithID(id string) idOption { return idOption(id) }
@@ -155,6 +157,7 @@ func (o classOption) applyToStack(c *StackConfig)             { o.apply(&c.Commo
 func (o classOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
 func (o classOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o classOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+func (o classOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
 
 // WithClass adds CSS classes (works on any component)
 func WithClass(class string) classOption { return classOption(class) }
@@ -179,6 +182,7 @@ func (o onOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonCo
 func (o onOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
 func (o onOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o onOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+func (o onOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
 
 // WithOn adds a data-on:event handler (works on any component)
 func WithOn(event, action string) onOption { return onOption{event, action} }
@@ -203,6 +207,7 @@ func (o bindAttrOption) applyToStack(c *StackConfig)             { o.apply(&c.Co
 func (o bindAttrOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
 func (o bindAttrOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o bindAttrOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
 
 // WithBindAttr adds a data-bind:attr binding for attribute bindings (works on any component)
 // Example: WithBindAttr("class", "$active ? 'selected' : ''")
@@ -220,6 +225,7 @@ func (o showOption) applyToStack(c *StackConfig)             { o.apply(&c.Common
 func (o showOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
 func (o showOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o showOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+func (o showOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
 
 // WithShow sets the data-show expression (works on any component)
 func WithShow(expr string) showOption { return showOption(expr) }
@@ -243,6 +249,7 @@ func (o attrsOption) applyToStack(c *StackConfig)             { o.apply(&c.Commo
 func (o attrsOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
 func (o attrsOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o attrsOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
 
 // WithAttrs adds extra HTML attributes (works on any component)
 func WithAttrs(attrs templ.Attributes) attrsOption { return attrsOption(attrs) }
@@ -775,6 +782,34 @@ func applyElementOptions(options []ElementOption) *ElementConfig {
 	config := &ElementConfig{}
 	for _, opt := range options {
 		opt.applyToElement(config)
+	}
+	return config
+}
+
+// ============================================================================
+// SimpleTable Config & Options
+// ============================================================================
+
+// SimpleTableConfig holds configuration for simple table components
+type SimpleTableConfig struct {
+	CommonConfig // embedded
+
+	Compact bool
+}
+
+// SimpleTable-specific option types
+type stCompactOption struct{}
+
+func (o stCompactOption) applyToSimpleTable(c *SimpleTableConfig) { c.Compact = true }
+
+// WithCompact enables compact table styling with reduced padding
+func WithCompact() stCompactOption { return stCompactOption{} }
+
+// applySimpleTableOptions applies all options and returns config
+func applySimpleTableOptions(options []SimpleTableOption) *SimpleTableConfig {
+	config := &SimpleTableConfig{}
+	for _, opt := range options {
+		opt.applyToSimpleTable(config)
 	}
 	return config
 }
