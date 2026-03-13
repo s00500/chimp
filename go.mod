@@ -5,16 +5,16 @@ go 1.24.2
 toolchain go1.24.5
 
 require (
-	github.com/a-h/templ v0.3.977
-	github.com/go-chi/chi/v5 v5.2.3
+	github.com/a-h/templ v0.3.1001
+	github.com/go-chi/chi/v5 v5.2.5
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.3.0
-	github.com/magefile/mage v1.15.0
+	github.com/magefile/mage v1.16.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/redis/go-redis/v9 v9.14.0
 	github.com/s00500/env_logger v0.1.29
 	github.com/spf13/cobra v1.9.1
-	github.com/starfederation/datastar-go v1.0.3
+	github.com/starfederation/datastar-go v1.1.0
 	go.uber.org/atomic v1.11.0
 )
 
@@ -32,7 +32,7 @@ require (
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/hookenz/gotailwind/v4 v4.1.18 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
-	github.com/klauspost/compress v1.18.2 // indirect
+	github.com/klauspost/compress v1.18.4 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/natefinch/atomic v1.0.1 // indirect
