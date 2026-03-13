@@ -19,10 +19,6 @@ var AllTools = map[string]ToolDef{
 		ToolName: "github.com/hookenz/gotailwind/v4",
 		Version:  "latest",
 	},
-	"Air": {
-		ToolName: "github.com/air-verse/air",
-		Version:  "latest",
-	},
 	"Templ": {
 		ToolName: "github.com/a-h/templ/cmd/templ",
 		Version:  "latest",

@@ -19,6 +19,6 @@ Install using `go install github.com/s00500/chimp/cli/chimp@latest`
 - a few helper functions and middleware like the **URLPathMiddleware** to get the current urlpath in the templates
 
 - CLI to add templates and scaffold you rporoject
-- CLI to install tools (like templ, tailwind and air)
+- CLI to install tools (like templ, tailwind and chimp)
 
 

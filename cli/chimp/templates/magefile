@@ -3,52 +3,29 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
 )
 
 // Templ watches and auto-generates templ templates
 func Templ() error {
-	return sh.RunV("go", "tool", "templ", "generate", "--watch", "--open-browser=false")
+	return sh.RunV("go", "tool", "templ", "generate", "--watch", "--open-browser=false", "--cmd", "go tool github.com/s00500/chimp/cli/chimp classes")
 }
 
 // TemplBuild generates templ templates once (for production)
 func TemplBuild() error {
+	if err := sh.RunV("go", "tool", "github.com/s00500/chimp/cli/chimp", "classes"); err != nil {
+		return err
+	}
 	return sh.RunV("go", "tool", "templ", "generate")
 }
 
-// Server runs development server with hot reload (air)
+// Server runs development server with live reload (chimp run)
 func Server() error {
-	env := map[string]string{
+	return sh.RunWithV(map[string]string{
 		"ENV":          "dev",
 		"SKIP_MIGRATE": "true",
-	}
-
-	cmd := exec.Command("air",
-		"--build.cmd", "go build -o tmp/bin/main .",
-		"--build.bin", "tmp/bin/main",
-		"--build.delay", "500",
-		"--build.exclude_dir", "node_modules",
-		"--build.include_ext", "go",
-		"--build.stop_on_error", "true",
-		"--misc.clean_on_exit", "true",
-	)
-
-	// Set environment variables
-	cmd.Env = os.Environ()
-	for k, v := range env {
-		cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
-	}
-
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-
-	return cmd.Run()
+	}, "go", "tool", "github.com/s00500/chimp/cli/chimp", "run", "--no-interactive", "--sync")
 }
 
 // TailwindClean builds clean Tailwind CSS for production
