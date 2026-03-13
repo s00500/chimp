@@ -290,7 +290,7 @@ func buttonClass(config *ButtonConfig) string {
 
 // iconButtonClass generates the CSS classes for an icon button
 func iconButtonClass(config *ButtonConfig) string {
-	return buildBtnClass(config, true)
+	return buildBtnClass(config, false)
 }
 
 var _ = templruntime.GeneratedTemplate
