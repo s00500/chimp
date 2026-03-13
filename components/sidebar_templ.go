@@ -155,7 +155,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if item.Icon != "" {
-				templ_7745c5c3_Err = templ.Raw(item.Icon).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = icon.Icon(item.Icon, "").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -234,7 +234,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if item.Icon != "" {
-				templ_7745c5c3_Err = templ.Raw(item.Icon).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = icon.Icon(item.Icon, "").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -322,7 +322,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if item.Icon != "" {
-				templ_7745c5c3_Err = templ.Raw(item.Icon).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = icon.Icon(item.Icon, "").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -898,7 +898,7 @@ func renderMobileDropdownItem(item SidebarItem, level int) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			if item.Icon != "" {
-				templ_7745c5c3_Err = templ.Raw(item.Icon).Render(ctx, templ_7745c5c3_Buffer)
+				templ_7745c5c3_Err = icon.Icon(item.Icon, "").Render(ctx, templ_7745c5c3_Buffer)
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -955,7 +955,7 @@ func mobileNavDropdown(items []SidebarItem, render func(item SidebarItem) templ.
 			return templ_7745c5c3_Err
 		}
 		if currentItem.Icon != "" {
-			templ_7745c5c3_Err = templ.Raw(currentItem.Icon).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = icon.Icon(currentItem.Icon, "").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -1054,7 +1054,7 @@ func MobileDropdownMenuItem(item SidebarItem) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		if item.Icon != "" {
-			templ_7745c5c3_Err = templ.Raw(item.Icon).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = icon.Icon(item.Icon, "").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

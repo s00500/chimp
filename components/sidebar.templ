@@ -88,7 +88,7 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 			>
 				<h3 class="text-lg font-bold">
 					if item.Icon != "" {
-						@templ.Raw(item.Icon)
+						@icon.Icon(item.Icon, "")
 					}
 					{ item.Label }
 				</h3>
@@ -107,7 +107,7 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 				>
 					<span class="flex items-center gap-2">
 						if item.Icon != "" {
-							@templ.Raw(item.Icon)
+							@icon.Icon(item.Icon, "")
 						}
 						{ item.Label }
 					</span>
@@ -134,7 +134,7 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 				}
 			>
 				if item.Icon != "" {
-					@templ.Raw(item.Icon)
+					@icon.Icon(item.Icon, "")
 				}
 				<span>{ item.Label }</span>
 			</a>
@@ -315,7 +315,7 @@ templ renderMobileDropdownItem(item SidebarItem, level int) {
 			}
 		>
 			if item.Icon != "" {
-				@templ.Raw(item.Icon)
+				@icon.Icon(item.Icon, "")
 			}
 			{ item.Label }
 		</a>
@@ -339,7 +339,7 @@ templ mobileNavDropdown(items []SidebarItem, render func(item SidebarItem) templ
 		>
 			<span class="flex items-center gap-2">
 				if currentItem.Icon != "" {
-					@templ.Raw(currentItem.Icon)
+					@icon.Icon(currentItem.Icon, "")
 				}
 				{ currentItem.Label }
 			</span>
@@ -369,7 +369,7 @@ templ MobileDropdownMenuItem(item SidebarItem) {
 		class={ templ.KV("bg-accent", item.Current) }
 	>
 		if item.Icon != "" {
-			@templ.Raw(item.Icon)
+			@icon.Icon(item.Icon, "")
 		}
 		{ item.Label }
 	</a>
