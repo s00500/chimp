@@ -283,7 +283,8 @@ type FormConfig struct {
 	Multiple    bool
 	EmptyOption string // placeholder option text
 
-	Error string // data-show expression for error
+	Error       string // data-show expression for error
+	Description string // hint text below the input
 }
 
 // Form-specific option types
@@ -341,6 +342,9 @@ func (o formEmptyOptionOption) applyToForm(c *FormConfig) { c.EmptyOption = stri
 type formErrorOption string
 func (o formErrorOption) applyToForm(c *FormConfig) { c.Error = string(o) }
 
+type formDescriptionOption string
+func (o formDescriptionOption) applyToForm(c *FormConfig) { c.Description = string(o) }
+
 type formBindOption string
 func (o formBindOption) applyToForm(c *FormConfig) { c.Datastar.Bind = string(o) }
 
@@ -385,6 +389,7 @@ func WithOptions(options []SelectOption) formOptionsOption { return formOptionsO
 func WithMultiple() formMultipleOption             { return formMultipleOption{} }
 func WithEmptyOption(text string) formEmptyOptionOption { return formEmptyOptionOption(text) }
 func WithError(expr string) formErrorOption        { return formErrorOption(expr) }
+func WithDescription(text string) formDescriptionOption { return formDescriptionOption(text) }
 func WithBind(expr string) formBindOption          { return formBindOption(expr) }
 func WithSignal(name, value string) formSignalOption { return formSignalOption{name, value} }
 func WithDataAttr(name, expr string) formDataAttrOption { return formDataAttrOption{name, expr} }

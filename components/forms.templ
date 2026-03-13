@@ -58,6 +58,9 @@ templ FormInput(label, name string, options ...FormOption) {
 			}
 			{ config.InputAttrs()... }
 		/>
+		if config.Description != "" {
+			<span class="text-muted-foreground text-sm">{ config.Description }</span>
+		}
 		if config.Error != "" {
 			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
 		}
@@ -107,6 +110,9 @@ templ FormTextarea(label, name string, options ...FormOption) {
 			}
 			{ config.InputAttrs()... }
 		></textarea>
+		if config.Description != "" {
+			<span class="text-muted-foreground text-sm">{ config.Description }</span>
+		}
 		if config.Error != "" {
 			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
 		}
@@ -156,6 +162,9 @@ templ FormSelect(label, name string, options ...FormOption) {
 				>{ opt.Label }</option>
 			}
 		</select>
+		if config.Description != "" {
+			<span class="text-muted-foreground text-sm">{ config.Description }</span>
+		}
 		if config.Error != "" {
 			<p class="field-error" data-show={ config.Error } data-text={ config.Error }></p>
 		}
