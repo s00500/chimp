@@ -86,9 +86,9 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 					style={ indentStyle(depth) }
 				}
 			>
-				<h3 class="text-lg font-bold">
+				<h3 class="text-lg font-bold flex items-center gap-2">
 					if item.Icon != "" {
-						@icon.Icon(item.Icon, "")
+						@icon.Icon(item.Icon, "size-5")
 					}
 					{ item.Label }
 				</h3>
@@ -107,7 +107,7 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 				>
 					<span class="flex items-center gap-2">
 						if item.Icon != "" {
-							@icon.Icon(item.Icon, "")
+							@icon.Icon(item.Icon, "size-5")
 						}
 						{ item.Label }
 					</span>
@@ -129,12 +129,13 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 		>
 			<a
 				href={ templ.SafeURL(item.Href) }
+				class="flex items-center gap-2"
 				if item.Current {
 					aria-current="page"
 				}
 			>
 				if item.Icon != "" {
-					@icon.Icon(item.Icon, "")
+					@icon.Icon(item.Icon, "size-5")
 				}
 				<span>{ item.Label }</span>
 			</a>
@@ -309,13 +310,13 @@ templ renderMobileDropdownItem(item SidebarItem, level int) {
 		<a
 			href={ templ.SafeURL(item.Href) }
 			role="menuitem"
-			class={ templ.KV("bg-accent", item.Current) }
+			class={ "flex items-center gap-2", templ.KV("bg-accent", item.Current) }
 			if level > 0 {
 				style={ indentStyle(level) }
 			}
 		>
 			if item.Icon != "" {
-				@icon.Icon(item.Icon, "")
+				@icon.Icon(item.Icon, "size-5")
 			}
 			{ item.Label }
 		</a>
@@ -339,7 +340,7 @@ templ mobileNavDropdown(items []SidebarItem, render func(item SidebarItem) templ
 		>
 			<span class="flex items-center gap-2">
 				if currentItem.Icon != "" {
-					@icon.Icon(currentItem.Icon, "")
+					@icon.Icon(currentItem.Icon, "size-5")
 				}
 				{ currentItem.Label }
 			</span>
@@ -366,10 +367,10 @@ templ MobileDropdownMenuItem(item SidebarItem) {
 	<a
 		href={ templ.SafeURL(item.Href) }
 		role="menuitem"
-		class={ templ.KV("bg-accent", item.Current) }
+		class={ "flex items-center gap-2", templ.KV("bg-accent", item.Current) }
 	>
 		if item.Icon != "" {
-			@icon.Icon(item.Icon, "")
+			@icon.Icon(item.Icon, "size-5")
 		}
 		{ item.Label }
 	</a>
