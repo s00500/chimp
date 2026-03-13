@@ -2,8 +2,16 @@ $_sidebarHidden,
 $_sidebarHidden}
 'p-0':
 -translate-x-1/2
+[&_td]:h-10
+[&_td]:py-1
+[&_th]:py-1
 absolute
 animate-spin
+bg-[#3182CE]/90
+bg-[#51A351]/90
+bg-[#C53030]/90
+bg-[#F89406]/90
+bg-accent
 bg-background
 bg-background/50
 bg-border
@@ -46,6 +54,8 @@ gap-2
 gap-3
 gap-4
 gap-5
+gap-x-4
+gap-y-2
 grid
 grid-cols-1
 h-12
@@ -56,6 +66,7 @@ h-8
 h-auto
 h-full
 hidden
+hover:bg-muted
 hover:opacity-100
 hover:text-foreground
 inner
@@ -70,6 +81,7 @@ left-1/2
 m-4
 max-h-80
 max-h-[612px]
+mb-2
 mb-6
 md:block
 md:flex-1
@@ -126,7 +138,6 @@ sidebar
 sm:max-w-[425px]
 space-x-2
 space-y-1
-space-y-2
 space-y-4
 spin
 sticky

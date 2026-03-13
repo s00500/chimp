@@ -244,8 +244,8 @@ templ FormSwitch(label, name string, options ...FormOption) {
 templ FormRadioGroup(label, name string, options ...FormOption) {
 	{{ config := applyFormOptions(options) }}
 	<fieldset class="field grid gap-2 flex-1">
-		<legend class="label">{ label }</legend>
-		<div class="space-y-2">
+		<legend class="label mb-2">{ label }</legend>
+		<div class={ templ.KV("flex flex-row flex-wrap gap-x-4 gap-y-2", config.Horizontal), templ.KV("flex flex-col gap-2", !config.Horizontal) }>
 			for _, opt := range config.Options {
 				<label class="radio">
 					<input

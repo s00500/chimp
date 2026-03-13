@@ -13,7 +13,10 @@ func main() {
 	fmt.Println("Scanning .templ files for Tailwind classes...")
 
 	classes := make(map[string]struct{})
+	// Match static class="..." attributes
 	classRegex := regexp.MustCompile(`class="([^"]*)"`)
+	// Match templ.KV("classes", ...) calls
+	kvRegex := regexp.MustCompile(`templ\.KV\("([^"]*)"`)
 
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -29,12 +32,14 @@ func main() {
 			return fmt.Errorf("failed to read %s: %w", path, err)
 		}
 
-		matches := classRegex.FindAllSubmatch(content, -1)
-		for _, match := range matches {
-			if len(match) > 1 {
-				classStr := string(match[1])
-				for _, class := range strings.Fields(classStr) {
-					classes[class] = struct{}{}
+		for _, regex := range []*regexp.Regexp{classRegex, kvRegex} {
+			matches := regex.FindAllSubmatch(content, -1)
+			for _, match := range matches {
+				if len(match) > 1 {
+					classStr := string(match[1])
+					for _, class := range strings.Fields(classStr) {
+						classes[class] = struct{}{}
+					}
 				}
 			}
 		}

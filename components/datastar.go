@@ -282,6 +282,7 @@ type FormConfig struct {
 	Options     []SelectOption // select/radio options
 	Multiple    bool
 	EmptyOption string // placeholder option text
+	Horizontal  bool   // horizontal layout for radio groups
 
 	Error       string // data-show expression for error
 	Description string // hint text below the input
@@ -339,6 +340,9 @@ func (o formMultipleOption) applyToForm(c *FormConfig) { c.Multiple = true }
 type formEmptyOptionOption string
 func (o formEmptyOptionOption) applyToForm(c *FormConfig) { c.EmptyOption = string(o) }
 
+type formHorizontalOption struct{}
+func (o formHorizontalOption) applyToForm(c *FormConfig) { c.Horizontal = true }
+
 type formErrorOption string
 func (o formErrorOption) applyToForm(c *FormConfig) { c.Error = string(o) }
 
@@ -388,6 +392,7 @@ func WithCols(cols int) formColsOption             { return formColsOption(cols)
 func WithOptions(options []SelectOption) formOptionsOption { return formOptionsOption(options) }
 func WithMultiple() formMultipleOption             { return formMultipleOption{} }
 func WithEmptyOption(text string) formEmptyOptionOption { return formEmptyOptionOption(text) }
+func WithHorizontal() formHorizontalOption             { return formHorizontalOption{} }
 func WithError(expr string) formErrorOption        { return formErrorOption(expr) }
 func WithDescription(text string) formDescriptionOption { return formDescriptionOption(text) }
 func WithBind(expr string) formBindOption          { return formBindOption(expr) }
