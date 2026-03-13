@@ -164,7 +164,7 @@ func UpdateAssets() error {
 
 // Templ watches and auto-generates templ templates
 func Templ() error {
-	return sh.RunV("go", "tool", "templ", "generate", "--watch", "--open-browser=false", "--cmd", "go run ./tools/extract-classes")
+	return sh.RunV("go", "tool", "templ", "generate", "--watch", "--open-browser=false", "--cmd", "go run ./tools/extract-classes && touch /tmp/chimp-sync")
 }
 
 // TemplGenerate generates templ templates once (for production/CI)

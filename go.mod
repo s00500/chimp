@@ -6,6 +6,7 @@ toolchain go1.24.5
 
 require (
 	github.com/a-h/templ v0.3.1001
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.3.0
@@ -28,7 +29,6 @@ require (
 	github.com/cli/browser v1.3.0 // indirect
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/fatih/color v1.16.0 // indirect
-	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/hookenz/gotailwind/v4 v4.1.18 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
