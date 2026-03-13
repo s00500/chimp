@@ -46,14 +46,18 @@ import "github.com/s00500/chimp/icon"
 templ DataTable(id string, options ...DataTableOption) {
 	{{ config := applyDataTableOptions(options) }}
 	{{ prefix := id }}
-	{{ if config.SignalPrefix != "" {
-	prefix = config.SignalPrefix
-} }}
+	{{
+		if config.SignalPrefix != "" {
+			prefix = config.SignalPrefix
+		}
+	}}
 	{{ pageSize := strconv.Itoa(config.PageSize) }}
 	{{ selectableSignals := "" }}
-	{{ if config.Selectable {
-	selectableSignals = ", selectedRows: {}, selectAll: false"
-} }}
+	{{
+		if config.Selectable {
+			selectableSignals = ", selectedRows: {}, selectAll: false"
+		}
+	}}
 	{{ signalsInit := fmt.Sprintf("{%s: {page: 1, pageSize: %s, sortField: '', sortDir: 'asc', totalRows: 0, loading: false%s}}", prefix, pageSize, selectableSignals) }}
 	{{ loadDataExpr := fmt.Sprintf("@get(`%s?page=${$%s.page}&pageSize=${$%s.pageSize}&sortField=${$%s.sortField}&sortDir=${$%s.sortDir}`)", config.DataEndpoint, prefix, prefix, prefix, prefix) }}
 	<div
@@ -130,51 +134,51 @@ templ DataTable(id string, options ...DataTableOption) {
 		</div>
 		<!-- Pagination -->
 		if !config.HidePagination {
-		<div
-			class="flex items-center justify-between pt-4"
-			data-show={ fmt.Sprintf("$%s.totalRows > 0", prefix) }
-		>
-			<div class="text-sm text-muted-foreground">
-				<span>Showing </span>
-				<span data-text={ fmt.Sprintf("(($%s.page - 1) * $%s.pageSize) + 1", prefix, prefix) }></span>
-				<span>–</span>
-				<span data-text={ fmt.Sprintf("Math.min($%s.page * $%s.pageSize, $%s.totalRows)", prefix, prefix, prefix) }></span>
-				<span>of </span>
-				<span data-text={ fmt.Sprintf("$%s.totalRows", prefix) }></span>
+			<div
+				class="flex items-center justify-between pt-4"
+				data-show={ fmt.Sprintf("$%s.totalRows > 0", prefix) }
+			>
+				<div class="text-sm text-muted-foreground">
+					<span>Showing Table </span>
+					<span data-text={ fmt.Sprintf("(($%s.page - 1) * $%s.pageSize) + 1", prefix, prefix) }></span>
+					<span>–</span>
+					<span data-text={ fmt.Sprintf("Math.min($%s.page * $%s.pageSize, $%s.totalRows)", prefix, prefix, prefix) }></span>
+					<span>of </span>
+					<span data-text={ fmt.Sprintf("$%s.totalRows", prefix) }></span>
+				</div>
+				<nav role="navigation" aria-label="pagination" class="flex justify-center">
+					<ul class="flex flex-row items-center gap-1">
+						<li>
+							<button
+								type="button"
+								class="btn-ghost gap-1 pl-2.5"
+								data-attr:disabled={ fmt.Sprintf("$%s.page <= 1", prefix) }
+								data-on:click={ fmt.Sprintf("$%s.page = $%s.page - 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
+							>
+								@icon.Icon(icon.MdiChevronLeft, "size-4")
+								<span>Previous</span>
+							</button>
+						</li>
+						<li>
+							<span
+								class="btn-icon-ghost pointer-events-none text-sm tabular-nums"
+								data-text={ fmt.Sprintf("$%s.page + ' / ' + Math.ceil($%s.totalRows / $%s.pageSize)", prefix, prefix, prefix) }
+							></span>
+						</li>
+						<li>
+							<button
+								type="button"
+								class="btn-ghost gap-1 pr-2.5"
+								data-attr:disabled={ fmt.Sprintf("$%s.page * $%s.pageSize >= $%s.totalRows", prefix, prefix, prefix) }
+								data-on:click={ fmt.Sprintf("$%s.page = $%s.page + 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
+							>
+								<span>Next</span>
+								@icon.Icon(icon.MdiChevronRight, "size-4")
+							</button>
+						</li>
+					</ul>
+				</nav>
 			</div>
-			<nav role="navigation" aria-label="pagination" class="flex justify-center">
-				<ul class="flex flex-row items-center gap-1">
-					<li>
-						<button
-							type="button"
-							class="btn-ghost gap-1 pl-2.5"
-							data-attr:disabled={ fmt.Sprintf("$%s.page <= 1", prefix) }
-							data-on:click={ fmt.Sprintf("$%s.page = $%s.page - 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
-						>
-							@icon.Icon(icon.MdiChevronLeft, "size-4")
-							<span>Previous</span>
-						</button>
-					</li>
-					<li>
-						<span
-							class="btn-icon-ghost pointer-events-none text-sm tabular-nums"
-							data-text={ fmt.Sprintf("$%s.page + ' / ' + Math.ceil($%s.totalRows / $%s.pageSize)", prefix, prefix, prefix) }
-						></span>
-					</li>
-					<li>
-						<button
-							type="button"
-							class="btn-ghost gap-1 pr-2.5"
-							data-attr:disabled={ fmt.Sprintf("$%s.page * $%s.pageSize >= $%s.totalRows", prefix, prefix, prefix) }
-							data-on:click={ fmt.Sprintf("$%s.page = $%s.page + 1; $%s.loading = true; %s", prefix, prefix, prefix, loadDataExpr) }
-						>
-							<span>Next</span>
-							@icon.Icon(icon.MdiChevronRight, "size-4")
-						</button>
-					</li>
-				</ul>
-			</nav>
-		</div>
 		}
 	</div>
 }

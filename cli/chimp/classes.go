@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/s00500/chimp/runner"
 	log "github.com/s00500/env_logger"
 	"github.com/spf13/cobra"
 )
@@ -25,9 +26,16 @@ var classesCmd = &cobra.Command{
 		log.MustFatal(log.Wrap(err, "failed to write "+outputPath))
 
 		log.Infof("Wrote %s", outputPath)
+
+		// Touch sync file to trigger reload in --sync consumers
+		sync, _ := cmd.Flags().GetBool("sync")
+		if sync {
+			runner.TouchSyncFile()
+		}
 	},
 }
 
 func init() {
+	classesCmd.Flags().Bool("sync", false, "Touch sync file after writing classes")
 	rootCmd.AddCommand(classesCmd)
 }
