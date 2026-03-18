@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"syscall"
 	"time"
 
 	log "github.com/s00500/env_logger"
@@ -51,7 +50,7 @@ func New(config Config) *Runner {
 }
 
 func (r *Runner) Run(ctx context.Context) error {
-	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	ctx, cancel := signal.NotifyContext(ctx, notifySignals()...)
 	defer cancel()
 
 	reload := make(chan struct{}, 1)

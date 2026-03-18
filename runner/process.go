@@ -4,7 +4,6 @@ import (
 	"context"
 	"os"
 	"os/exec"
-	"syscall"
 	"time"
 
 	log "github.com/s00500/env_logger"
@@ -32,7 +31,7 @@ func (p *process) start(ctx context.Context) {
 	p.cmd.Dir = p.dir
 	p.cmd.Stdout = os.Stdout
 	p.cmd.Stderr = os.Stderr
-	p.cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	setProcAttr(p.cmd)
 
 	if !p.interactive {
 		p.cmd.Stdin = os.Stdin
@@ -64,18 +63,15 @@ func (p *process) stop() {
 		return
 	}
 
-	pid := p.cmd.Process.Pid
-
-	// Send SIGINT to the process group
-	_ = syscall.Kill(-pid, syscall.SIGINT)
+	gracefulStop(p.cmd)
 
 	// Wait up to 5 seconds for graceful shutdown
 	select {
 	case <-p.done:
 		return
 	case <-time.After(5 * time.Second):
-		log.Warn("[chimp] process did not exit after SIGINT, sending SIGKILL")
-		_ = syscall.Kill(-pid, syscall.SIGKILL)
+		log.Warn("[chimp] process did not exit gracefully, force killing")
+		forceStop(p.cmd)
 		<-p.done
 	}
 }

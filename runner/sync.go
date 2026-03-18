@@ -4,17 +4,20 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 	log "github.com/s00500/env_logger"
 )
 
-const syncFile = "/tmp/chimp-sync"
+func syncFilePath() string {
+	return filepath.Join(os.TempDir(), "chimp-sync")
+}
 
 // TouchSyncFile writes the current timestamp to the sync file (master/producer).
 func TouchSyncFile() {
-	err := os.WriteFile(syncFile, []byte(fmt.Sprintf("%d", time.Now().UnixNano())), 0644)
+	err := os.WriteFile(syncFilePath(), []byte(fmt.Sprintf("%d", time.Now().UnixNano())), 0644)
 	if err != nil {
 		log.Warnf("[chimp] failed to touch sync file: %v", err)
 	}
@@ -26,9 +29,11 @@ type syncWatcher struct {
 }
 
 func newSyncWatcher() (*syncWatcher, error) {
+	sf := syncFilePath()
+
 	// Ensure the sync file exists so we can watch the parent dir for changes to it
-	if _, err := os.Stat(syncFile); os.IsNotExist(err) {
-		_ = os.WriteFile(syncFile, []byte("0"), 0644)
+	if _, err := os.Stat(sf); os.IsNotExist(err) {
+		_ = os.WriteFile(sf, []byte("0"), 0644)
 	}
 
 	fsw, err := fsnotify.NewWatcher()
@@ -36,8 +41,8 @@ func newSyncWatcher() (*syncWatcher, error) {
 		return nil, err
 	}
 
-	// Watch /tmp and filter to our specific file
-	if err := fsw.Add("/tmp"); err != nil {
+	// Watch the temp directory and filter to our specific file
+	if err := fsw.Add(filepath.Dir(sf)); err != nil {
 		fsw.Close()
 		return nil, err
 	}
@@ -54,7 +59,7 @@ func (sw *syncWatcher) watch(ctx context.Context, reload chan<- struct{}) {
 			if !ok {
 				return
 			}
-			if event.Name != syncFile {
+			if event.Name != syncFilePath() {
 				continue
 			}
 			if event.Has(fsnotify.Write) || event.Has(fsnotify.Create) {
