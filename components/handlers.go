@@ -416,6 +416,21 @@ func (h EventHandler) Capture() EventHandler {
 	return h
 }
 
+// Duration adds a duration modifier with the specified milliseconds.
+// Used with OnInterval to set the interval timing.
+// Example: OnInterval(action).Duration(500) -> data-on:interval__duration.500ms="..."
+func (h EventHandler) Duration(ms int) EventHandler {
+	h.mods = append(h.mods, fmt.Sprintf("duration.%dms", ms))
+	return h
+}
+
+// Leading adds the __leading modifier (execute immediately, then at interval).
+// Example: OnInterval(action).Duration(500).Leading() -> data-on:interval__duration.500ms__leading="..."
+func (h EventHandler) Leading() EventHandler {
+	h.mods = append(h.mods, "leading")
+	return h
+}
+
 // Implement all component option interfaces for EventHandler
 func (h EventHandler) applyToForm(c *FormConfig)               { h.toOption().applyToForm(c) }
 func (h EventHandler) applyToButton(c *ButtonConfig)           { h.toOption().applyToButton(c) }
@@ -463,6 +478,14 @@ func OnLoad(action Action) EventHandler {
 	return EventHandler{event: "load", action: action.String()}
 }
 
+// DataInit creates a load event handler for initializing data when an element mounts.
+// Shortcut for OnLoad — reads more naturally for data-fetching on mount.
+// Example: DataInit(GetSSE("/api/users"))
+// Example: DataInit(PostSSE("/api/init")).Once()
+func DataInit(action Action) EventHandler {
+	return OnLoad(action)
+}
+
 // OnFocus creates a focus event handler.
 func OnFocus(action Action) EventHandler {
 	return EventHandler{event: "focus", action: action.String()}
@@ -497,6 +520,15 @@ func OnMouseleave(action Action) EventHandler {
 // Example: OnScroll(action).Throttle(100)
 func OnScroll(action Action) EventHandler {
 	return EventHandler{event: "scroll", action: action.String()}
+}
+
+// OnInterval creates an interval event handler that fires repeatedly.
+// Default interval is 1 second.
+// Example: OnInterval(GetSSE("/api/poll"))
+// Example: OnInterval(GetSSE("/api/poll")).Duration(5000)
+// Example: OnInterval(RawAction("$count++")).Duration(500).Leading()
+func OnInterval(action Action) EventHandler {
+	return EventHandler{event: "interval", action: action.String()}
 }
 
 // ============================================================================

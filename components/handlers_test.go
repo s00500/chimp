@@ -320,6 +320,86 @@ func TestOnKeydownWindow(t *testing.T) {
 	}
 }
 
+func TestOnInterval(t *testing.T) {
+	tests := []struct {
+		name   string
+		handler EventHandler
+		event  string
+		action string
+	}{
+		{
+			name:    "default interval",
+			handler: OnInterval(GetSSE("/api/poll")),
+			event:   "interval",
+			action:  "@get('/api/poll')",
+		},
+		{
+			name:    "custom duration",
+			handler: OnInterval(GetSSE("/api/poll")).Duration(5000),
+			event:   "interval__duration.5000ms",
+			action:  "@get('/api/poll')",
+		},
+		{
+			name:    "short duration with leading",
+			handler: OnInterval(RawAction("$count++")).Duration(500).Leading(),
+			event:   "interval__duration.500ms__leading",
+			action:  "$count++",
+		},
+		{
+			name:    "leading only",
+			handler: OnInterval(PostSSE("/api/heartbeat")).Leading(),
+			event:   "interval__leading",
+			action:  "@post('/api/heartbeat')",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opt := tt.handler.toOption()
+			if opt.event != tt.event {
+				t.Errorf("event = %q, want %q", opt.event, tt.event)
+			}
+			if opt.action != tt.action {
+				t.Errorf("action = %q, want %q", opt.action, tt.action)
+			}
+		})
+	}
+}
+
+func TestDataInit(t *testing.T) {
+	tests := []struct {
+		name   string
+		handler EventHandler
+		event  string
+		action string
+	}{
+		{
+			name:    "basic init",
+			handler: DataInit(GetSSE("/api/users")),
+			event:   "load",
+			action:  "@get('/api/users')",
+		},
+		{
+			name:    "init with once",
+			handler: DataInit(PostSSE("/api/init")).Once(),
+			event:   "load__once",
+			action:  "@post('/api/init')",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			opt := tt.handler.toOption()
+			if opt.event != tt.event {
+				t.Errorf("event = %q, want %q", opt.event, tt.event)
+			}
+			if opt.action != tt.action {
+				t.Errorf("action = %q, want %q", opt.action, tt.action)
+			}
+		})
+	}
+}
+
 func TestElementOptions(t *testing.T) {
 	// Test that element options apply correctly
 	config := applyElementOptions([]ElementOption{
