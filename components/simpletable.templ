@@ -15,24 +15,26 @@ import "strings"
 //	}
 templ SimpleTable(headers []string, options ...SimpleTableOption) {
 	{{ config := applySimpleTableOptions(options) }}
-	<table
-		class={ "table w-full", templ.KV("[&_td]:py-1 [&_th]:py-1", config.Compact), templ.KV("[&_td]:h-10", !config.Compact), config.Class }
-		if config.ID != "" {
-			id={ config.ID }
-		}
-		{ config.CommonAttrs()... }
-	>
-		<thead class="table-header">
-			<tr class="table-row">
-				for _, h := range headers {
-					<th class="table-head">{ h }</th>
-				}
-			</tr>
-		</thead>
-		<tbody class="table-body">
-			{ children... }
-		</tbody>
-	</table>
+	<div class="overflow-x-auto">
+		<table
+			class={ "table w-full", templ.KV("[&_td]:py-1 [&_th]:py-1", config.Compact), templ.KV("[&_td]:h-10", !config.Compact), config.Class }
+			if config.ID != "" {
+				id={ config.ID }
+			}
+			{ config.CommonAttrs()... }
+		>
+			<thead class="table-header">
+				<tr class="table-row">
+					for _, h := range headers {
+						<th class="table-head">{ h }</th>
+					}
+				</tr>
+			</thead>
+			<tbody class="table-body">
+				{ children... }
+			</tbody>
+		</table>
+	</div>
 }
 
 // TableRow renders a table row with BaseCoat styling.
