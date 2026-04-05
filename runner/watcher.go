@@ -82,10 +82,10 @@ func (w *watcher) shouldIgnoreDir(name string) bool {
 }
 
 func (w *watcher) shouldProcess(name string) bool {
-	// Ignore generated templ files
-	if strings.HasSuffix(name, "_templ.go") {
-		return false
-	}
+	//// Ignore generated templ files
+	//if strings.HasSuffix(name, "_templ.go") {
+	//	return false
+	//}
 	ext := filepath.Ext(name)
 	return w.exts[ext]
 }
