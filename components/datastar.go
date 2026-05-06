@@ -118,6 +118,7 @@ type FormGroupOption interface{ applyToFormGroup(*FormGroupConfig) }
 type CardOption interface{ applyToCard(*CardConfig) }
 type SectionOption interface{ applyToSection(*SectionConfig) }
 type SimpleTableOption interface{ applyToSimpleTable(*SimpleTableConfig) }
+type DropzoneOption interface{ applyToDropzone(*DropzoneConfig) }
 
 // ============================================================================
 // Common Options (implement multiple interfaces - work on many components)
@@ -135,6 +136,7 @@ func (o idOption) applyToFormGroup(c *FormGroupConfig)     { c.ID = string(o) }
 func (o idOption) applyToCard(c *CardConfig)               { c.ID = string(o) }
 func (o idOption) applyToSection(c *SectionConfig)         { c.ID = string(o) }
 func (o idOption) applyToSimpleTable(c *SimpleTableConfig) { c.ID = string(o) }
+func (o idOption) applyToDropzone(c *DropzoneConfig)       { c.ID = string(o) }
 
 // WithID sets the id attribute (works on any component)
 func WithID(id string) idOption { return idOption(id) }
@@ -158,6 +160,7 @@ func (o classOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.Commo
 func (o classOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o classOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
 func (o classOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
+func (o classOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
 
 // WithClass adds CSS classes (works on any component)
 func WithClass(class string) classOption { return classOption(class) }
@@ -183,6 +186,7 @@ func (o onOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonCo
 func (o onOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o onOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
 func (o onOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
+func (o onOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
 
 // WithOn adds a data-on:event handler (works on any component)
 func WithOn(event, action string) onOption { return onOption{event, action} }
@@ -208,6 +212,7 @@ func (o bindAttrOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.Co
 func (o bindAttrOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o bindAttrOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
 func (o bindAttrOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
 
 // WithBindAttr adds a data-bind:attr binding for attribute bindings (works on any component)
 // Example: WithBindAttr("class", "$active ? 'selected' : ''")
@@ -226,6 +231,7 @@ func (o showOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.Common
 func (o showOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o showOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
 func (o showOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
+func (o showOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
 
 // WithShow sets the data-show expression (works on any component)
 func WithShow(expr string) showOption { return showOption(expr) }
@@ -250,6 +256,7 @@ func (o attrsOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.Commo
 func (o attrsOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
 func (o attrsOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
 func (o attrsOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
 
 // WithAttrs adds extra HTML attributes (works on any component)
 func WithAttrs(attrs templ.Attributes) attrsOption { return attrsOption(attrs) }
@@ -834,6 +841,65 @@ func applySimpleTableOptions(options []SimpleTableOption) *SimpleTableConfig {
 	config := &SimpleTableConfig{}
 	for _, opt := range options {
 		opt.applyToSimpleTable(config)
+	}
+	return config
+}
+
+// ============================================================================
+// Dropzone Config & Options
+// ============================================================================
+
+// DropzoneConfig holds configuration for the dropzone file upload component
+type DropzoneConfig struct {
+	CommonConfig // embedded
+
+	Multiple    bool
+	Accept      string // file type filter, e.g. "image/*", ".pdf,.doc"
+	MaxFileSize int64  // max bytes per file (0 = no limit)
+	MaxFiles    int    // max file count, multi mode only (0 = unlimited)
+	InputName   string // name attribute for the file input (default: "file")
+	Disabled    bool
+	Description string // help text below the main instruction
+}
+
+// Dropzone-specific option types
+type dzMultipleOption struct{}
+func (o dzMultipleOption) applyToDropzone(c *DropzoneConfig) { c.Multiple = true }
+
+type dzAcceptOption string
+func (o dzAcceptOption) applyToDropzone(c *DropzoneConfig) { c.Accept = string(o) }
+
+type dzMaxFileSizeOption int64
+func (o dzMaxFileSizeOption) applyToDropzone(c *DropzoneConfig) { c.MaxFileSize = int64(o) }
+
+type dzMaxFilesOption int
+func (o dzMaxFilesOption) applyToDropzone(c *DropzoneConfig) { c.MaxFiles = int(o) }
+
+type dzInputNameOption string
+func (o dzInputNameOption) applyToDropzone(c *DropzoneConfig) { c.InputName = string(o) }
+
+type dzDisabledOption struct{}
+func (o dzDisabledOption) applyToDropzone(c *DropzoneConfig) { c.Disabled = true }
+
+type dzDescriptionOption string
+func (o dzDescriptionOption) applyToDropzone(c *DropzoneConfig) { c.Description = string(o) }
+
+// Dropzone option constructors
+func WithDropzoneMultiple() dzMultipleOption                    { return dzMultipleOption{} }
+func WithAccept(accept string) dzAcceptOption                   { return dzAcceptOption(accept) }
+func WithMaxFileSize(bytes int64) dzMaxFileSizeOption            { return dzMaxFileSizeOption(bytes) }
+func WithMaxFiles(n int) dzMaxFilesOption                        { return dzMaxFilesOption(n) }
+func WithInputName(name string) dzInputNameOption                { return dzInputNameOption(name) }
+func WithDropzoneDisabled() dzDisabledOption                     { return dzDisabledOption{} }
+func WithDropzoneDescription(text string) dzDescriptionOption    { return dzDescriptionOption(text) }
+
+// applyDropzoneOptions applies all options and returns config
+func applyDropzoneOptions(options []DropzoneOption) *DropzoneConfig {
+	config := &DropzoneConfig{
+		InputName: "file",
+	}
+	for _, opt := range options {
+		opt.applyToDropzone(config)
 	}
 	return config
 }

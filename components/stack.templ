@@ -79,6 +79,7 @@ templ Form(options ...FormGroupOption) {
 			data-on:submit__prevent={ config.OnSubmit }
 		}
 		{ config.Datastar.ToAttrs()... }
+		{ templ.Attributes(config.Attrs)... }
 	>
 		{ children... }
 	</form>

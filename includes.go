@@ -55,13 +55,22 @@ func baseCoatJSHandler(w http.ResponseWriter, r *http.Request) {
 //go:embed static/chimp-autocomplete.js
 var chimpAutocompleteBytes []byte
 
+//go:embed static/chimp-dropzone.js
+var chimpDropzoneBytes []byte
+
 func IncludedChimpJS() templ.Component {
-	return templ.Raw(`<script src="static/chimp-autocomplete.js"></script>`)
+	return templ.Raw(`<script src="static/chimp-autocomplete.js"></script>
+<script src="static/chimp-dropzone.js"></script>`)
 }
 
 func chimpAutocompleteHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bytes.NewReader(chimpAutocompleteBytes)
 	http.ServeContent(w, r, "chimp-autocomplete.js", modTime, buf)
+}
+
+func chimpDropzoneHandler(w http.ResponseWriter, r *http.Request) {
+	buf := bytes.NewReader(chimpDropzoneBytes)
+	http.ServeContent(w, r, "chimp-dropzone.js", modTime, buf)
 }
 
 //go:embed static/neo-sans-std-m.otf
@@ -98,4 +107,5 @@ func ServeIncludedAssets(r chi.Router, baseURL string) {
 	r.Get(p+"/static/basecoat.min.js", baseCoatJSHandler)
 	r.Get(p+"/static/neo-sans-std-m.otf", neoSansFontHandler)
 	r.Get(p+"/static/chimp-autocomplete.js", chimpAutocompleteHandler)
+	r.Get(p+"/static/chimp-dropzone.js", chimpDropzoneHandler)
 }

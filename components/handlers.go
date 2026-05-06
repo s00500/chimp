@@ -2,6 +2,7 @@ package components
 
 import (
 	"fmt"
+	"mime/multipart"
 	"net/http"
 	"strings"
 
@@ -441,6 +442,7 @@ func (h EventHandler) applyToFormGroup(c *FormGroupConfig)     { h.toOption().ap
 func (h EventHandler) applyToCard(c *CardConfig)               { h.toOption().applyToCard(c) }
 func (h EventHandler) applyToSection(c *SectionConfig)         { h.toOption().applyToSection(c) }
 func (h EventHandler) applyToElement(c *ElementConfig)         { h.toOption().applyToElement(c) }
+func (h EventHandler) applyToDropzone(c *DropzoneConfig)       { h.toOption().applyToDropzone(c) }
 
 // ============================================================================
 // Event Handler Constructors
@@ -790,4 +792,52 @@ func (e EventBuilder) Once() EventBuilder {
 // Attr returns the full attribute name (data-on:event__mods).
 func (e EventBuilder) Attr() string {
 	return "data-on:" + e.String()
+}
+
+// ============================================================================
+// File Upload Helpers
+// ============================================================================
+
+// UploadedFile represents a file received from a multipart form upload.
+type UploadedFile struct {
+	Name   string
+	Size   int64
+	Header *multipart.FileHeader
+}
+
+// Open opens the uploaded file for reading. Close the returned file when done.
+func (f *UploadedFile) Open() (multipart.File, error) {
+	return f.Header.Open()
+}
+
+// ReadUploadedFile reads a single file from a multipart request.
+// The name parameter must match the Dropzone's InputName (default: "file").
+func ReadUploadedFile(r *http.Request, name string) (*UploadedFile, multipart.File, error) {
+	file, header, err := r.FormFile(name)
+	if err != nil {
+		return nil, nil, fmt.Errorf("reading uploaded file %q: %w", name, err)
+	}
+	return &UploadedFile{
+		Name:   header.Filename,
+		Size:   header.Size,
+		Header: header,
+	}, file, nil
+}
+
+// ReadUploadedFiles reads multiple files from a multipart request.
+// The name parameter must match the Dropzone's InputName (default: "file").
+func ReadUploadedFiles(r *http.Request, name string) ([]*UploadedFile, error) {
+	if err := r.ParseMultipartForm(32 << 20); err != nil {
+		return nil, fmt.Errorf("parsing multipart form: %w", err)
+	}
+	fileHeaders := r.MultipartForm.File[name]
+	files := make([]*UploadedFile, 0, len(fileHeaders))
+	for _, header := range fileHeaders {
+		files = append(files, &UploadedFile{
+			Name:   header.Filename,
+			Size:   header.Size,
+			Header: header,
+		})
+	}
+	return files, nil
 }

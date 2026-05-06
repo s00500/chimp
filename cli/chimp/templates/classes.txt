@@ -35,6 +35,7 @@ cursor-pointer
 dark
 dialog
 dropdown-menu
+dropzone-filelist
 duration-300
 ease-in-out
 field
@@ -54,6 +55,7 @@ gap-2
 gap-3
 gap-4
 gap-5
+gap-6
 gap-x-4
 gap-y-2
 grid
@@ -81,6 +83,7 @@ left-1/2
 m-4
 max-h-80
 max-h-[612px]
+max-w-2xl
 mb-2
 mb-6
 md:block
@@ -96,8 +99,11 @@ min-h-14
 min-h-screen
 min-w-56
 mr-2
+mt-1
+mt-2
 mt-3
 mx-2
+mx-auto
 my-2
 opacity-25
 opacity-50
@@ -113,6 +119,7 @@ p-2
 p-4
 p-5
 p-6
+p-8
 pl-2.5
 pointer-events-auto
 pointer-events-none
@@ -138,7 +145,9 @@ sm:max-w-[425px]
 space-x-2
 space-y-2
 space-y-4
+space-y-6
 spin
+sr-only
 sticky
 table
 table-body
@@ -147,6 +156,7 @@ table-head
 table-header
 table-row
 tabular-nums
+text-2xl
 text-base
 text-center
 text-destructive
@@ -154,6 +164,7 @@ text-green-600
 text-lg
 text-muted-foreground
 text-sm
+text-xs
 toast
 toast-content
 toaster-top

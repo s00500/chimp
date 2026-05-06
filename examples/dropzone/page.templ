@@ -1,0 +1,59 @@
+package main
+
+import cc "github.com/s00500/chimp/components"
+import "github.com/s00500/chimp"
+
+templ page() {
+	<html class="dark">
+		<head>
+			<title>Dropzone Demo</title>
+			<script src="https://cdn.tailwindcss.com"></script>
+			@chimp.IncludedDatastar()
+			@chimp.IncludedBaseCoatCSS()
+			@chimp.IncludedBaseCoatJS()
+			@chimp.IncludedChimpJS()
+		</head>
+		<body class="p-8 max-w-2xl mx-auto space-y-6">
+			<h1 class="text-2xl font-bold">Dropzone Demo</h1>
+			<div class="grid grid-cols-1 gap-6">
+				@cc.Card(cc.WithCardTitle("Single File"), cc.WithCardDescription("Upload one file")) {
+					<section>
+						@cc.Form(
+							cc.WithFormSubmit(cc.PostSSE("/upload").String()),
+							cc.WithAttrs(templ.Attributes{"enctype": "multipart/form-data"}),
+						) {
+							@cc.Stack() {
+								@cc.Dropzone("Choose a file",
+									cc.WithAccept("image/*,.pdf,.txt"),
+									cc.WithMaxFileSize(10 * 1024 * 1024),
+									cc.WithDropzoneDescription("Images, PDFs, or text up to 10MB"),
+								)
+								@cc.Button("Upload", cc.WithButtonType("submit"))
+							}
+						}
+					</section>
+				}
+				@cc.Card(cc.WithCardTitle("Multi File"), cc.WithCardDescription("Upload multiple files")) {
+					<section>
+						@cc.Form(
+							cc.WithFormSubmit(cc.PostSSE("/upload").String()),
+							cc.WithAttrs(templ.Attributes{"enctype": "multipart/form-data"}),
+						) {
+							@cc.Stack() {
+								@cc.Dropzone("Choose files",
+									cc.WithDropzoneMultiple(),
+									cc.WithInputName("file"),
+									cc.WithMaxFiles(5),
+									cc.WithMaxFileSize(10 * 1024 * 1024),
+									cc.WithDropzoneDescription("Up to 5 files, 10MB each"),
+								)
+								@cc.Button("Upload All", cc.WithButtonType("submit"))
+							}
+						}
+					</section>
+				}
+			</div>
+			@chimp.HotReload(true)
+		</body>
+	</html>
+}
