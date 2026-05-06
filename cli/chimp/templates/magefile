@@ -23,8 +23,7 @@ func TemplBuild() error {
 // Server runs development server with live reload (chimp run)
 func Server() error {
 	return sh.RunWithV(map[string]string{
-		"ENV":          "dev",
-		"SKIP_MIGRATE": "true",
+		"ENV": "dev",
 	}, "go", "tool", "github.com/s00500/chimp/cli/chimp", "run", "--sync")
 }
 
