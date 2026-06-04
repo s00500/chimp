@@ -21,6 +21,7 @@ templ FormInput(label, name string, options ...FormOption) {
 		<input
 			class={ "input", config.Class }
 			type={ config.Type }
+			value={ config.Value }
 			id={ name }
 			name={ name }
 			if config.Placeholder != "" {

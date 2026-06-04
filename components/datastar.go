@@ -119,6 +119,9 @@ type CardOption interface{ applyToCard(*CardConfig) }
 type SectionOption interface{ applyToSection(*SectionConfig) }
 type SimpleTableOption interface{ applyToSimpleTable(*SimpleTableConfig) }
 type DropzoneOption interface{ applyToDropzone(*DropzoneConfig) }
+type BadgeOption interface{ applyToBadge(*BadgeConfig) }
+type AccordionOption interface{ applyToAccordion(*AccordionConfig) }
+type AccordionItemOption interface{ applyToAccordionItem(*AccordionItemConfig) }
 
 // ============================================================================
 // Common Options (implement multiple interfaces - work on many components)
@@ -127,16 +130,16 @@ type DropzoneOption interface{ applyToDropzone(*DropzoneConfig) }
 // idOption sets the id attribute
 type idOption string
 
-func (o idOption) applyToForm(c *FormConfig)               { c.ID = string(o) }
-func (o idOption) applyToButton(c *ButtonConfig)           { c.ID = string(o) }
+func (o idOption) applyToForm(c *FormConfig)                 { c.ID = string(o) }
+func (o idOption) applyToButton(c *ButtonConfig)             { c.ID = string(o) }
 func (o idOption) applyToAutocomplete(c *AutocompleteConfig) { c.ID = string(o) }
-func (o idOption) applyToDataTable(c *DataTableConfig)     { c.ID = string(o) }
-func (o idOption) applyToStack(c *StackConfig)             { c.ID = string(o) }
-func (o idOption) applyToFormGroup(c *FormGroupConfig)     { c.ID = string(o) }
-func (o idOption) applyToCard(c *CardConfig)               { c.ID = string(o) }
-func (o idOption) applyToSection(c *SectionConfig)         { c.ID = string(o) }
-func (o idOption) applyToSimpleTable(c *SimpleTableConfig) { c.ID = string(o) }
-func (o idOption) applyToDropzone(c *DropzoneConfig)       { c.ID = string(o) }
+func (o idOption) applyToDataTable(c *DataTableConfig)       { c.ID = string(o) }
+func (o idOption) applyToStack(c *StackConfig)               { c.ID = string(o) }
+func (o idOption) applyToFormGroup(c *FormGroupConfig)       { c.ID = string(o) }
+func (o idOption) applyToCard(c *CardConfig)                 { c.ID = string(o) }
+func (o idOption) applyToSection(c *SectionConfig)           { c.ID = string(o) }
+func (o idOption) applyToSimpleTable(c *SimpleTableConfig)   { c.ID = string(o) }
+func (o idOption) applyToDropzone(c *DropzoneConfig)         { c.ID = string(o) }
 
 // WithID sets the id attribute (works on any component)
 func WithID(id string) idOption { return idOption(id) }
@@ -151,16 +154,16 @@ func (o classOption) apply(c *CommonConfig) {
 		c.Class += " " + string(o)
 	}
 }
-func (o classOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
-func (o classOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o classOption) applyToForm(c *FormConfig)                 { o.apply(&c.CommonConfig) }
+func (o classOption) applyToButton(c *ButtonConfig)             { o.apply(&c.CommonConfig) }
 func (o classOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
-func (o classOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
-func (o classOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
-func (o classOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
-func (o classOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
-func (o classOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
-func (o classOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
-func (o classOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
+func (o classOption) applyToDataTable(c *DataTableConfig)       { o.apply(&c.CommonConfig) }
+func (o classOption) applyToStack(c *StackConfig)               { o.apply(&c.CommonConfig) }
+func (o classOption) applyToFormGroup(c *FormGroupConfig)       { o.apply(&c.CommonConfig) }
+func (o classOption) applyToCard(c *CardConfig)                 { o.apply(&c.CommonConfig) }
+func (o classOption) applyToSection(c *SectionConfig)           { o.apply(&c.CommonConfig) }
+func (o classOption) applyToSimpleTable(c *SimpleTableConfig)   { o.apply(&c.CommonConfig) }
+func (o classOption) applyToDropzone(c *DropzoneConfig)         { o.apply(&c.CommonConfig) }
 
 // WithClass adds CSS classes (works on any component)
 func WithClass(class string) classOption { return classOption(class) }
@@ -177,16 +180,16 @@ func (o onOption) apply(c *CommonConfig) {
 	}
 	c.Datastar.On[o.event] = o.action
 }
-func (o onOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
-func (o onOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o onOption) applyToForm(c *FormConfig)                 { o.apply(&c.CommonConfig) }
+func (o onOption) applyToButton(c *ButtonConfig)             { o.apply(&c.CommonConfig) }
 func (o onOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
-func (o onOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
-func (o onOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
-func (o onOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
-func (o onOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
-func (o onOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
-func (o onOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
-func (o onOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
+func (o onOption) applyToDataTable(c *DataTableConfig)       { o.apply(&c.CommonConfig) }
+func (o onOption) applyToStack(c *StackConfig)               { o.apply(&c.CommonConfig) }
+func (o onOption) applyToFormGroup(c *FormGroupConfig)       { o.apply(&c.CommonConfig) }
+func (o onOption) applyToCard(c *CardConfig)                 { o.apply(&c.CommonConfig) }
+func (o onOption) applyToSection(c *SectionConfig)           { o.apply(&c.CommonConfig) }
+func (o onOption) applyToSimpleTable(c *SimpleTableConfig)   { o.apply(&c.CommonConfig) }
+func (o onOption) applyToDropzone(c *DropzoneConfig)         { o.apply(&c.CommonConfig) }
 
 // WithOn adds a data-on:event handler (works on any component)
 func WithOn(event, action string) onOption { return onOption{event, action} }
@@ -203,35 +206,35 @@ func (o bindAttrOption) apply(c *CommonConfig) {
 	}
 	c.Datastar.BindMap[o.attr] = o.expr
 }
-func (o bindAttrOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToForm(c *FormConfig)                 { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToButton(c *ButtonConfig)             { o.apply(&c.CommonConfig) }
 func (o bindAttrOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToDataTable(c *DataTableConfig)       { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToStack(c *StackConfig)               { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToFormGroup(c *FormGroupConfig)       { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToCard(c *CardConfig)                 { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToSection(c *SectionConfig)           { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToSimpleTable(c *SimpleTableConfig)   { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToDropzone(c *DropzoneConfig)         { o.apply(&c.CommonConfig) }
 
 // WithBindAttr adds a data-bind:attr binding for attribute bindings (works on any component)
-// Example: WithBindAttr("class", "$active ? 'selected' : ''")
+// Example: WithBindAttr("class", "$active ? 'selected' : ”")
 func WithBindAttr(attr, expr string) bindAttrOption { return bindAttrOption{attr, expr} }
 
 // showOption sets the data-show expression
 type showOption string
 
-func (o showOption) apply(c *CommonConfig) { c.Datastar.Show = string(o) }
-func (o showOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
-func (o showOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o showOption) apply(c *CommonConfig)                     { c.Datastar.Show = string(o) }
+func (o showOption) applyToForm(c *FormConfig)                 { o.apply(&c.CommonConfig) }
+func (o showOption) applyToButton(c *ButtonConfig)             { o.apply(&c.CommonConfig) }
 func (o showOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
-func (o showOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
-func (o showOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
-func (o showOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
-func (o showOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
-func (o showOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
-func (o showOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
-func (o showOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
+func (o showOption) applyToDataTable(c *DataTableConfig)       { o.apply(&c.CommonConfig) }
+func (o showOption) applyToStack(c *StackConfig)               { o.apply(&c.CommonConfig) }
+func (o showOption) applyToFormGroup(c *FormGroupConfig)       { o.apply(&c.CommonConfig) }
+func (o showOption) applyToCard(c *CardConfig)                 { o.apply(&c.CommonConfig) }
+func (o showOption) applyToSection(c *SectionConfig)           { o.apply(&c.CommonConfig) }
+func (o showOption) applyToSimpleTable(c *SimpleTableConfig)   { o.apply(&c.CommonConfig) }
+func (o showOption) applyToDropzone(c *DropzoneConfig)         { o.apply(&c.CommonConfig) }
 
 // WithShow sets the data-show expression (works on any component)
 func WithShow(expr string) showOption { return showOption(expr) }
@@ -247,16 +250,16 @@ func (o attrsOption) apply(c *CommonConfig) {
 		c.Attrs[k] = v
 	}
 }
-func (o attrsOption) applyToForm(c *FormConfig)               { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToButton(c *ButtonConfig)           { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToForm(c *FormConfig)                 { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToButton(c *ButtonConfig)             { o.apply(&c.CommonConfig) }
 func (o attrsOption) applyToAutocomplete(c *AutocompleteConfig) { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToDataTable(c *DataTableConfig)     { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToStack(c *StackConfig)             { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToFormGroup(c *FormGroupConfig)     { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToCard(c *CardConfig)               { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToSection(c *SectionConfig)         { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToSimpleTable(c *SimpleTableConfig) { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToDropzone(c *DropzoneConfig)       { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToDataTable(c *DataTableConfig)       { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToStack(c *StackConfig)               { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToFormGroup(c *FormGroupConfig)       { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToCard(c *CardConfig)                 { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToSection(c *SectionConfig)           { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToSimpleTable(c *SimpleTableConfig)   { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToDropzone(c *DropzoneConfig)         { o.apply(&c.CommonConfig) }
 
 // WithAttrs adds extra HTML attributes (works on any component)
 func WithAttrs(attrs templ.Attributes) attrsOption { return attrsOption(attrs) }
@@ -293,76 +296,104 @@ type FormConfig struct {
 
 	Error       string // data-show expression for error
 	Description string // hint text below the input
+
+	Value string
 }
 
 // Form-specific option types
 type formTypeOption string
+
 func (o formTypeOption) applyToForm(c *FormConfig) { c.Type = string(o) }
 
 type formPlaceholderOption string
+
 func (o formPlaceholderOption) applyToForm(c *FormConfig) { c.Placeholder = string(o) }
 
 type formRequiredOption struct{}
+
 func (o formRequiredOption) applyToForm(c *FormConfig) { c.Required = true }
 
 type formDisabledOption struct{}
+
 func (o formDisabledOption) applyToForm(c *FormConfig) { c.Disabled = true }
 
 type formReadonlyOption struct{}
+
 func (o formReadonlyOption) applyToForm(c *FormConfig) { c.Readonly = true }
 
 type formAutofocusOption struct{}
+
 func (o formAutofocusOption) applyToForm(c *FormConfig) { c.Autofocus = true }
 
 type formMinOption string
+
 func (o formMinOption) applyToForm(c *FormConfig) { c.Min = string(o) }
 
 type formMaxOption string
+
 func (o formMaxOption) applyToForm(c *FormConfig) { c.Max = string(o) }
 
 type formMinLengthOption int
+
 func (o formMinLengthOption) applyToForm(c *FormConfig) { c.MinLength = int(o) }
 
 type formMaxLengthOption int
+
 func (o formMaxLengthOption) applyToForm(c *FormConfig) { c.MaxLength = int(o) }
 
 type formPatternOption string
+
 func (o formPatternOption) applyToForm(c *FormConfig) { c.Pattern = string(o) }
 
 type formStepOption string
+
 func (o formStepOption) applyToForm(c *FormConfig) { c.Step = string(o) }
 
 type formRowsOption int
+
 func (o formRowsOption) applyToForm(c *FormConfig) { c.Rows = int(o) }
 
 type formColsOption int
+
 func (o formColsOption) applyToForm(c *FormConfig) { c.Cols = int(o) }
 
 type formOptionsOption []SelectOption
+
 func (o formOptionsOption) applyToForm(c *FormConfig) { c.Options = []SelectOption(o) }
 
 type formMultipleOption struct{}
+
 func (o formMultipleOption) applyToForm(c *FormConfig) { c.Multiple = true }
 
 type formEmptyOptionOption string
+
 func (o formEmptyOptionOption) applyToForm(c *FormConfig) { c.EmptyOption = string(o) }
 
 type formHorizontalOption struct{}
+
 func (o formHorizontalOption) applyToForm(c *FormConfig) { c.Horizontal = true }
 
 type formErrorOption string
+
 func (o formErrorOption) applyToForm(c *FormConfig) { c.Error = string(o) }
 
 type formDescriptionOption string
+
 func (o formDescriptionOption) applyToForm(c *FormConfig) { c.Description = string(o) }
 
 type formBindOption string
+
 func (o formBindOption) applyToForm(c *FormConfig) { c.Datastar.Bind = string(o) }
+
+type formValueOption string
+
+func (o formValueOption) applyToForm(c *FormConfig) { c.Value = string(o) }
 
 type formSignalOption struct {
 	name  string
 	value string
 }
+
 func (o formSignalOption) applyToForm(c *FormConfig) {
 	if c.Datastar.Signals == nil {
 		c.Datastar.Signals = make(map[string]string)
@@ -374,6 +405,7 @@ type formDataAttrOption struct {
 	name string
 	expr string
 }
+
 func (o formDataAttrOption) applyToForm(c *FormConfig) {
 	if c.Datastar.Attrs == nil {
 		c.Datastar.Attrs = make(map[string]string)
@@ -382,29 +414,30 @@ func (o formDataAttrOption) applyToForm(c *FormConfig) {
 }
 
 // Form option constructors
-func WithType(t string) formTypeOption             { return formTypeOption(t) }
-func WithPlaceholder(p string) formPlaceholderOption { return formPlaceholderOption(p) }
-func WithRequired() formRequiredOption             { return formRequiredOption{} }
-func WithDisabled() formDisabledOption             { return formDisabledOption{} }
-func WithReadonly() formReadonlyOption             { return formReadonlyOption{} }
-func WithAutofocus() formAutofocusOption           { return formAutofocusOption{} }
-func WithMin(min string) formMinOption             { return formMinOption(min) }
-func WithMax(max string) formMaxOption             { return formMaxOption(max) }
-func WithMinLength(n int) formMinLengthOption      { return formMinLengthOption(n) }
-func WithMaxLength(n int) formMaxLengthOption      { return formMaxLengthOption(n) }
-func WithPattern(pattern string) formPatternOption { return formPatternOption(pattern) }
-func WithStep(step string) formStepOption          { return formStepOption(step) }
-func WithRows(rows int) formRowsOption             { return formRowsOption(rows) }
-func WithCols(cols int) formColsOption             { return formColsOption(cols) }
+func WithType(t string) formTypeOption                     { return formTypeOption(t) }
+func WithPlaceholder(p string) formPlaceholderOption       { return formPlaceholderOption(p) }
+func WithRequired() formRequiredOption                     { return formRequiredOption{} }
+func WithDisabled() formDisabledOption                     { return formDisabledOption{} }
+func WithReadonly() formReadonlyOption                     { return formReadonlyOption{} }
+func WithAutofocus() formAutofocusOption                   { return formAutofocusOption{} }
+func WithMin(min string) formMinOption                     { return formMinOption(min) }
+func WithMax(max string) formMaxOption                     { return formMaxOption(max) }
+func WithMinLength(n int) formMinLengthOption              { return formMinLengthOption(n) }
+func WithMaxLength(n int) formMaxLengthOption              { return formMaxLengthOption(n) }
+func WithPattern(pattern string) formPatternOption         { return formPatternOption(pattern) }
+func WithStep(step string) formStepOption                  { return formStepOption(step) }
+func WithRows(rows int) formRowsOption                     { return formRowsOption(rows) }
+func WithCols(cols int) formColsOption                     { return formColsOption(cols) }
 func WithOptions(options []SelectOption) formOptionsOption { return formOptionsOption(options) }
-func WithMultiple() formMultipleOption             { return formMultipleOption{} }
-func WithEmptyOption(text string) formEmptyOptionOption { return formEmptyOptionOption(text) }
-func WithHorizontal() formHorizontalOption             { return formHorizontalOption{} }
-func WithError(expr string) formErrorOption        { return formErrorOption(expr) }
-func WithDescription(text string) formDescriptionOption { return formDescriptionOption(text) }
-func WithBind(expr string) formBindOption          { return formBindOption(expr) }
-func WithSignal(name, value string) formSignalOption { return formSignalOption{name, value} }
-func WithDataAttr(name, expr string) formDataAttrOption { return formDataAttrOption{name, expr} }
+func WithMultiple() formMultipleOption                     { return formMultipleOption{} }
+func WithEmptyOption(text string) formEmptyOptionOption    { return formEmptyOptionOption(text) }
+func WithHorizontal() formHorizontalOption                 { return formHorizontalOption{} }
+func WithError(expr string) formErrorOption                { return formErrorOption(expr) }
+func WithDescription(text string) formDescriptionOption    { return formDescriptionOption(text) }
+func WithBind(expr string) formBindOption                  { return formBindOption(expr) }
+func WithValue(expr string) formValueOption                { return formValueOption(expr) }
+func WithSignal(name, value string) formSignalOption       { return formSignalOption{name, value} }
+func WithDataAttr(name, expr string) formDataAttrOption    { return formDataAttrOption{name, expr} }
 
 // applyFormOptions applies all options to a FormConfig
 func applyFormOptions(options []FormOption) *FormConfig {
@@ -446,26 +479,31 @@ type ButtonConfig struct {
 
 // Button-specific option types
 type buttonVariantOption Variant
+
 func (o buttonVariantOption) applyToButton(c *ButtonConfig) { c.Variant = Variant(o) }
 
 type buttonSizeOption Size
+
 func (o buttonSizeOption) applyToButton(c *ButtonConfig) { c.Size = Size(o) }
 
 type buttonTypeOption string
+
 func (o buttonTypeOption) applyToButton(c *ButtonConfig) { c.Type = string(o) }
 
 type buttonDisabledOption struct{}
+
 func (o buttonDisabledOption) applyToButton(c *ButtonConfig) { c.Disabled = true }
 
 type buttonLoadingOption string
+
 func (o buttonLoadingOption) applyToButton(c *ButtonConfig) { c.Loading = string(o) }
 
 // Button option constructors
-func WithVariant(v Variant) buttonVariantOption     { return buttonVariantOption(v) }
-func WithSize(s Size) buttonSizeOption              { return buttonSizeOption(s) }
-func WithButtonType(t string) buttonTypeOption      { return buttonTypeOption(t) }
-func WithButtonDisabled() buttonDisabledOption      { return buttonDisabledOption{} }
-func WithLoading(expr string) buttonLoadingOption   { return buttonLoadingOption(expr) }
+func WithVariant(v Variant) buttonVariantOption   { return buttonVariantOption(v) }
+func WithSize(s Size) buttonSizeOption            { return buttonSizeOption(s) }
+func WithButtonType(t string) buttonTypeOption    { return buttonTypeOption(t) }
+func WithButtonDisabled() buttonDisabledOption    { return buttonDisabledOption{} }
+func WithLoading(expr string) buttonLoadingOption { return buttonLoadingOption(expr) }
 
 // applyButtonOptions applies all options to a ButtonConfig
 func applyButtonOptions(options []ButtonOption) *ButtonConfig {
@@ -515,37 +553,51 @@ type AutocompleteConfig struct {
 
 // Autocomplete-specific option types
 type acSearchEndpointOption string
-func (o acSearchEndpointOption) applyToAutocomplete(c *AutocompleteConfig) { c.SearchEndpoint = string(o) }
+
+func (o acSearchEndpointOption) applyToAutocomplete(c *AutocompleteConfig) {
+	c.SearchEndpoint = string(o)
+}
 
 type acDisplayFieldOption string
+
 func (o acDisplayFieldOption) applyToAutocomplete(c *AutocompleteConfig) { c.DisplayField = string(o) }
 
 type acValueFieldOption string
+
 func (o acValueFieldOption) applyToAutocomplete(c *AutocompleteConfig) { c.ValueField = string(o) }
 
 type acMinCharsOption int
+
 func (o acMinCharsOption) applyToAutocomplete(c *AutocompleteConfig) { c.MinChars = int(o) }
 
 type acDebounceOption int
+
 func (o acDebounceOption) applyToAutocomplete(c *AutocompleteConfig) { c.Debounce = int(o) }
 
 type acPlaceholderOption string
+
 func (o acPlaceholderOption) applyToAutocomplete(c *AutocompleteConfig) { c.Placeholder = string(o) }
 
 type acBindOption string
+
 func (o acBindOption) applyToAutocomplete(c *AutocompleteConfig) { c.Datastar.Bind = string(o) }
 
 type acRequiredOption struct{}
+
 func (o acRequiredOption) applyToAutocomplete(c *AutocompleteConfig) { c.Required = true }
 
 type acDisabledOption struct{}
+
 func (o acDisabledOption) applyToAutocomplete(c *AutocompleteConfig) { c.Disabled = true }
 
 type acErrorOption string
+
 func (o acErrorOption) applyToAutocomplete(c *AutocompleteConfig) { c.Error = string(o) }
 
 // Autocomplete option constructors
-func WithSearchEndpoint(endpoint string) acSearchEndpointOption { return acSearchEndpointOption(endpoint) }
+func WithSearchEndpoint(endpoint string) acSearchEndpointOption {
+	return acSearchEndpointOption(endpoint)
+}
 func WithDisplayField(field string) acDisplayFieldOption       { return acDisplayFieldOption(field) }
 func WithValueField(field string) acValueFieldOption           { return acValueFieldOption(field) }
 func WithMinChars(n int) acMinCharsOption                      { return acMinCharsOption(n) }
@@ -590,34 +642,43 @@ type DataTableConfig struct {
 
 // DataTable-specific option types
 type dtDataEndpointOption string
+
 func (o dtDataEndpointOption) applyToDataTable(c *DataTableConfig) { c.DataEndpoint = string(o) }
 
 type dtColumnsOption []Column
+
 func (o dtColumnsOption) applyToDataTable(c *DataTableConfig) { c.Columns = []Column(o) }
 
 type dtPageSizeOption int
+
 func (o dtPageSizeOption) applyToDataTable(c *DataTableConfig) { c.PageSize = int(o) }
 
 type dtSelectableOption struct{}
+
 func (o dtSelectableOption) applyToDataTable(c *DataTableConfig) { c.Selectable = true }
 
 type dtHidePaginationOption struct{}
+
 func (o dtHidePaginationOption) applyToDataTable(c *DataTableConfig) { c.HidePagination = true }
 
 type dtSignalPrefixOption string
+
 func (o dtSignalPrefixOption) applyToDataTable(c *DataTableConfig) { c.SignalPrefix = string(o) }
 
 type dtRowActionsOption func(rowIndex int) templ.Component
+
 func (o dtRowActionsOption) applyToDataTable(c *DataTableConfig) { c.RowActions = o }
 
 // DataTable option constructors
-func WithDataEndpoint(endpoint string) dtDataEndpointOption         { return dtDataEndpointOption(endpoint) }
-func WithColumns(columns []Column) dtColumnsOption                  { return dtColumnsOption(columns) }
-func WithPageSize(size int) dtPageSizeOption                        { return dtPageSizeOption(size) }
-func WithSelectable() dtSelectableOption                            { return dtSelectableOption{} }
-func WithHidePagination() dtHidePaginationOption                    { return dtHidePaginationOption{} }
-func WithSignalPrefix(prefix string) dtSignalPrefixOption           { return dtSignalPrefixOption(prefix) }
-func WithRowActions(fn func(rowIndex int) templ.Component) dtRowActionsOption { return dtRowActionsOption(fn) }
+func WithDataEndpoint(endpoint string) dtDataEndpointOption { return dtDataEndpointOption(endpoint) }
+func WithColumns(columns []Column) dtColumnsOption          { return dtColumnsOption(columns) }
+func WithPageSize(size int) dtPageSizeOption                { return dtPageSizeOption(size) }
+func WithSelectable() dtSelectableOption                    { return dtSelectableOption{} }
+func WithHidePagination() dtHidePaginationOption            { return dtHidePaginationOption{} }
+func WithSignalPrefix(prefix string) dtSignalPrefixOption   { return dtSignalPrefixOption(prefix) }
+func WithRowActions(fn func(rowIndex int) templ.Component) dtRowActionsOption {
+	return dtRowActionsOption(fn)
+}
 
 // applyDataTableOptions applies all options and returns config
 func applyDataTableOptions(options []DataTableOption) *DataTableConfig {
@@ -645,13 +706,15 @@ type StackConfig struct {
 
 // Stack-specific option types
 type stackGapOption string
+
 func (o stackGapOption) applyToStack(c *StackConfig) { c.Gap = string(o) }
 
 type stackDirectionOption string
+
 func (o stackDirectionOption) applyToStack(c *StackConfig) { c.Direction = string(o) }
 
 // Stack option constructors
-func WithGap(gap string) stackGapOption           { return stackGapOption(gap) }
+func WithGap(gap string) stackGapOption             { return stackGapOption(gap) }
 func WithDirection(dir string) stackDirectionOption { return stackDirectionOption(dir) }
 
 // applyStackOptions applies all options and returns config
@@ -679,13 +742,15 @@ type FormGroupConfig struct {
 
 // FormGroup-specific option types
 type fgSubmitOption string
+
 func (o fgSubmitOption) applyToFormGroup(c *FormGroupConfig) { c.OnSubmit = string(o) }
 
 type fgSignalsOption map[string]string
+
 func (o fgSignalsOption) applyToFormGroup(c *FormGroupConfig) { c.Datastar.Signals = o }
 
 // FormGroup option constructors
-func WithFormSubmit(action string) fgSubmitOption              { return fgSubmitOption(action) }
+func WithFormSubmit(action string) fgSubmitOption               { return fgSubmitOption(action) }
 func WithFormSignals(signals map[string]string) fgSignalsOption { return fgSignalsOption(signals) }
 
 // applyFormGroupOptions applies all options and returns config
@@ -712,18 +777,21 @@ type CardConfig struct {
 
 // Card-specific option types
 type cardTitleOption string
+
 func (o cardTitleOption) applyToCard(c *CardConfig) { c.Title = string(o) }
 
 type cardDescriptionOption string
+
 func (o cardDescriptionOption) applyToCard(c *CardConfig) { c.Description = string(o) }
 
 type cardPaddingOption string
+
 func (o cardPaddingOption) applyToCard(c *CardConfig) { c.Padding = string(o) }
 
 // Card option constructors
-func WithCardTitle(title string) cardTitleOption             { return cardTitleOption(title) }
-func WithCardDescription(text string) cardDescriptionOption  { return cardDescriptionOption(text) }
-func WithPadding(size string) cardPaddingOption              { return cardPaddingOption(size) }
+func WithCardTitle(title string) cardTitleOption            { return cardTitleOption(title) }
+func WithCardDescription(text string) cardDescriptionOption { return cardDescriptionOption(text) }
+func WithPadding(size string) cardPaddingOption             { return cardPaddingOption(size) }
 
 // applyCardOptions applies all options and returns config
 func applyCardOptions(options []CardOption) *CardConfig {
@@ -750,13 +818,15 @@ type SectionConfig struct {
 
 // Section-specific option types
 type sectionTitleOption string
+
 func (o sectionTitleOption) applyToSection(c *SectionConfig) { c.Title = string(o) }
 
 type sectionPaddingOption string
+
 func (o sectionPaddingOption) applyToSection(c *SectionConfig) { c.Padding = string(o) }
 
 // Section option constructors
-func WithSectionTitle(title string) sectionTitleOption   { return sectionTitleOption(title) }
+func WithSectionTitle(title string) sectionTitleOption    { return sectionTitleOption(title) }
 func WithSectionPadding(size string) sectionPaddingOption { return sectionPaddingOption(size) }
 
 // applySectionOptions applies all options and returns config
@@ -783,12 +853,12 @@ type ElementConfig struct {
 }
 
 // Common options for Element
-func (o idOption) applyToElement(c *ElementConfig)    { c.ID = string(o) }
-func (o classOption) applyToElement(c *ElementConfig) { o.apply(&c.CommonConfig) }
-func (o onOption) applyToElement(c *ElementConfig)    { o.apply(&c.CommonConfig) }
-func (o bindAttrOption) applyToElement(c *ElementConfig)  { o.apply(&c.CommonConfig) }
-func (o showOption) applyToElement(c *ElementConfig)  { o.apply(&c.CommonConfig) }
-func (o attrsOption) applyToElement(c *ElementConfig) { o.apply(&c.CommonConfig) }
+func (o idOption) applyToElement(c *ElementConfig)       { c.ID = string(o) }
+func (o classOption) applyToElement(c *ElementConfig)    { o.apply(&c.CommonConfig) }
+func (o onOption) applyToElement(c *ElementConfig)       { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToElement(c *ElementConfig) { o.apply(&c.CommonConfig) }
+func (o showOption) applyToElement(c *ElementConfig)     { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToElement(c *ElementConfig)    { o.apply(&c.CommonConfig) }
 
 // Element-specific options
 type elementBindOption string
@@ -804,9 +874,11 @@ type elementTextOption string
 func (o elementTextOption) applyToElement(c *ElementConfig) { c.Datastar.Text = string(o) }
 
 // Element option constructors
-func WithElementBind(expr string) elementBindOption               { return elementBindOption(expr) }
-func WithSignals(signals map[string]string) elementSignalsOption  { return elementSignalsOption(signals) }
-func WithText(expr string) elementTextOption                      { return elementTextOption(expr) }
+func WithElementBind(expr string) elementBindOption { return elementBindOption(expr) }
+func WithSignals(signals map[string]string) elementSignalsOption {
+	return elementSignalsOption(signals)
+}
+func WithText(expr string) elementTextOption { return elementTextOption(expr) }
 
 // applyElementOptions applies all options and returns config
 func applyElementOptions(options []ElementOption) *ElementConfig {
@@ -864,34 +936,41 @@ type DropzoneConfig struct {
 
 // Dropzone-specific option types
 type dzMultipleOption struct{}
+
 func (o dzMultipleOption) applyToDropzone(c *DropzoneConfig) { c.Multiple = true }
 
 type dzAcceptOption string
+
 func (o dzAcceptOption) applyToDropzone(c *DropzoneConfig) { c.Accept = string(o) }
 
 type dzMaxFileSizeOption int64
+
 func (o dzMaxFileSizeOption) applyToDropzone(c *DropzoneConfig) { c.MaxFileSize = int64(o) }
 
 type dzMaxFilesOption int
+
 func (o dzMaxFilesOption) applyToDropzone(c *DropzoneConfig) { c.MaxFiles = int(o) }
 
 type dzInputNameOption string
+
 func (o dzInputNameOption) applyToDropzone(c *DropzoneConfig) { c.InputName = string(o) }
 
 type dzDisabledOption struct{}
+
 func (o dzDisabledOption) applyToDropzone(c *DropzoneConfig) { c.Disabled = true }
 
 type dzDescriptionOption string
+
 func (o dzDescriptionOption) applyToDropzone(c *DropzoneConfig) { c.Description = string(o) }
 
 // Dropzone option constructors
-func WithDropzoneMultiple() dzMultipleOption                    { return dzMultipleOption{} }
-func WithAccept(accept string) dzAcceptOption                   { return dzAcceptOption(accept) }
-func WithMaxFileSize(bytes int64) dzMaxFileSizeOption            { return dzMaxFileSizeOption(bytes) }
-func WithMaxFiles(n int) dzMaxFilesOption                        { return dzMaxFilesOption(n) }
-func WithInputName(name string) dzInputNameOption                { return dzInputNameOption(name) }
-func WithDropzoneDisabled() dzDisabledOption                     { return dzDisabledOption{} }
-func WithDropzoneDescription(text string) dzDescriptionOption    { return dzDescriptionOption(text) }
+func WithDropzoneMultiple() dzMultipleOption                  { return dzMultipleOption{} }
+func WithAccept(accept string) dzAcceptOption                 { return dzAcceptOption(accept) }
+func WithMaxFileSize(bytes int64) dzMaxFileSizeOption         { return dzMaxFileSizeOption(bytes) }
+func WithMaxFiles(n int) dzMaxFilesOption                     { return dzMaxFilesOption(n) }
+func WithInputName(name string) dzInputNameOption             { return dzInputNameOption(name) }
+func WithDropzoneDisabled() dzDisabledOption                  { return dzDisabledOption{} }
+func WithDropzoneDescription(text string) dzDescriptionOption { return dzDescriptionOption(text) }
 
 // applyDropzoneOptions applies all options and returns config
 func applyDropzoneOptions(options []DropzoneOption) *DropzoneConfig {
@@ -900,6 +979,95 @@ func applyDropzoneOptions(options []DropzoneOption) *DropzoneConfig {
 	}
 	for _, opt := range options {
 		opt.applyToDropzone(config)
+	}
+	return config
+}
+
+// ============================================================================
+// Badge Config & Options
+// ============================================================================
+
+// BadgeConfig holds configuration for the Badge component.
+type BadgeConfig struct {
+	CommonConfig // embedded
+
+	Variant Variant
+}
+
+// Common options applicable to Badge.
+func (o idOption) applyToBadge(c *BadgeConfig)       { c.ID = string(o) }
+func (o classOption) applyToBadge(c *BadgeConfig)    { o.apply(&c.CommonConfig) }
+func (o onOption) applyToBadge(c *BadgeConfig)       { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToBadge(c *BadgeConfig) { o.apply(&c.CommonConfig) }
+func (o showOption) applyToBadge(c *BadgeConfig)     { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToBadge(c *BadgeConfig)    { o.apply(&c.CommonConfig) }
+
+// WithVariant also applies to badges (primary, secondary, destructive, outline).
+func (o buttonVariantOption) applyToBadge(c *BadgeConfig) { c.Variant = Variant(o) }
+
+// applyBadgeOptions applies all options and returns config
+func applyBadgeOptions(options []BadgeOption) *BadgeConfig {
+	config := &BadgeConfig{Variant: VariantPrimary}
+	for _, opt := range options {
+		opt.applyToBadge(config)
+	}
+	return config
+}
+
+// ============================================================================
+// Accordion Config & Options
+// ============================================================================
+
+// AccordionConfig holds configuration for the Accordion container.
+type AccordionConfig struct {
+	CommonConfig // embedded
+}
+
+// AccordionItemConfig holds configuration for a single AccordionItem.
+type AccordionItemConfig struct {
+	CommonConfig // embedded
+
+	Open bool
+}
+
+// Common options applicable to Accordion.
+func (o idOption) applyToAccordion(c *AccordionConfig)       { c.ID = string(o) }
+func (o classOption) applyToAccordion(c *AccordionConfig)    { o.apply(&c.CommonConfig) }
+func (o onOption) applyToAccordion(c *AccordionConfig)       { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToAccordion(c *AccordionConfig) { o.apply(&c.CommonConfig) }
+func (o showOption) applyToAccordion(c *AccordionConfig)     { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToAccordion(c *AccordionConfig)    { o.apply(&c.CommonConfig) }
+
+// Common options applicable to AccordionItem.
+func (o idOption) applyToAccordionItem(c *AccordionItemConfig)       { c.ID = string(o) }
+func (o classOption) applyToAccordionItem(c *AccordionItemConfig)    { o.apply(&c.CommonConfig) }
+func (o onOption) applyToAccordionItem(c *AccordionItemConfig)       { o.apply(&c.CommonConfig) }
+func (o bindAttrOption) applyToAccordionItem(c *AccordionItemConfig) { o.apply(&c.CommonConfig) }
+func (o showOption) applyToAccordionItem(c *AccordionItemConfig)     { o.apply(&c.CommonConfig) }
+func (o attrsOption) applyToAccordionItem(c *AccordionItemConfig)    { o.apply(&c.CommonConfig) }
+
+// AccordionItem-specific options.
+type accordionOpenOption struct{}
+
+func (o accordionOpenOption) applyToAccordionItem(c *AccordionItemConfig) { c.Open = true }
+
+// WithItemOpen marks an AccordionItem as expanded by default.
+func WithItemOpen() accordionOpenOption { return accordionOpenOption{} }
+
+// applyAccordionOptions applies all options and returns config
+func applyAccordionOptions(options []AccordionOption) *AccordionConfig {
+	config := &AccordionConfig{}
+	for _, opt := range options {
+		opt.applyToAccordion(config)
+	}
+	return config
+}
+
+// applyAccordionItemOptions applies all options and returns config
+func applyAccordionItemOptions(options []AccordionItemOption) *AccordionItemConfig {
+	config := &AccordionItemConfig{}
+	for _, opt := range options {
+		opt.applyToAccordionItem(config)
 	}
 	return config
 }

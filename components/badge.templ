@@ -1,0 +1,52 @@
+package components
+
+// Badge renders a small status/label pill based on BaseCoat's badge styles.
+//
+// Variants map to BaseCoat classes: primary (default) -> "badge",
+// secondary -> "badge-secondary", destructive -> "badge-destructive",
+// outline -> "badge-outline". (Ghost has no badge style and falls back to "badge".)
+//
+// Example:
+//
+//	@Badge("New")
+//	@Badge("Beta", WithVariant(VariantSecondary))
+//	@Badge("Failed", WithVariant(VariantDestructive))
+//	@Badge("Draft", WithVariant(VariantOutline))
+//
+// Children render after the text, so an icon can be embedded:
+//
+//	@Badge("Online") {
+//	    @icon.Icon(icon.MdiCheck, "")
+//	}
+//
+// For a live value, bind data-text via WithAttrs and toggle with WithShow:
+//
+//	@Badge("", WithAttrs(templ.Attributes{"data-text": "$unread"}), WithShow("$unread > 0"))
+templ Badge(text string, options ...BadgeOption) {
+	{{ config := applyBadgeOptions(options) }}
+	<span
+		class={ badgeClass(config) }
+		{ config.CommonAttrs()... }
+	>
+		{ text }
+		{ children... }
+	</span>
+}
+
+// badgeClass maps the configured variant to the matching BaseCoat badge class
+// and appends any extra classes set via WithClass.
+func badgeClass(config *BadgeConfig) string {
+	class := "badge"
+	switch config.Variant {
+	case VariantSecondary:
+		class = "badge-secondary"
+	case VariantDestructive:
+		class = "badge-destructive"
+	case VariantOutline:
+		class = "badge-outline"
+	}
+	if config.Class != "" {
+		class += " " + config.Class
+	}
+	return class
+}
