@@ -21,7 +21,9 @@ templ FormInput(label, name string, options ...FormOption) {
 		<input
 			class={ "input", config.Class }
 			type={ config.Type }
-			value={ config.Value }
+			if config.Value != "" {
+				value={ config.Value }
+			}
 			id={ name }
 			name={ name }
 			if config.Placeholder != "" {
@@ -85,6 +87,9 @@ templ FormTextarea(label, name string, options ...FormOption) {
 			class={ "textarea", config.Class }
 			id={ name }
 			name={ name }
+			if config.Value != "" {
+				value={ config.Value }
+			}
 			if config.Placeholder != "" {
 				placeholder={ config.Placeholder }
 			}
@@ -160,6 +165,9 @@ templ FormSelect(label, name string, options ...FormOption) {
 					if opt.Disabled {
 						disabled
 					}
+					if config.Value != "" && opt.Value == config.Value {
+						selected
+					}
 				>{ opt.Label }</option>
 			}
 		</select>
@@ -190,6 +198,9 @@ templ FormCheckbox(label, name string, options ...FormOption) {
 				}
 				if config.Disabled {
 					disabled
+				}
+				if config.Value == "true" {
+					checked
 				}
 				{ config.InputAttrs()... }
 			/>
