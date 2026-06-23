@@ -78,6 +78,7 @@ func TestFormInput(t *testing.T) {
 		WithPlaceholder("you@example.com"),
 		WithRequired(),
 		WithError("$errors.email"),
+		WithValue("value"),
 	).Render(ctx, &buf)
 	if err != nil {
 		t.Fatalf("render failed: %v", err)
@@ -111,6 +112,11 @@ func TestFormInput(t *testing.T) {
 	// Verify error element
 	if !strings.Contains(output, `data-show="$errors.email"`) {
 		t.Error("expected error element with data-show")
+	}
+
+	// Verify value attribute
+	if !strings.Contains(output, `value="value"`) {
+		t.Error("expected value attribute")
 	}
 }
 
@@ -261,6 +267,66 @@ func TestCard(t *testing.T) {
 	}
 	if !strings.Contains(output, "p-6") {
 		t.Error("expected p-6 class for lg padding")
+	}
+}
+
+func TestBadge(t *testing.T) {
+	ctx := context.Background()
+
+	cases := []struct {
+		name string
+		opts []BadgeOption
+		want string
+	}{
+		{"default", nil, "badge"},
+		{"primary", []BadgeOption{WithVariant(VariantPrimary)}, "badge"},
+		{"secondary", []BadgeOption{WithVariant(VariantSecondary)}, "badge-secondary"},
+		{"destructive", []BadgeOption{WithVariant(VariantDestructive)}, "badge-destructive"},
+		{"outline", []BadgeOption{WithVariant(VariantOutline)}, "badge-outline"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf strings.Builder
+			if err := Badge("Label", tc.opts...).Render(ctx, &buf); err != nil {
+				t.Fatalf("render failed: %v", err)
+			}
+			out := buf.String()
+			if !strings.Contains(out, `class="`+tc.want+`"`) {
+				t.Errorf("want class %q, got %q", tc.want, out)
+			}
+			if !strings.Contains(out, "Label") {
+				t.Error("expected badge text 'Label'")
+			}
+		})
+	}
+}
+
+func TestAccordion(t *testing.T) {
+	ctx := context.Background()
+	var buf strings.Builder
+
+	err := AccordionItem("Is it accessible?", WithItemOpen()).Render(ctx, &buf)
+	if err != nil {
+		t.Fatalf("render failed: %v", err)
+	}
+
+	output := buf.String()
+	t.Log("Output:", output)
+
+	if !strings.Contains(output, "<details") {
+		t.Error("expected details element")
+	}
+	if !strings.Contains(output, "open") {
+		t.Error("expected open attribute for WithItemOpen")
+	}
+	if !strings.Contains(output, "<summary") {
+		t.Error("expected summary element")
+	}
+	if !strings.Contains(output, "Is it accessible?") {
+		t.Error("expected item title")
+	}
+	if !strings.Contains(output, "group-open:rotate-180") {
+		t.Error("expected chevron with group-open rotation")
 	}
 }
 

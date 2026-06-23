@@ -17,6 +17,13 @@ func main() {
 	classRegex := regexp.MustCompile(`class="([^"]*)"`)
 	// Match templ.KV("classes", ...) calls
 	kvRegex := regexp.MustCompile(`templ\.KV\("([^"]*)"`)
+	// Match templ class={ ... } expressions (the class attribute, not
+	// data-attr:class / data-bind:class — hence the leading whitespace).
+	// (?s) lets the body span multiple lines; .*? stops at the first closing brace.
+	classExprRegex := regexp.MustCompile(`(?s)\sclass=\{(.*?)\}`)
+	// Match double-quoted string literals, used to pull class strings out of
+	// class={ "literal", config.Class } expression bodies.
+	literalRegex := regexp.MustCompile(`"([^"]*)"`)
 
 	err := filepath.WalkDir(".", func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -38,6 +45,21 @@ func main() {
 				if len(match) > 1 {
 					classStr := string(match[1])
 					for _, class := range strings.Fields(classStr) {
+						classes[class] = struct{}{}
+					}
+				}
+			}
+		}
+
+		// Pull class strings out of templ class={ "literal", ... } expressions,
+		// including any literals inside templ.KV(...) within the same body.
+		for _, expr := range classExprRegex.FindAllSubmatch(content, -1) {
+			if len(expr) < 2 {
+				continue
+			}
+			for _, lit := range literalRegex.FindAllSubmatch(expr[1], -1) {
+				if len(lit) > 1 {
+					for _, class := range strings.Fields(string(lit[1])) {
 						classes[class] = struct{}{}
 					}
 				}
