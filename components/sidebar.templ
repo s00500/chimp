@@ -61,7 +61,16 @@ func indentStyle(depth int) string {
 	return ""
 }
 
-// sidebarStyles renders CSS for sidebar chevron animations (include once per page)
+// sidebarStyles renders CSS for sidebar chevron animations and the active-page
+// indicator (include once per page).
+//
+// The active-page styling lives here rather than relying on basecoat's `.sidebar`
+// component, because basecoat only styles `a[aria-current="page"]` when it is nested
+// inside `<aside class="sidebar">` (SimpleSidebarLayout). The Card and Section
+// layouts render into `.card`/bordered sections, so they need their own rules. These
+// use the same `--sidebar-*` variables as basecoat, so the look matches and respects
+// light/dark themes. Inside `.sidebar` the more specific basecoat rules win, so the
+// Simple layout is unchanged (no double padding).
 templ sidebarStyles() {
 	<style>
 		details > summary .chevron-icon {
@@ -69,6 +78,24 @@ templ sidebarStyles() {
 		}
 		details[open] > summary .chevron-icon {
 			transform: rotate(0deg);
+		}
+		.chimp-sidebar-link {
+			padding: calc(var(--spacing, 0.25rem) * 2);
+			border-radius: var(--radius-md, 0.375rem);
+			transition: background-color 0.15s ease, color 0.15s ease;
+		}
+		/* Theme-proof hover: a faint tint of the text color that stays visible on any
+		   background, even when accent/muted tokens collapse into the surface color. */
+		.chimp-sidebar-link:hover {
+			background-color: color-mix(in oklab, var(--foreground) 8%, transparent);
+		}
+		/* Active item: a gray tint of the text color, stronger than hover so it
+		   reads as selected. Built from --foreground via color-mix so it always
+		   contrasts with the surface — some themes set --sidebar-accent equal to
+		   --card/--sidebar, which would make an accent-based highlight invisible. */
+		.chimp-sidebar-link[aria-current="page"] {
+			background-color: color-mix(in oklab, var(--foreground) 15%, transparent);
+			font-weight: var(--font-weight-medium, 500);
 		}
 	</style>
 }
@@ -129,7 +156,7 @@ templ renderSidebarItemRecursive(item SidebarItem, depth int) {
 		>
 			<a
 				href={ templ.SafeURL(item.Href) }
-				class="flex items-center gap-2"
+				class="chimp-sidebar-link flex items-center gap-2"
 				if item.Current {
 					aria-current="page"
 				}

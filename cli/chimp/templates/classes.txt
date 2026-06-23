@@ -32,6 +32,7 @@ btn-icon-ghost
 btn-outline
 card
 checkbox
+chimp-sidebar-link
 cursor-pointer
 dark
 dialog

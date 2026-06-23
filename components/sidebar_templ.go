@@ -69,7 +69,16 @@ func indentStyle(depth int) string {
 	return ""
 }
 
-// sidebarStyles renders CSS for sidebar chevron animations (include once per page)
+// sidebarStyles renders CSS for sidebar chevron animations and the active-page
+// indicator (include once per page).
+//
+// The active-page styling lives here rather than relying on basecoat's `.sidebar`
+// component, because basecoat only styles `a[aria-current="page"]` when it is nested
+// inside `<aside class="sidebar">` (SimpleSidebarLayout). The Card and Section
+// layouts render into `.card`/bordered sections, so they need their own rules. These
+// use the same `--sidebar-*` variables as basecoat, so the look matches and respects
+// light/dark themes. Inside `.sidebar` the more specific basecoat rules win, so the
+// Simple layout is unchanged (no double padding).
 func sidebarStyles() templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -91,7 +100,7 @@ func sidebarStyles() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\tdetails > summary .chevron-icon {\n\t\t\ttransform: rotate(-90deg);\n\t\t}\n\t\tdetails[open] > summary .chevron-icon {\n\t\t\ttransform: rotate(0deg);\n\t\t}\n\t</style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<style>\n\t\tdetails > summary .chevron-icon {\n\t\t\ttransform: rotate(-90deg);\n\t\t}\n\t\tdetails[open] > summary .chevron-icon {\n\t\t\ttransform: rotate(0deg);\n\t\t}\n\t\t.chimp-sidebar-link {\n\t\t\tpadding: calc(var(--spacing, 0.25rem) * 2);\n\t\t\tborder-radius: var(--radius-md, 0.375rem);\n\t\t\ttransition: background-color 0.15s ease, color 0.15s ease;\n\t\t}\n\t\t/* Theme-proof hover: a faint tint of the text color that stays visible on any\n\t\t   background, even when accent/muted tokens collapse into the surface color. */\n\t\t.chimp-sidebar-link:hover {\n\t\t\tbackground-color: color-mix(in oklab, var(--foreground) 8%, transparent);\n\t\t}\n\t\t/* Active item: a gray tint of the text color, stronger than hover so it\n\t\t   reads as selected. Built from --foreground via color-mix so it always\n\t\t   contrasts with the surface — some themes set --sidebar-accent equal to\n\t\t   --card/--sidebar, which would make an accent-based highlight invisible. */\n\t\t.chimp-sidebar-link[aria-current=\"page\"] {\n\t\t\tbackground-color: color-mix(in oklab, var(--foreground) 15%, transparent);\n\t\t\tfont-weight: var(--font-weight-medium, 500);\n\t\t}\n\t</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -139,7 +148,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(indentStyle(depth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 86, Col: 31}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 113, Col: 31}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -163,7 +172,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 93, Col: 17}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 120, Col: 17}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -186,7 +195,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(indentStyle(depth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 101, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 128, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
@@ -242,7 +251,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 			var templ_7745c5c3_Var8 string
 			templ_7745c5c3_Var8, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 112, Col: 18}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 139, Col: 18}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var8))
 			if templ_7745c5c3_Err != nil {
@@ -283,7 +292,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 				var templ_7745c5c3_Var9 string
 				templ_7745c5c3_Var9, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(indentStyle(depth))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 127, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 154, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 				if templ_7745c5c3_Err != nil {
@@ -301,13 +310,13 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 			var templ_7745c5c3_Var10 templ.SafeURL
 			templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(item.Href))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 131, Col: 35}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 158, Col: 35}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"flex items-center gap-2\"")
+			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 23, "\" class=\"chimp-sidebar-link flex items-center gap-2\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -334,7 +343,7 @@ func renderSidebarItemRecursive(item SidebarItem, depth int) templ.Component {
 			var templ_7745c5c3_Var11 string
 			templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 140, Col: 22}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 167, Col: 22}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 			if templ_7745c5c3_Err != nil {
@@ -404,7 +413,7 @@ func SimpleSidebarLayout(title string, items []SidebarItem, config SidebarConfig
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 157, Col: 50}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 184, Col: 50}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -560,7 +569,7 @@ func contentHeaderBar(title string) templ.Component {
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 220, Col: 35}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 247, Col: 35}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -806,7 +815,7 @@ func renderMobileDropdownItem(item SidebarItem, level int) templ.Component {
 				var templ_7745c5c3_Var24 string
 				templ_7745c5c3_Var24, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(indentStyle(level))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 303, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 330, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var24))
 				if templ_7745c5c3_Err != nil {
@@ -824,7 +833,7 @@ func renderMobileDropdownItem(item SidebarItem, level int) templ.Component {
 			var templ_7745c5c3_Var25 string
 			templ_7745c5c3_Var25, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 306, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 333, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var25))
 			if templ_7745c5c3_Err != nil {
@@ -851,7 +860,7 @@ func renderMobileDropdownItem(item SidebarItem, level int) templ.Component {
 			var templ_7745c5c3_Var27 templ.SafeURL
 			templ_7745c5c3_Var27, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(item.Href))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 311, Col: 34}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 338, Col: 34}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var27))
 			if templ_7745c5c3_Err != nil {
@@ -882,7 +891,7 @@ func renderMobileDropdownItem(item SidebarItem, level int) templ.Component {
 				var templ_7745c5c3_Var29 string
 				templ_7745c5c3_Var29, templ_7745c5c3_Err = templruntime.SanitizeStyleAttributeValues(indentStyle(level))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 315, Col: 30}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 342, Col: 30}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var29))
 				if templ_7745c5c3_Err != nil {
@@ -906,7 +915,7 @@ func renderMobileDropdownItem(item SidebarItem, level int) templ.Component {
 			var templ_7745c5c3_Var30 string
 			templ_7745c5c3_Var30, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 321, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 348, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var30))
 			if templ_7745c5c3_Err != nil {
@@ -963,7 +972,7 @@ func mobileNavDropdown(items []SidebarItem, render func(item SidebarItem) templ.
 		var templ_7745c5c3_Var32 string
 		templ_7745c5c3_Var32, templ_7745c5c3_Err = templ.JoinStringErrs(currentItem.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 345, Col: 23}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 372, Col: 23}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var32))
 		if templ_7745c5c3_Err != nil {
@@ -1030,7 +1039,7 @@ func MobileDropdownMenuItem(item SidebarItem) templ.Component {
 		var templ_7745c5c3_Var35 templ.SafeURL
 		templ_7745c5c3_Var35, templ_7745c5c3_Err = templ.JoinURLErrs(templ.SafeURL(item.Href))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 368, Col: 33}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 395, Col: 33}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var35))
 		if templ_7745c5c3_Err != nil {
@@ -1062,7 +1071,7 @@ func MobileDropdownMenuItem(item SidebarItem) templ.Component {
 		var templ_7745c5c3_Var37 string
 		templ_7745c5c3_Var37, templ_7745c5c3_Err = templ.JoinStringErrs(item.Label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 375, Col: 14}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 402, Col: 14}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var37))
 		if templ_7745c5c3_Err != nil {
@@ -1135,7 +1144,7 @@ func MobileDropdownHeading(label string) templ.Component {
 		var templ_7745c5c3_Var40 string
 		templ_7745c5c3_Var40, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 387, Col: 9}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 414, Col: 9}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var40))
 		if templ_7745c5c3_Err != nil {
@@ -1256,7 +1265,7 @@ func SectionSidebarLayout(title string, items []SidebarItem, config SidebarConfi
 					var templ_7745c5c3_Var44 string
 					templ_7745c5c3_Var44, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 					if templ_7745c5c3_Err != nil {
-						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 423, Col: 48}
+						return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/sidebar.templ`, Line: 450, Col: 48}
 					}
 					_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var44))
 					if templ_7745c5c3_Err != nil {
