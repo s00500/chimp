@@ -21,4 +21,10 @@ Install using `go install github.com/s00500/chimp/cli/chimp@latest`
 - CLI to add templates and scaffold you rporoject
 - CLI to install tools (like templ, tailwind and chimp)
 
+## License
 
+Chimp's own source code is licensed under the [MIT License](LICENSE).
+
+Chimp also bundles third-party assets (Datastar, Basecoat UI, Tailwind CSS,
+and the Heroicons/Lucide/Material Design Icons icon sets), each under its own
+permissive license — see [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md).
