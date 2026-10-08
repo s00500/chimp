@@ -44,6 +44,7 @@ func main() {
 	mw := store.CreateSessionStore[state.ClientState](appName, store.CookieStore(sessionKey))
 
 	r.Use(mw)
+	r.Use(chimp.BaseMiddleware(baseURL))   // Middleware to provide the base URL to chimp.Base()
 	r.Use(chimp.UrlPathMiddleware(baseURL)) // Middleware to handle using the URL in your templates
 
 	// TODO: Register your handlers here. Tipp: use a seperate file or package for handlerfunctions
@@ -57,10 +58,10 @@ func main() {
 	//------------
 
 	// TODO: Use static or embedded serving. Make sure your embedded fs is setup correctly
-	chimp.ServeIncludedAssets(r, "")
+	chimp.ServeIncludedAssets(r, baseURL)
 	// chimp.ServeStaticFromEmbedded(r, staticFS, "static")
 
-	chimp.ServeHotReload(r, baseURL, os.Getenv("GOENV") == "dev")
+	chimp.ServeHotReload(r, os.Getenv("GOENV") == "dev")
 
 	port := 8090
 	chimp.ServeStatic(r, "static", "static")
