@@ -11,7 +11,7 @@ requirements. Nothing in Chimp's MIT license overrides these terms.
 
 ## Datastar
 
-- File(s): `static/datastar.min.js` (v1.0.1)
+- File(s): `static/datastar.min.js` (v1.0.4), `static/datastar-rocket.min.js` (v1.0.4 + Rocket beta.2)
 - Project: https://data-star.dev
 - License: MIT
 

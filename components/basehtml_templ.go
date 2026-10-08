@@ -14,6 +14,7 @@ type BaseHTMLConfig struct {
 	CacheBust               bool
 	IncludeFont             bool
 	TweakCN                 bool
+	Rocket                  bool
 	AdditionalHeaderContent templ.Component
 }
 
@@ -24,6 +25,7 @@ type BaseHTMLOption func(*BaseHTMLConfig)
 var defaults = BaseHTMLConfig{
 	IncludeFont: true,
 	TweakCN:     false,
+	Rocket:      true,
 }
 
 // SetDefaults configures the global default values for all BaseHTML calls.
@@ -48,6 +50,13 @@ func WithFont() BaseHTMLOption {
 func WithTweakCN(enabled bool) BaseHTMLOption {
 	return func(c *BaseHTMLConfig) {
 		c.TweakCN = enabled
+	}
+}
+
+// WithRocket selects the Datastar bundle that includes Rocket (web components, default) or plain Datastar (false).
+func WithRocket(enabled bool) BaseHTMLOption {
+	return func(c *BaseHTMLConfig) {
+		c.Rocket = enabled
 	}
 }
 
@@ -89,6 +98,7 @@ func BaseHTML(title string, opts ...BaseHTMLOption) templ.Component {
 			CacheBust:               defaults.CacheBust,
 			IncludeFont:             defaults.IncludeFont,
 			TweakCN:                 defaults.TweakCN,
+			Rocket:                  defaults.Rocket,
 			AdditionalHeaderContent: defaults.AdditionalHeaderContent,
 		}
 		for _, opt := range opts {
@@ -106,9 +116,16 @@ func BaseHTML(title string, opts ...BaseHTMLOption) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = chimp.IncludedDatastar().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if config.Rocket {
+			templ_7745c5c3_Err = chimp.IncludedDatastarRocket().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		} else {
+			templ_7745c5c3_Err = chimp.IncludedDatastar().Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		templ_7745c5c3_Err = chimp.IncludedBaseCoatJS().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
@@ -147,7 +164,7 @@ func BaseHTML(title string, opts ...BaseHTMLOption) templ.Component {
 		var templ_7745c5c3_Var2 string
 		templ_7745c5c3_Var2, templ_7745c5c3_Err = templ.JoinStringErrs(title)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/basehtml.templ`, Line: 89, Col: 17}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `components/basehtml.templ`, Line: 103, Col: 17}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {

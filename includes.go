@@ -14,18 +14,32 @@ import (
 
 // I need to setup static hosting and THEN I can add template functions for them...
 
-var modTime = time.Date(2025, 8, 4, 0, 0, 0, 0, time.UTC)
+var modTime = time.Date(2026, 10, 8, 0, 0, 0, 0, time.UTC)
 
 //go:embed static/datastar.min.js
 var datastarBytes []byte
 
+//go:embed static/datastar-rocket.min.js
+var datastarRocketBytes []byte
+
 func IncludedDatastar() templ.Component {
-	return templ.Raw(`<script type="module" src="static/datastar.min.js?v=rc6"></script>`)
+	return templ.Raw(`<script type="module" src="static/datastar.min.js?v=1.0.4"></script>`)
+}
+
+// IncludedDatastarRocket includes the Datastar bundle with Rocket (web components) built in.
+// It replaces IncludedDatastar, do not include both on the same page.
+func IncludedDatastarRocket() templ.Component {
+	return templ.Raw(`<script type="module" src="static/datastar-rocket.min.js?v=1.0.4"></script>`)
 }
 
 func datastarHandler(w http.ResponseWriter, r *http.Request) {
 	buf := bytes.NewReader(datastarBytes)
 	http.ServeContent(w, r, "datastar.min.js", modTime, buf)
+}
+
+func datastarRocketHandler(w http.ResponseWriter, r *http.Request) {
+	buf := bytes.NewReader(datastarRocketBytes)
+	http.ServeContent(w, r, "datastar-rocket.min.js", modTime, buf)
 }
 
 //go:embed static/basecoat.cdn.min.css
@@ -103,6 +117,7 @@ func ServeIncludedAssets(r chi.Router, baseURL string) {
 		p = "/" + p
 	}
 	r.Get(p+"/static/datastar.min.js", datastarHandler)
+	r.Get(p+"/static/datastar-rocket.min.js", datastarRocketHandler)
 	r.Get(p+"/static/basecoat.min.css", baseCoatCSSHandler)
 	r.Get(p+"/static/basecoat.min.js", baseCoatJSHandler)
 	r.Get(p+"/static/neo-sans-std-m.otf", neoSansFontHandler)

@@ -48,15 +48,22 @@ func UpdateDatastar() error {
 		return fmt.Errorf("failed to create static directory: %w", err)
 	}
 
-	// Download from jsDelivr CDN (GitHub)
-	downloadURL := fmt.Sprintf("https://cdn.jsdelivr.net/gh/starfederation/datastar@%s/bundles/datastar.js", version)
-	outputPath := filepath.Join(staticDir, "datastar.min.js")
-
-	if err := downloadFile(downloadURL, outputPath); err != nil {
-		return fmt.Errorf("failed to download Datastar: %w", err)
+	// Download from jsDelivr CDN (GitHub): plain Datastar and the bundle including Rocket
+	bundles := map[string]string{
+		"datastar.js":        "datastar.min.js",
+		"datastar-rocket.js": "datastar-rocket.min.js",
 	}
+	for bundle, file := range bundles {
+		downloadURL := fmt.Sprintf("https://cdn.jsdelivr.net/gh/starfederation/datastar@%s/bundles/%s", version, bundle)
+		outputPath := filepath.Join(staticDir, file)
 
-	fmt.Printf("✅ Updated %s to version %s\n", outputPath, version)
+		if err := downloadFile(downloadURL, outputPath); err != nil {
+			return fmt.Errorf("failed to download %s: %w", bundle, err)
+		}
+
+		fmt.Printf("✅ Updated %s to version %s\n", outputPath, version)
+	}
+	fmt.Println("⚠️  Remember to update the ?v= cache bust in includes.go and THIRD_PARTY_LICENSES.md")
 	return nil
 }
 

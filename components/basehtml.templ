@@ -6,6 +6,7 @@ type BaseHTMLConfig struct {
 	CacheBust               bool
 	IncludeFont             bool
 	TweakCN                 bool
+	Rocket                  bool
 	AdditionalHeaderContent templ.Component
 }
 
@@ -16,6 +17,7 @@ type BaseHTMLOption func(*BaseHTMLConfig)
 var defaults = BaseHTMLConfig{
 	IncludeFont: true,
 	TweakCN:     false,
+	Rocket:      true,
 }
 
 // SetDefaults configures the global default values for all BaseHTML calls.
@@ -43,6 +45,13 @@ func WithTweakCN(enabled bool) BaseHTMLOption {
 	}
 }
 
+// WithRocket selects the Datastar bundle that includes Rocket (web components, default) or plain Datastar (false).
+func WithRocket(enabled bool) BaseHTMLOption {
+	return func(c *BaseHTMLConfig) {
+		c.Rocket = enabled
+	}
+}
+
 func WithCacheBust(enabled bool) BaseHTMLOption {
 	return func(c *BaseHTMLConfig) {
 		c.CacheBust = enabled
@@ -62,6 +71,7 @@ templ BaseHTML(title string, opts ...BaseHTMLOption) {
 			CacheBust:               defaults.CacheBust,
 			IncludeFont:             defaults.IncludeFont,
 			TweakCN:                 defaults.TweakCN,
+			Rocket:                  defaults.Rocket,
 			AdditionalHeaderContent: defaults.AdditionalHeaderContent,
 		}
 		for _, opt := range opts {
@@ -72,7 +82,11 @@ templ BaseHTML(title string, opts ...BaseHTMLOption) {
 		<head>
 			@chimp.Base()
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			@chimp.IncludedDatastar()
+			if config.Rocket {
+				@chimp.IncludedDatastarRocket()
+			} else {
+				@chimp.IncludedDatastar()
+			}
 			// we do not include the BasecoatCSS, as this is created by ourself
 			@chimp.IncludedBaseCoatJS()
 			@chimp.IncludedChimpJS()
